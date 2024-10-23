@@ -63,7 +63,7 @@ DATA_WIDTH: 64
 # ID_WIDTH: AXI5 ID width for all channels
 #     Valid values:
 #         2-32
-ID_WIDTH: 4
+ID_WIDTH: 5
 
 
 #

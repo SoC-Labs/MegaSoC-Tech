@@ -17,11 +17,11 @@
       </Parameter>
       <Parameter>
         <Name>ACP</Name>
-        <Value>TRUE</Value>
+        <Value>FALSE</Value>
       </Parameter>
       <Parameter>
         <Name>ACE</Name>
-        <Value>FALSE</Value>
+        <Value>TRUE</Value>
       </Parameter>
       <Parameter>
         <Name>L1_ICACHE_SIZE</Name>
@@ -49,7 +49,7 @@
       </Parameter>
       <Parameter>
         <Name>L2_CACHE_SIZE</Name>
-        <Value>512KB</Value>
+        <Value>256KB</Value>
       </Parameter>
       <Parameter>
         <Name>L2_INPUT_LATENCY</Name>
@@ -57,7 +57,7 @@
       </Parameter>
       <Parameter>
         <Name>NUM_CPUS</Name>
-        <Value>2</Value>
+        <Value>1</Value>
       </Parameter>
       <Parameter>
         <Name>CRYPTO</Name>
@@ -101,24 +101,8 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>interrupt_master_VCPU_MNT_IRQ1</Name>
-        <UID>IF-interrupt_master_VCPU_MNT_IRQ1</UID>
-        <Requester/>
-        <Protocol>
-          <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>TimerEventInterface_master_CPU0</Name>
         <UID>IF-TimerEventInterface_master_CPU0</UID>
-        <Requester/>
-        <Protocol>
-          <ProtocolRef>TimerEventInterface</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>TimerEventInterface_master_CPU1</Name>
-        <UID>IF-TimerEventInterface_master_CPU1</UID>
         <Requester/>
         <Protocol>
           <ProtocolRef>TimerEventInterface</ProtocolRef>
@@ -140,15 +124,6 @@
               <Value>2</Value>
             </Parameter>
           </Parameters>
-        </Protocol>
-        <ClockDomainRef>CD-CLKIN</ClockDomainRef>
-      </Interface>
-      <Interface>
-        <Name>CHI-RNF_master</Name>
-        <UID>IF-CHI-RNF_master</UID>
-        <Requester/>
-        <Protocol>
-          <ProtocolRef>CHI-RNF-r0p0_0</ProtocolRef>
         </Protocol>
         <ClockDomainRef>CD-CLKIN</ClockDomainRef>
       </Interface>
@@ -198,28 +173,47 @@
         <ClockDomainRef>CD-CLKIN</ClockDomainRef>
       </Interface>
       <Interface>
-        <Name>Channel_master_CTI_IRQ1</Name>
-        <UID>IF-Channel_master_CTI_IRQ1</UID>
+        <Name>ACE_master</Name>
+        <UID>IF-ACE_master</UID>
         <Requester/>
         <Protocol>
-          <ProtocolRef>Channel</ProtocolRef>
-        </Protocol>
-        <ClockDomainRef>CD-CLKIN</ClockDomainRef>
-      </Interface>
-      <Interface>
-        <Name>ATB_master_CPU1</Name>
-        <UID>IF-ATB_master_CPU1</UID>
-        <Requester/>
-        <Protocol>
-          <ProtocolRef>ATB4</ProtocolRef>
+          <ProtocolRef>ACE</ProtocolRef>
           <Parameters>
             <Parameter>
-              <Name>ATBDataWidth</Name>
-              <Value>32</Value>
+              <Name>ADDR_WIDTH</Name>
+              <Value>44</Value>
             </Parameter>
             <Parameter>
-              <Name>ATBytesWidth</Name>
-              <Value>2</Value>
+              <Name>DATA_WIDTH</Name>
+              <Value>128</Value>
+            </Parameter>
+            <Parameter>
+              <Name>ID_R_WIDTH</Name>
+              <Value>5</Value>
+            </Parameter>
+            <Parameter>
+              <Name>ID_W_WIDTH</Name>
+              <Value>5</Value>
+            </Parameter>
+            <Parameter>
+              <Name>AWUSER_WIDTH</Name>
+              <Value>0</Value>
+            </Parameter>
+            <Parameter>
+              <Name>ARUSER_WIDTH</Name>
+              <Value>0</Value>
+            </Parameter>
+            <Parameter>
+              <Name>WUSER_WIDTH</Name>
+              <Value>0</Value>
+            </Parameter>
+            <Parameter>
+              <Name>RUSER_WIDTH</Name>
+              <Value>0</Value>
+            </Parameter>
+            <Parameter>
+              <Name>BUSER_WIDTH</Name>
+              <Value>0</Value>
             </Parameter>
           </Parameters>
         </Protocol>
@@ -234,24 +228,8 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>interrupt_master_COMMIRQ1</Name>
-        <UID>IF-interrupt_master_COMMIRQ1</UID>
-        <Requester/>
-        <Protocol>
-          <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>interrupt_master_PMU_IRQ0</Name>
         <UID>IF-interrupt_master_PMU_IRQ0</UID>
-        <Requester/>
-        <Protocol>
-          <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>interrupt_master_PMU_IRQ1</Name>
-        <UID>IF-interrupt_master_PMU_IRQ1</UID>
         <Requester/>
         <Protocol>
           <ProtocolRef>interrupt</ProtocolRef>
@@ -266,30 +244,8 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP13</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP13</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>interrupt_slave_FIQ0</Name>
         <UID>IF-interrupt_slave_FIQ0</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>interrupt_slave_FIQ1</Name>
-        <UID>IF-interrupt_slave_FIQ1</UID>
         <Completer/>
         <Protocol>
           <ProtocolRef>interrupt</ProtocolRef>
@@ -323,30 +279,8 @@
         <ClockDomainRef>CD-CLKIN</ClockDomainRef>
       </Interface>
       <Interface>
-        <Name>Staticcfg_slave_SAMHNF1_NODEID</Name>
-        <UID>IF-Staticcfg_slave_SAMHNF1_NODEID</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>RESET_slave_CPU_PORESET0</Name>
         <UID>IF-RESET_slave_CPU_PORESET0</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>RESET</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>RESET_slave_CPU_PORESET1</Name>
-        <UID>IF-RESET_slave_CPU_PORESET1</UID>
         <Completer/>
         <Protocol>
           <ProtocolRef>RESET</ProtocolRef>
@@ -394,30 +328,8 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>Staticcfg_slave_CFGEND1</Name>
-        <UID>IF-Staticcfg_slave_CFGEND1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>Q-Channel_slave_NEON0</Name>
         <UID>IF-Q-Channel_slave_NEON0</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Q-Channel-generic</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Q-Channel_slave_NEON1</Name>
-        <UID>IF-Q-Channel_slave_NEON1</UID>
         <Completer/>
         <Protocol>
           <ProtocolRef>Q-Channel-generic</ProtocolRef>
@@ -438,61 +350,11 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>Staticcfg_slave_CFGTE1</Name>
-        <UID>IF-Staticcfg_slave_CFGTE1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>interrupt_slave_VIRQ0</Name>
         <UID>IF-interrupt_slave_VIRQ0</UID>
         <Completer/>
         <Protocol>
           <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>interrupt_slave_VIRQ1</Name>
-        <UID>IF-interrupt_slave_VIRQ1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP4</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP4</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP10</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP10</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
         </Protocol>
       </Interface>
       <Interface>
@@ -504,122 +366,8 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>interrupt_slave_VFIQ1</Name>
-        <UID>IF-interrupt_slave_VFIQ1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP9</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP9</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>ACP_slave</Name>
-        <UID>IF-ACP_slave</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>ACP4</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMMN_BASE</Name>
-        <UID>IF-Staticcfg_slave_SAMMN_BASE</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP5</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP5</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMMN_NODEID</Name>
-        <UID>IF-Staticcfg_slave_SAMMN_NODEID</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP0</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP0</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>Staticcfg_slave_VINITHI0</Name>
         <UID>IF-Staticcfg_slave_VINITHI0</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_VINITHI1</Name>
-        <UID>IF-Staticcfg_slave_VINITHI1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP12</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP12</UID>
         <Completer/>
         <Protocol>
           <ProtocolRef>Staticcfg</ProtocolRef>
@@ -662,30 +410,8 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>Authentication_slave_CPU1</Name>
-        <UID>IF-Authentication_slave_CPU1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Authentication</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>Staticcfg_slave_CP15SDISABLE0</Name>
         <UID>IF-Staticcfg_slave_CP15SDISABLE0</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_CP15SDISABLE1</Name>
-        <UID>IF-Staticcfg_slave_CP15SDISABLE1</UID>
         <Completer/>
         <Protocol>
           <ProtocolRef>Staticcfg</ProtocolRef>
@@ -705,90 +431,6 @@
           <ProtocolRef>Channel</ProtocolRef>
         </Protocol>
         <ClockDomainRef>CD-CLKIN</ClockDomainRef>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_NODEID</Name>
-        <UID>IF-Staticcfg_slave_NODEID</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP8</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP8</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP2</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP2</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMHNF0_NODEID</Name>
-        <UID>IF-Staticcfg_slave_SAMHNF0_NODEID</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_RVB_ARADDR1</Name>
-        <UID>IF-Staticcfg_slave_RVB_ARADDR1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMHNF5_NODEID</Name>
-        <UID>IF-Staticcfg_slave_SAMHNF5_NODEID</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
       </Interface>
       <Interface>
         <Name>Staticcfg_slave_SYSBARDISABLE</Name>
@@ -819,50 +461,8 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP1</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMHNF2_NODEID</Name>
-        <UID>IF-Staticcfg_slave_SAMHNF2_NODEID</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>Staticcfg_slave_AA64nAA32_CPU0</Name>
         <UID>IF-Staticcfg_slave_AA64nAA32_CPU0</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_AA64nAA32_CPU1</Name>
-        <UID>IF-Staticcfg_slave_AA64nAA32_CPU1</UID>
         <Completer/>
         <Protocol>
           <ProtocolRef>Staticcfg</ProtocolRef>
@@ -897,14 +497,6 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>RESET_slave_CORE_RESET1</Name>
-        <UID>IF-RESET_slave_CORE_RESET1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>RESET</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>interrupt_slave_SEI0</Name>
         <UID>IF-interrupt_slave_SEI0</UID>
         <Completer/>
@@ -913,30 +505,8 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>interrupt_slave_SEI1</Name>
-        <UID>IF-interrupt_slave_SEI1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>Staticcfg_slave_CLUSTERIDAFF2</Name>
         <UID>IF-Staticcfg_slave_CLUSTERIDAFF2</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMHNI0_NODID</Name>
-        <UID>IF-Staticcfg_slave_SAMHNI0_NODID</UID>
         <Completer/>
         <Protocol>
           <ProtocolRef>Staticcfg</ProtocolRef>
@@ -963,117 +533,11 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>Staticcfg_slave_SAMHNF4_NODEID</Name>
-        <UID>IF-Staticcfg_slave_SAMHNF4_NODEID</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP6</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP6</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SCLKEN</Name>
-        <UID>IF-Staticcfg_slave_SCLKEN</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP3</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP3</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMHNF6_NODEID</Name>
-        <UID>IF-Staticcfg_slave_SAMHNF6_NODEID</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>interrupt_slave_IRQ0</Name>
         <UID>IF-interrupt_slave_IRQ0</UID>
         <Completer/>
         <Protocol>
           <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>interrupt_slave_IRQ1</Name>
-        <UID>IF-interrupt_slave_IRQ1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP15</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP15</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMHNF_MODE</Name>
-        <UID>IF-Staticcfg_slave_SAMHNF_MODE</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
         </Protocol>
       </Interface>
       <Interface>
@@ -1093,67 +557,8 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>interrupt_slave_VSEI1</Name>
-        <UID>IF-interrupt_slave_VSEI1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMHNF7_NODEID</Name>
-        <UID>IF-Staticcfg_slave_SAMHNF7_NODEID</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP7</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP7</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMHNI1_NODID</Name>
-        <UID>IF-Staticcfg_slave_SAMHNI1_NODID</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>EVENT_slave_EDBGRQ0</Name>
         <UID>IF-EVENT_slave_EDBGRQ0</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>EVENT</ProtocolRef>
-        </Protocol>
-        <ClockDomainRef>CD-CLKIN</ClockDomainRef>
-      </Interface>
-      <Interface>
-        <Name>EVENT_slave_EDBGRQ1</Name>
-        <UID>IF-EVENT_slave_EDBGRQ1</UID>
         <Completer/>
         <Protocol>
           <ProtocolRef>EVENT</ProtocolRef>
@@ -1183,28 +588,6 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>Q-Channel_slave_CPU1</Name>
-        <UID>IF-Q-Channel_slave_CPU1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Q-Channel-generic</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SINACT</Name>
-        <UID>IF-Staticcfg_slave_SINACT</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>Staticcfg_slave_BROADCASTOUTER</Name>
         <UID>IF-Staticcfg_slave_BROADCASTOUTER</UID>
         <Completer/>
@@ -1221,20 +604,6 @@
       <Interface>
         <Name>Staticcfg_slave_RVB_ARADDR0</Name>
         <UID>IF-Staticcfg_slave_RVB_ARADDR0</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP14</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP14</UID>
         <Completer/>
         <Protocol>
           <ProtocolRef>Staticcfg</ProtocolRef>
@@ -1276,20 +645,6 @@
         </Protocol>
       </Interface>
       <Interface>
-        <Name>Staticcfg_slave_SAMADDRMAP11</Name>
-        <UID>IF-Staticcfg_slave_SAMADDRMAP11</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
-        </Protocol>
-      </Interface>
-      <Interface>
         <Name>Staticcfg_slave_PERIPHBASE</Name>
         <UID>IF-Staticcfg_slave_PERIPHBASE</UID>
         <Completer/>
@@ -1309,28 +664,6 @@
         <Completer/>
         <Protocol>
           <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>interrupt_slave_REI1</Name>
-        <UID>IF-interrupt_slave_REI1</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>interrupt</ProtocolRef>
-        </Protocol>
-      </Interface>
-      <Interface>
-        <Name>Staticcfg_slave_SAMHNF3_NODEID</Name>
-        <UID>IF-Staticcfg_slave_SAMHNF3_NODEID</UID>
-        <Completer/>
-        <Protocol>
-          <ProtocolRef>Staticcfg</ProtocolRef>
-          <Parameters>
-            <Parameter>
-              <Name>CONFIGURATION_WIDTH</Name>
-              <Value>1</Value>
-            </Parameter>
-          </Parameters>
         </Protocol>
       </Interface>
     </Interfaces>

@@ -1,17 +1,18 @@
 
 
-module SRAM (
+module SRAM #(
+  parameter MEM_DEPTH = (1<<15)
+) (
     input  wire           clk,
-    input  wire [13:0]    memaddr,
+    input  wire [19:0]    memaddr,
     input  wire [63:0]    memd,
     output wire [63:0]    memq,
     input  wire           memcen,
     input  wire [7:0]     memwen
 );
-  parameter MEM_DEPTH = (1<<10);
 
   wire                WriteEnable;        // Write data update
-  wire   [10:0]       Addr;
+  wire   [15:0]       Addr;
   reg    [63:0]      DataAtAddress;      // Current write-data at address
   reg    [63:0]      Mask;               // Write data-mask
   reg    [63:0]      NextData;           // Next write-data
@@ -19,7 +20,7 @@ module SRAM (
 
   integer                  i;     // Write-strobe loop variable
   integer                  j;     // Mask-bit loop variable
-  assign Addr = memaddr[13:4];
+  assign Addr = memaddr[19:3];
   // -------------
   // Memory arrays
   // -------------
@@ -27,6 +28,15 @@ module SRAM (
   // Memory array 0 - used in both 32-bit and 64-bit modes
   reg    [63:0]           mem [MEM_DEPTH-1:0];
   assign WriteEnable = (memwen != {8{1'b1}}) ? 1'b1 : 1'b0;
+
+  integer k;
+  initial 
+    begin 
+      for(k=0;k<MEM_DEPTH;k=k+1) begin 
+        mem[k] = 64'd0;
+      end 
+    end
+    
 
   always @ (posedge clk)
     begin : p_memaccess

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Megasoc SRAM Wrapper
+// Expansion Subsystem SRAM Wrapper
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
@@ -12,7 +12,7 @@
 //  sie300_axi5_sram_ctrl_expansion_subsystem
 //  SRAM
 
-module SRAM_wrapper(
+module ROM_wrapper(
     input  wire             ACLK,
     input  wire             ARESETn,
 
@@ -56,7 +56,7 @@ module SRAM_wrapper(
     output wire [63:0]      RDATA,
     output wire [1:0]       RRESP,
     output wire             RLAST,
-    output wire [1:0]       RPOISON,
+    output wire             RPOISON,
     input  wire             AWAKEUP,
 
     input  wire             clk_qreqn,
@@ -75,10 +75,10 @@ module SRAM_wrapper(
 );
 
 
-wire [19:0]     memaddr;
-wire [63:0]    memd;
-wire [63:0]    memq;
-wire            memcen;
+wire [19:0]    memaddr;
+wire [64:0]    memd;
+wire [64:0]    memq;
+wire           memcen;
 wire [7:0]     memwen;
 
 sie300_axi5_sram_ctrl_1 u_SMC(
@@ -140,22 +140,14 @@ sie300_axi5_sram_ctrl_1 u_SMC(
     .memwen(memwen)
 );
 
-cmsdk_fpga_sram #(.AW(19)) u_fpga_sram_0(
-    .CLK(ACLK),
-    .ADDR(memaddr),
-    .WDATA(memd[31:0]),
-    .WREN(memwen[3:0]),
-    .CS(memcen),
-    .RDATA(memq[31:0])
+SRAM #(.MEM_DEPTH(1<<14)) u_ROM (
+    .clk(ACLK),
+    .memaddr(memaddr),
+    .memd(memd),
+    .memq(memq),
+    .memcen(memcen),
+    .memwen(memwen)
 );
 
-cmsdk_fpga_sram #(.AW(19)) u_fpga_sram_1(
-    .CLK(ACLK),
-    .ADDR(memaddr),
-    .WDATA(memd[63:32]),
-    .WREN(memwen[7:4]),
-    .CS(memcen),
-    .RDATA(memq[63:32])
-);
 
 endmodule

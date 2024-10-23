@@ -140,22 +140,14 @@ sie300_axi5_sram_ctrl_1 u_SMC(
     .memwen(memwen)
 );
 
-cmsdk_fpga_sram #(.AW(19)) u_fpga_sram_0(
-    .CLK(ACLK),
-    .ADDR(memaddr),
-    .WDATA(memd[31:0]),
-    .WREN(memwen[3:0]),
-    .CS(memcen),
-    .RDATA(memq[31:0])
+SRAM u_SRAM(
+    .clk(ACLK),
+    .memaddr(memaddr),
+    .memd(memd),
+    .memq(memq),
+    .memcen(memcen),
+    .memwen(memwen)
 );
 
-cmsdk_fpga_sram #(.AW(19)) u_fpga_sram_1(
-    .CLK(ACLK),
-    .ADDR(memaddr),
-    .WDATA(memd[63:32]),
-    .WREN(memwen[7:4]),
-    .CS(memcen),
-    .RDATA(memq[63:32])
-);
 
 endmodule

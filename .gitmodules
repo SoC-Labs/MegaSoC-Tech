@@ -1,0 +1,3 @@
+[submodule "logical/sl_ahb_qspi"]
+	path = logical/sl_ahb_qspi
+	url = https://git.soton.ac.uk/soclabs/ahb_qspi.git

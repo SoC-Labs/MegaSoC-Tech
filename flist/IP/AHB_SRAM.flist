@@ -1,0 +1,6 @@
+
+
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/ahb_SRAM/sl_ahb_sram.v 
+$(ARM_IP_LIBRARY_PATH)/Corstone-101/BP210-r1p1-00rel0/BP210-BU-00000-r1p1-00rel0/logical/models/memories/cmsdk_fpga_sram.v
+$(ARM_IP_LIBRARY_PATH)/Corstone-101/BP210-r1p1-00rel0/BP210-BU-00000-r1p1-00rel0/logical/cmsdk_ahb_to_sram/verilog/cmsdk_ahb_to_sram.v
+// $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/models/memories/cmsdk_ahb_ram_beh.v

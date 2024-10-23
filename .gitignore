@@ -1,3 +1,11 @@
 logical/CortexA53_1
+logical/GIC400
 logical/sie300
+logical/SMC
 logical/shared
+logical/nic400_megasoc_main
+
+software/build
+
+.ecmproject
+.project

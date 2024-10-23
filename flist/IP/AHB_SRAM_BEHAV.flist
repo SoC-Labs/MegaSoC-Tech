@@ -1,0 +1,4 @@
+
+
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/ahb_SRAM/behavioural/sl_ahb_sram.v 
+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/models/memories/cmsdk_ahb_ram_beh.v

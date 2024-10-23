@@ -1,0 +1,229 @@
+##------------------------------------------------------------------------------
+## The confidential and proprietary information contained in this file may
+## only be used by a person authorised under and to the extent permitted
+## by a subsisting licensing agreement from Arm Limited or its affiliates.
+##
+##        (C) COPYRIGHT 2018-2021 Arm Limited or its affiliates.
+##            ALL RIGHTS RESERVED
+##
+## This entire notice must be reproduced on all copies of this file
+## and copies of this file may only be made by a person if such person is
+## permitted to do so under the terms of a subsisting license agreement
+## from Arm Limited or its affiliates.
+##
+##      Release Information : SSE710-r0p0-00rel0
+##
+##------------------------------------------------------------------------------
+## Purpose : C test Makefile
+##------------------------------------------------------------------------------
+
+SW_LIB_PATH       := $(SOCLABS_MEGASOC_TECH_DIR)/software/lib/sw_lib
+LOCAL_SW_LIB_PATH := $(SW_LIB_PATH)/host
+BUILD_DIR_LIB     := $(BUILD_DIR)/obj/lib
+
+# ------------------------------------------------------------------------------
+# Default build target
+# ------------------------------------------------------------------------------
+
+OUTPUT_FILES = $(BUILD_DIR)/app_ram.v8-a.hex \
+               $(BUILD_DIR)/app_flash.v8-a.hex 
+
+all: disp build $(OUTPUT_FILES)
+disp:
+	@echo -e "\n------------------- Executing make target $@ -------------------"
+	@echo "Running from $(CURDIR)"
+	@echo "TEST_PATH         = $(TEST_PATH)"
+	@echo "TEST_ID           = $(TEST_ID)"
+	@echo "SW_LIB_PATH       = $(SW_LIB_PATH)"
+	@echo "BUILD_DIR         = $(BUILD_DIR)"
+	@echo "AARCH64           = $(AARCH64)"
+
+build:
+	mkdir -p $(BUILD_DIR)
+
+clean:
+	@echo "Cleaning all build files"
+	rm -rf $(BUILD_DIR)
+
+all_bootloader: disp build $(BUILD_DIR)/bootloader.hex
+
+# ------------------------------------------------------------------------------
+# Tool setup
+# ------------------------------------------------------------------------------
+EM = $(MEM_IMG_PATH)/cg071_elf2mem
+FE = fromelf
+
+ifeq ($(COMPILE_GCC), 0)
+    AS = armclang
+    CC = armclang
+    LD = armlink
+else
+    ifeq ($(AARCH64), 1)
+        AS = aarch64-none-elf-gcc
+        CC = aarch64-none-elf-gcc
+        LD = aarch64-none-elf-gcc
+        OD = aarch64-none-elf-objdump
+    else
+        AS = arm-none-eabi-gcc
+        CC = arm-none-eabi-gcc
+        LD = arm-none-eabi-gcc
+        OD = arm-none-eabi-objdump
+    endif
+endif
+
+# ------------------------------------------------------------------------------
+# Build Host processor executable image
+# ------------------------------------------------------------------------------
+BOOT_CODE ?=0
+# List of object files
+ifeq ($(BOOT_CODE), 1)
+    APP_SRC += $(SW_LIB_PATH)/apps/src/system.c
+    APP_SRC += $(SW_LIB_PATH)/apps/src/boot.s                 
+    APP_SRC += $(SW_LIB_PATH)/apps/src/platform.c             
+    APP_SRC += $(SW_LIB_PATH)/apps/src/cpu_asm_codes.c         
+    APP_SRC += $(SW_LIB_PATH)/apps/src/ipc.s                
+    APP_SRC += $(SW_LIB_PATH)/apps/src/irq.s               
+    APP_SRC += $(SW_LIB_PATH)/apps/src/vect_64.s  
+    APP_SRC += $(SW_LIB_PATH)/apps/src/page_table.s  
+endif
+APP_SRC += $(SW_LIB_PATH)/apps/src/system.c
+APP_SRC += $(SW_LIB_PATH)/apps/src/boot.s                 
+APP_SRC += $(SW_LIB_PATH)/apps/src/platform.c             
+APP_SRC += $(SW_LIB_PATH)/apps/src/cpu_asm_codes.c         
+APP_SRC += $(SW_LIB_PATH)/apps/src/ipc.s                
+APP_SRC += $(SW_LIB_PATH)/apps/src/irq.s               
+APP_SRC += $(SW_LIB_PATH)/apps/src/vect_64.s  
+APP_SRC += $(SW_LIB_PATH)/apps/src/page_table.s  
+
+# APP_SRC += $(SW_LIB_PATH)/devices/src/dma_350_command_lib.c
+# APP_SRC += $(SW_LIB_PATH)/devices/src/pl011_uart.c
+# APP_SRC += $(SW_LIB_PATH)/devices/src/intr_rtr_1.c
+# APP_SRC += $(SW_LIB_PATH)/devices/src/firewall_1.c
+APP_SRC += $(SW_LIB_PATH)/devices/src/gic400.c
+# APP_SRC += $(SW_LIB_PATH)/devices/src/watchdog_generic.c
+APP_SRC += $(SW_LIB_PATH)/host/src/sys_utils.c
+# APP_SRC += $(SW_LIB_PATH)/devices/src/qspi_flash.c
+APP_SRC += $(SW_LIB_PATH)/common/src/system_level_functions.c
+APP_SRC += $(SW_LIB_PATH)/devices/src/uart_stdout.c
+CPU := -mcpu=cortex-a53
+CPU := $(CPU)+nocrypto
+
+# Cortex-A class ASM flags
+APP_AS_FLAGS += -Os -x assembler-with-cpp -mlittle-endian $(CPU) -DAARCH_V8
+ifeq ($(COMPILE_GCC), 0)
+    APP_AS_FLAGS += -mno-unaligned-access
+    ifeq ($(AARCH64), 1)
+        APP_AS_FLAGS += --target=aarch64-arm-none-eabi -DAARCH_V8_64 -D__V8_ARCH__ -D__ARMCC_VERSION__
+    else
+        APP_AS_FLAGS += --target=arm-arm-none-eabi -mfpu=neon -marm -DARM_V8_32BIT
+    endif
+else
+    APP_AS_FLAGS += -c -std=c99 -D__GCC_COMPILER__
+    ifeq ($(AARCH64), 1)
+        APP_AS_FLAGS += -DARM_V8_64 -D__V8_ARCH__
+    else
+        APP_AS_FLAGS += -DARM_V8_32BIT
+    endif
+endif
+
+# Cortex-A class ASM include files and directories
+APP_AS_INC_DIR += $(LOCAL_SW_LIB_PATH)/include $(SW_LIB_PATH)/common/include $(SW_LIB_PATH)/devices/include/
+ifeq ($(AARCH64), 1)
+    APP_AS_INC_DIR += $(SW_LIB_PATH)/apps/include/
+else
+    APP_AS_INC_DIR += $(SW_LIB_PATH)/apps_v8_32/include/
+endif
+
+# Cortex-A class C flags
+APP_C_FLAGS += -Os -mlittle-endian $(CPU) -DAARCH_V8 -DSYNC_CPU_HOST -DTB_UART
+ifeq ($(COMPILE_GCC), 0)
+    APP_C_FLAGS += -mno-unaligned-access
+    ifeq ($(AARCH64), 1)
+        APP_C_FLAGS += --target=aarch64-arm-none-eabi -DAARCH_V8_64 -D__V8_ARCH__
+    else
+        APP_C_FLAGS += --target=arm-arm-none-eabi -mfpu=neon -marm -DARM_V8_32BIT
+    endif
+else
+    APP_C_FLAGS += -c --specs=nosys.specs -std=c99 -D__GCC_COMPILER__
+    ifeq ($(AARCH64), 1)
+      APP_C_FLAGS += -DARM_V8_64 -D__V8_ARCH__
+    else
+      APP_C_FLAGS += -DARM_V8_32BIT
+    endif
+endif
+
+# Cortex-A class C include files and directories
+APP_C_INC_DIR += $(LOCAL_SW_LIB_PATH)/include $(SW_LIB_PATH)/common/include $(SW_LIB_PATH)/devices/include/
+ifeq ($(AARCH64), 1)
+    APP_C_INC_DIR += $(SW_LIB_PATH)/apps/include/
+else
+    APP_C_INC_DIR += $(SW_LIB_PATH)/apps_v8_32/include/
+endif
+
+# Cortex-A class linker scripts / scatter files
+APP_SCAT ?= default
+
+# Cortex-A class linker flags
+ifeq ($(COMPILE_GCC), 0)
+    APP_LD_FLAGS += --no_remove --map --show_parent_lib --show_full_path --list=function_list.v8-a.txt
+    ifeq ($(AARCH64), 1)
+      APP_LD_FLAGS += --cpu=8-A.64
+    else
+      APP_LD_FLAGS += --cpu=8.2-A.32
+    endif
+    APP_SCAT_LOAD := --scatter $(LOCAL_SW_LIB_PATH)/scat/$(APP_SCAT).scat
+else
+    APP_LD_FLAGS += --specs=nosys.specs -T $(LOCAL_SW_LIB_PATH)/scat/$(APP_SCAT).ld -static -lc -nostartfiles
+endif
+
+# Auto variable
+APP_OBJ = $(addprefix $(BUILD_DIR_LIB)/,$(addsuffix .v8-a.o,$(APP_SRC)))
+APP_ASINCLUDES = $(filter .hs, $(APP_AS_INC_DIR))
+APP_CINCLUDES  = $(filter .h,  $(APP_C_INC_DIR))
+
+
+# Compile Cortex-A class ASM code
+$(BUILD_DIR_LIB)/%.s.v8-a.o: %.s ${APP_ASINCLUDES}
+	@echo -e "\n------------------- Executing make target $(@F) -------------------"
+	mkdir -p `dirname $@`
+	$(AS) $(APP_AS_FLAGS) $(APP_AS_INC_DIR:%=-I%) -c $< -o $@
+
+# Compile Cortex-A class C code
+$(BUILD_DIR_LIB)/%.c.v8-a.o: %.c  ${APP_CINCLUDES}
+	@echo -e "\n------------------- Executing make target $(@F) -------------------"
+	mkdir -p `dirname $@`
+	$(CC) $(APP_C_FLAGS) $(APP_C_INC_DIR:%=-I%) -c $< -o $@
+
+# Linking Cortex-A class object files
+ifeq ($(COMPILE_GCC), 0)
+$(BUILD_DIR)/app.v8-a.elf: $(APP_OBJ)
+	@echo -e "\n------------------- Executing make target $(@F) -------------------"
+	$(LD) --debug --verbose $(APP_LD_FLAGS) -o $@ $(filter %.o, $(^)) $(APP_SCAT_LOAD)
+	$(FE) -c --output $@.disass $@
+else
+$(BUILD_DIR)/app.v8-a.elf: $(APP_OBJ)
+	@echo -e "\n------------------- Executing make target $(@F) -------------------"
+	$(LD) --debug --verbose $(APP_LD_FLAGS) -o $@ $(filter %.o, $(^))
+	$(OD) -a -x -d -w -S $@ > $@.disass
+endif
+
+# ------------------------------------------------------------------------------
+# Build memory device images
+# ------------------------------------------------------------------------------
+
+$(BUILD_DIR)/app_ram.v8-a.hex: $(BUILD_DIR)/app.v8-a.elf
+	@echo -e "\n------------------- Executing make target $(@F) -------------------"
+	$(EM) window,0x00800000,0x600000,0x00800000:vmem,64,1 $^ --compact -v 3 --output $@
+
+$(BUILD_DIR)/app_flash.v8-a.hex: $(BUILD_DIR)/app.v8-a.elf
+	@echo -e "\n------------------- Executing make target $(@F) -------------------"
+	fromelf --vhx -a --output $@ $^
+    # $(EM) window,0x00000000,0x400000,0x00000000:vmem,8,1 $^ --compact --output $@
+
+$(BUILD_DIR)/bootloader.hex: $(BUILD_DIR)/app.v8-a.elf
+	@echo -e "\n------------------- Executing make target $(@F) -------------------"
+	$(EM) window,0x00000000,0x400000,0x00000000:vmem,64,1 $^ --compact --output $@
+
+# ------------------------------------------------------------------------------
+# End of Makefile
+# ------------------------------------------------------------------------------

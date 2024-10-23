@@ -1,0 +1,6 @@
+//+define+CORTEXA53_UNIVENT
+//+define+CORTEXA53_UNIVENT_DPI_CAPTURE
+
+
++incdir+$(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/logical/ca53univent/verilog
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/logical/ca53univent/verilog/ca53_follower.sv

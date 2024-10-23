@@ -1,0 +1,34 @@
+//-----------------------------------------------------------------------------
+// MegaSoC Tech Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// David Mapstone (d.a.mapstone@soton.ac.uk)
+// Daniel Newbrook (d.newbrook@soton.ac.uk)
+//
+// Copyright � 2021-3, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for MegaSoC Tech IP
+//-----------------------------------------------------------------------------
+
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_wrapper.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_cpu_ss.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_irq_sync.v
+
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/ROM/ROM_wrapper.v 
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/logical/SRAM.v 
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/logical/SRAM_wrapper.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_subsystem.v
+
+// -f $(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/flist/Top/ahb_QSPI_SIM.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/AHB_SRAM.flist
+// ARM IP
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/ARM_Cortex_A53.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/CA53_tarmac.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/GIC400.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/nic400_megasoc_main.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SIE300_SRAM_controller.flist
+// -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PL011.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/Corstone101.flist 

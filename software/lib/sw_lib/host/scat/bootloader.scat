@@ -1,0 +1,28 @@
+
+
+LoadRegion 0x00000000
+{
+    SEC_ROM_BOOT_IMG 0x0000000 
+    {
+        boot.s.v8-a.o (SECURE_ROM_BOOT, +FIRST) 
+        *(+RO)
+    }
+
+}
+
+SRAM 0x00800000
+{
+    ARM_LIB_STACK 0x00800000 EMPTY 0x2000 
+    {
+    }
+
+    ARM_LIB_HEAP 0x00802000  EMPTY  0x2000 
+    {
+
+    }
+
+    RWZI 0x00804000 0x2000
+    {
+        *(+RW,+ZI)
+    }
+}
