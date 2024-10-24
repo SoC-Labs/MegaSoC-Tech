@@ -23,12 +23,14 @@ void SET_QPI_MODE(){
 }
 
 void qspi_enable_cache(){
+  // Don't enable prefetch, this causes problems for some reason
+    CACHE_CTRL->CCR = 0x00;
     uint32_t QSPI_CTRL_tmp;
     QSPI_CTRL_tmp=SL_AHB_QSPI->QSPI_CONTROL;
     QSPI_CTRL_tmp = QSPI_CTRL_tmp | 1<<8;
     SL_AHB_QSPI->QSPI_CONTROL = QSPI_CTRL_tmp;
 
-    CACHE_CTRL->CCR = 0x61;
+    CACHE_CTRL->CCR = 0x01;
     while((CACHE_CTRL->SR&0x3)!=2){;}
 
     return;

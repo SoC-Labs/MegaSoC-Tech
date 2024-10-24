@@ -102,7 +102,7 @@ APP_SRC += $(SW_LIB_PATH)/apps/src/page_table.s
 APP_SRC += $(SW_LIB_PATH)/devices/src/gic400.c
 # APP_SRC += $(SW_LIB_PATH)/devices/src/watchdog_generic.c
 APP_SRC += $(SW_LIB_PATH)/host/src/sys_utils.c
-# APP_SRC += $(SW_LIB_PATH)/devices/src/qspi_flash.c
+APP_SRC += $(SW_LIB_PATH)/devices/src/qspi_flash.c
 APP_SRC += $(SW_LIB_PATH)/common/src/system_level_functions.c
 APP_SRC += $(SW_LIB_PATH)/devices/src/uart_stdout.c
 CPU := -mcpu=cortex-a53

@@ -1,6 +1,7 @@
 #include "uart_stdout.h"
 #include "sys_memory_map.h"
 #include "sys_intr_map.h"
+#include "system.h"
 #include <stdio.h>
 #include "gic400.h"
 #include "CMSDK.h"
@@ -49,6 +50,11 @@ int main(void) {
   // Timer present - continue 
   errors += timer_interrupt_test_1(CMSDK_TIMER0);
 
+  if(errors==0){
+    TEST_PASS();
+  } else {
+    TEST_FAIL();
+  }
   UartEndSimulation();
 }
 

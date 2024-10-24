@@ -217,11 +217,8 @@ int c_print_str(const char * fmt) {
 
 __attribute__((weak)) void TEST_PASS(void) {
   // Halt simulation
-  char *tube_addr = (char *)SYS_UART0_BASE;
-  c_print_str("TEST PASSED OK\n");
-  *tube_addr = (char )4;
-    __wfi();
-  
+  printf("\n** TEST PASSED **\n");
+  UartEndSimulation();
 }
 
 /** @brief TEST_FAIL, Terminates Test by printing test FAIL message
@@ -230,10 +227,8 @@ __attribute__((weak)) void TEST_PASS(void) {
 
 __attribute__((weak)) void TEST_FAIL(void) {
   // Halt simulation 
-  char *tube_addr = (char *)SYS_UART0_BASE;
-  c_print_str("TEST FAILED\n");
-  *tube_addr = (char )4;
-    __wfi();
+  printf("\n** TEST FAILED **\n");
+  UartEndSimulation();
 
 }
 

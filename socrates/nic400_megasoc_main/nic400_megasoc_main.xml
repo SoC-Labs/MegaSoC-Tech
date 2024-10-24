@@ -111,18 +111,19 @@
       </MasterInterface>
       <MasterInterface>
         <Name>FLASH</Name>
-        <AHBLiteInitiatorMasterProtocol>
+        <AHBLiteTargetMasterProtocol>
           <AddressWidth>32</AddressWidth>
           <DataWidth>32</DataWidth>
+          <AUSEREnabled>false</AUSEREnabled>
           <RUSEREnabled>false</RUSEREnabled>
           <WUSEREnabled>false</WUSEREnabled>
           <ReadIssuing>1</ReadIssuing>
           <WriteIssuing>1</WriteIssuing>
           <TotalIssuing>1</TotalIssuing>
-          <TrustZoneMaster>non_secure</TrustZoneMaster>
+          <TrustZoneMaster>secure</TrustZoneMaster>
           <MultiPorted>false</MultiPorted>
           <LockSupport>false</LockSupport>
-        </AHBLiteInitiatorMasterProtocol>
+        </AHBLiteTargetMasterProtocol>
         <GeographicDomainRef>gd0</GeographicDomainRef>
         <ClockRef>clk0</ClockRef>
       </MasterInterface>
@@ -697,7 +698,7 @@
         &lt;multi_ported&gt;false&lt;/multi_ported&gt;
         &lt;multi_region&gt;false&lt;/multi_region&gt;
         &lt;name&gt;FLASH&lt;/name&gt;
-        &lt;protocol&gt;ahb_m&lt;/protocol&gt;
+        &lt;protocol&gt;ahb_ms&lt;/protocol&gt;
         &lt;qv_out&gt;false&lt;/qv_out&gt;
         &lt;reg&gt;
             &lt;impl&gt;present&lt;/impl&gt;
@@ -771,7 +772,7 @@
         &lt;slave_if_data_width&gt;128&lt;/slave_if_data_width&gt;
         &lt;token_prerequest def=&quot;true&quot;&gt;false&lt;/token_prerequest&gt;
         &lt;token_prerequest_bridge def=&quot;true&quot;&gt;false&lt;/token_prerequest_bridge&gt;
-        &lt;trustzone&gt;nsec&lt;/trustzone&gt;
+        &lt;trustzone&gt;sec&lt;/trustzone&gt;
         &lt;vn_external&gt;none&lt;/vn_external&gt;
         &lt;vn_external_bridge&gt;none&lt;/vn_external_bridge&gt;
         &lt;x&gt;0&lt;/x&gt;
@@ -1760,7 +1761,7 @@
         &lt;out_reads&gt;1&lt;/out_reads&gt;
         &lt;out_trans&gt;1&lt;/out_trans&gt;
         &lt;out_writes&gt;1&lt;/out_writes&gt;
-        &lt;protocol&gt;ahb_m&lt;/protocol&gt;
+        &lt;protocol&gt;ahb_ms&lt;/protocol&gt;
         &lt;ruser&gt;false&lt;/ruser&gt;
         &lt;src&gt;FLASH&lt;/src&gt;
         &lt;src_port&gt;FLASH_m&lt;/src_port&gt;
@@ -1976,18 +1977,18 @@
         &lt;link&gt;
             &lt;slave_if&gt;
                 &lt;name&gt;A53&lt;/name&gt;
-                &lt;master_if&gt;apb_group0&lt;/master_if&gt;
-                &lt;master_if&gt;DRAM&lt;/master_if&gt;
+                &lt;master_if&gt;ROM&lt;/master_if&gt;
                 &lt;master_if&gt;FLASH&lt;/master_if&gt;
-                &lt;master_if&gt;DEBUG&lt;parent&gt;apb_group0&lt;/parent&gt;
-                &lt;/master_if&gt;
+                &lt;master_if&gt;RAM&lt;/master_if&gt;
+                &lt;master_if&gt;DRAM&lt;/master_if&gt;
+                &lt;master_if&gt;GIC&lt;/master_if&gt;
+                &lt;master_if&gt;apb_group0&lt;/master_if&gt;
                 &lt;master_if&gt;PERIPHERAL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
                 &lt;master_if&gt;FLASH_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
-                &lt;master_if&gt;GIC&lt;/master_if&gt;
-                &lt;master_if&gt;RAM&lt;/master_if&gt;
-                &lt;master_if&gt;ROM&lt;/master_if&gt;
+                &lt;master_if&gt;DEBUG&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;/master_if&gt;
             &lt;/slave_if&gt;
         &lt;/link&gt;
     &lt;/architecture&gt;

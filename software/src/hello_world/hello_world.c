@@ -1,4 +1,5 @@
 #include "uart_stdout.h"
+#include "system.h"
 #include <stdio.h>
 
 int main(void) {
@@ -6,5 +7,5 @@ int main(void) {
   UartStdOutInit();
 
   printf("Hello SoCLabs MegaSoC\n");
-  UartEndSimulation();
+  TEST_PASS();
 }

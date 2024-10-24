@@ -11,9 +11,9 @@ int main(void) {
     errors += access_addr_wdata(0x00806000,16,0xCAFECAFE);
 
     if(errors!=0){
-        printf("Test Failed\n");
+        TEST_FAIL();
     } else {
-        printf("Test Passed\n");
+        TEST_PASS();
     }
     UartEndSimulation();
 }

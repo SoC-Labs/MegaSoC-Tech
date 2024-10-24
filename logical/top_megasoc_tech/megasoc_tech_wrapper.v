@@ -244,6 +244,7 @@ wire                RLAST_DRAM;
 wire                RVALID_DRAM;
 wire                RREADY_DRAM;
 
+wire                HSELx_FLASH;
 wire [31:0]         HADDR_FLASH;
 wire [1:0]          HTRANS_FLASH;
 wire                HWRITE_FLASH;
@@ -252,6 +253,7 @@ wire [2:0]          HBURST_FLASH;
 wire [3:0]          HPROT_FLASH;
 wire [31:0]         HWDATA_FLASH;
 wire [31:0]         HRDATA_FLASH;
+wire                HREADYOUT_FLASH;
 wire                HREADY_FLASH;
 wire                HRESP_FLASH;
 
@@ -520,6 +522,7 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .RVALID_DRAM(),
     .RREADY_DRAM(),
 
+    .HSELx_FLASH(HSELx_FLASH),
     .HADDR_FLASH(HADDR_FLASH),
     .HTRANS_FLASH(HTRANS_FLASH),
     .HWRITE_FLASH(HWRITE_FLASH),
@@ -528,6 +531,7 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .HPROT_FLASH(HPROT_FLASH),
     .HWDATA_FLASH(HWDATA_FLASH),
     .HRDATA_FLASH(HRDATA_FLASH),
+    .HREADYOUT_FLASH(HREADYOUT_FLASH),
     .HREADY_FLASH(HREADY_FLASH),
     .HRESP_FLASH(HRESP_FLASH),
 
@@ -766,53 +770,38 @@ ROM_wrapper u_ROM_wrapper(
     .cfg_gate_resp(1'b0)
 );
 
-// top_ahb_qspi #(.DATA_W(32)) u_sl_ahb_qspi(
-//     .HCLK(SYS_CLK),
-//     .HRESETn(SYS_RESETn),
-//     .PCLK(SYS_CLK),
-//     .PRESETn(SYS_RESETn),
-//     .HADDR(HADDR_FLASH),
-//     .HTRANS(HTRANS_FLASH),
-//     .HWRITE(HWRITE_FLASH),
-//     .HSIZE(HSIZE_FLASH),
-//     .HBURST(HBURST_FLASH),
-//     .HPROT(HPROT_FLASH),
-//     .HWDATA(HWDATA_FLASH),
-//     .HSELx(1'b1),
-//     .HRDATA(HRDATA_FLASH),
-//     .HREADY(1'b1),
-//     .HREADYOUT(HREADY_FLASH),
-//     .HRESP(HRESP_FLASH),
-//     .PADDR(PADDR_FLASH_CTRL),
-//     .PPROT(PPROT_FLASH_CTRL),
-//     .PSEL(PSELx_FLASH_CTRL),
-//     .PENABLE(PENABLE_FLASH_CTRL),
-//     .PWRITE(PWRITE_FLASH_CTRL),
-//     .PWDATA(PWDATA_FLASH_CTRL),
-//     .PSTRB(PSTRB_FLASH_CTRL),
-//     .PRDATA(PRDATA_FLASH_CTRL),
-//     .PREADY(PREADY_FLASH_CTRL),
-//     .PSLVERR(PSLVERR_FLASH_CTRL),   
-//     .QSPI_SCLK(QSPI_SCLK),
-//     .QSPI_nCS(QSPI_nCS),
-//     .QSPI_IO_o(QSPI_IO_o),
-//     .QSPI_IO_i(QSPI_IO_i),
-//     .QSPI_IO_e(QSPI_IO_e)
-// );
-
-sl_ahb_sram u_sl_ahb_sram(
+top_ahb_qspi #(.DATA_W(32)) u_sl_ahb_qspi(
     .HCLK(SYS_CLK),
     .HRESETn(SYS_RESETn),
-    .HSEL(1'b1),
-    .HREADY(1'b1),
-    .HTRANS(HTRANS_FLASH),
-    .HSIZE(HSIZE_FLASH),
-    .HWRITE(HWRITE_FLASH),
+    .PCLK(SYS_CLK),
+    .PRESETn(SYS_RESETn),
     .HADDR(HADDR_FLASH),
+    .HTRANS(HTRANS_FLASH),
+    .HWRITE(HWRITE_FLASH),
+    .HSIZE(HSIZE_FLASH),
+    .HBURST(HBURST_FLASH),
+    .HPROT(HPROT_FLASH),
     .HWDATA(HWDATA_FLASH),
-    .HREADYOUT(HREADY_FLASH),
+    .HSELx(HSELx_FLASH),
+    .HRDATA(HRDATA_FLASH),
+    .HREADY(HREADY_FLASH),
+    .HREADYOUT(HREADYOUT_FLASH),
     .HRESP(HRESP_FLASH),
-    .HRDATA(HRDATA_FLASH)
+    .PADDR(PADDR_FLASH_CTRL),
+    .PPROT(PPROT_FLASH_CTRL),
+    .PSEL(PSELx_FLASH_CTRL),
+    .PENABLE(PENABLE_FLASH_CTRL),
+    .PWRITE(PWRITE_FLASH_CTRL),
+    .PWDATA(PWDATA_FLASH_CTRL),
+    .PSTRB(PSTRB_FLASH_CTRL),
+    .PRDATA(PRDATA_FLASH_CTRL),
+    .PREADY(PREADY_FLASH_CTRL),
+    .PSLVERR(PSLVERR_FLASH_CTRL),   
+    .QSPI_SCLK(QSPI_SCLK),
+    .QSPI_nCS(QSPI_nCS),
+    .QSPI_IO_o(QSPI_IO_o),
+    .QSPI_IO_i(QSPI_IO_i),
+    .QSPI_IO_e(QSPI_IO_e)
 );
 
 SRAM_wrapper u_SRAM_wrapper(
