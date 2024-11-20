@@ -158,7 +158,7 @@ module megasoc_cpu_ss #(
   assign cfg_aa64naa32  = {NUM_CPUS{1'b1}};
   assign cfg_vinithi    = {NUM_CPUS{1'b1}};
   assign cfg_cfgte      = {NUM_CPUS{1'b1}};
-  assign cfg_periphbase = 22'b0000000001000000000000;
+  assign cfg_periphbase = 22'h000044; // Base address for GIC 0x01100000UL
   assign cfg_clusterid  = 8'h00;
 
 
@@ -217,7 +217,7 @@ module megasoc_cpu_ss #(
        .nVSEI                       ({NUM_CPUS{1'b1}}),
        .nREI                        ({NUM_CPUS{1'b1}}),
        .nVCPUMNTIRQ                 (),
-       .PERIPHBASE                  (cfg_periphbase),
+       .PERIPHBASE                  (cfg_periphbase), // Base address for GIC
        .GICCDISABLE                 (1'b1),
        .ICDTVALID                   (1'b0),
        .ICDTREADY                   (),
@@ -364,8 +364,8 @@ module megasoc_cpu_ss #(
        .PSLVERRDBG                  (PSLVERRDBG_CPU),
 
        // Miscellaneous debug signals
-       .DBGROMADDR                  ({28{1'b0}}),
-       .DBGROMADDRV                 (1'b0),
+       .DBGROMADDR                  (28'h0060000), //0x60000000
+       .DBGROMADDRV                 (1'b1),
        .DBGACK                      (),
        .nCOMMIRQ                    (),
        .COMMRX                      (),

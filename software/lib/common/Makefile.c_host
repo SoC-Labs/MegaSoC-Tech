@@ -222,7 +222,9 @@ $(BUILD_DIR)/app_flash.v8-a.hex: $(BUILD_DIR)/app.v8-a.elf
 
 $(BUILD_DIR)/bootloader.hex: $(BUILD_DIR)/app.v8-a.elf
 	@echo -e "\n------------------- Executing make target $(@F) -------------------"
-	$(EM) window,0x00000000,0x400000,0x00000000:vmem,64,1 $^ --compact --output $@
+	fromelf --vhx -a --output $@ $^
+	# $(EM) window,0x00000000,0x400000,0x00000000:vmem,64,1 $^ --compact --output $@
+    
 
 # ------------------------------------------------------------------------------
 # End of Makefile

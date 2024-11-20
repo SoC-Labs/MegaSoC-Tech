@@ -134,20 +134,18 @@ sie300_axi5_sram_ctrl_1 u_SMC(
     .ext_gt_qacceptn(ext_gt_qacceptn),
     .cfg_gate_resp(cfg_gate_resp),
     .memaddr(memaddr),
-    .memd(memd),
+    .memd(),
     .memq(memq),
     .memcen(memcen),
     .memwen(memwen)
 );
 
-SRAM #(.MEM_DEPTH(1<<14)) u_ROM (
-    .clk(ACLK),
-    .memaddr(memaddr),
-    .memd(memd),
-    .memq(memq),
-    .memcen(memcen),
-    .memwen(memwen)
-);
+bootrom u_ROM (
+    .CLK(ACLK),
+    .W_ADDR(memaddr[19:3]),
+    .RDATA(memq),
+    .EN(~memcen)
+    );
 
 
 endmodule

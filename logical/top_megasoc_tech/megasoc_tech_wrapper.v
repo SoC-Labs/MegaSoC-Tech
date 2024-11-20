@@ -71,41 +71,41 @@ module megasoc_tech_wrapper(
     
 
     // Millisoc system AXI Subordinate
-    input wire         AXI_EXP_SYS_awid,
-    input wire  [31:0] AXI_EXP_SYS_awaddr,
-    input wire  [7:0]  AXI_EXP_SYS_awlen,
-    input wire  [2:0]  AXI_EXP_SYS_awsize,
-    input wire  [1:0]  AXI_EXP_SYS_awburst,
-    input wire         AXI_EXP_SYS_awlock,
-    input wire  [3:0]  AXI_EXP_SYS_awcache,
-    input wire  [2:0]  AXI_EXP_SYS_awprot,
-    input wire         AXI_EXP_SYS_awvalid,
-    output wire        AXI_EXP_SYS_awready,
-    input wire  [63:0] AXI_EXP_SYS_wdata,
-    input wire  [7:0]  AXI_EXP_SYS_wstrb,
-    input wire         AXI_EXP_SYS_wlast,
-    input wire         AXI_EXP_SYS_wvalid,
-    output wire        AXI_EXP_SYS_wready,
-    output wire        AXI_EXP_SYS_bid,
-    output wire [1:0]  AXI_EXP_SYS_bresp,
-    output wire        AXI_EXP_SYS_bvalid,
-    input wire         AXI_EXP_SYS_bready,
-    input wire         AXI_EXP_SYS_arid,
-    input wire  [31:0] AXI_EXP_SYS_araddr,
-    input wire  [7:0]  AXI_EXP_SYS_arlen,
-    input wire  [2:0]  AXI_EXP_SYS_arsize,
-    input wire  [1:0]  AXI_EXP_SYS_arburst,
-    input wire         AXI_EXP_SYS_arlock,
-    input wire  [3:0]  AXI_EXP_SYS_arcache,
-    input wire  [2:0]  AXI_EXP_SYS_arprot,
-    input wire         AXI_EXP_SYS_arvalid,
-    output wire        AXI_EXP_SYS_arready,
-    output wire        AXI_EXP_SYS_rid,
-    output wire [63:0] AXI_EXP_SYS_rdata,
-    output wire [1:0]  AXI_EXP_SYS_rresp,
-    output wire        AXI_EXP_SYS_rlast,
-    output wire        AXI_EXP_SYS_rvalid,
-    input wire         AXI_EXP_SYS_rready,
+    input wire          AXI_EXP_SYS_awid,
+    input wire  [31:0]  AXI_EXP_SYS_awaddr,
+    input wire  [7:0]   AXI_EXP_SYS_awlen,
+    input wire  [2:0]   AXI_EXP_SYS_awsize,
+    input wire  [1:0]   AXI_EXP_SYS_awburst,
+    input wire          AXI_EXP_SYS_awlock,
+    input wire  [3:0]   AXI_EXP_SYS_awcache,
+    input wire  [2:0]   AXI_EXP_SYS_awprot,
+    input wire          AXI_EXP_SYS_awvalid,
+    output wire         AXI_EXP_SYS_awready,
+    input wire  [63:0]  AXI_EXP_SYS_wdata,
+    input wire  [7:0]   AXI_EXP_SYS_wstrb,
+    input wire          AXI_EXP_SYS_wlast,
+    input wire          AXI_EXP_SYS_wvalid,
+    output wire         AXI_EXP_SYS_wready,
+    output wire         AXI_EXP_SYS_bid,
+    output wire [1:0]   AXI_EXP_SYS_bresp,
+    output wire         AXI_EXP_SYS_bvalid,
+    input wire          AXI_EXP_SYS_bready,
+    input wire          AXI_EXP_SYS_arid,
+    input wire  [31:0]  AXI_EXP_SYS_araddr,
+    input wire  [7:0]   AXI_EXP_SYS_arlen,
+    input wire  [2:0]   AXI_EXP_SYS_arsize,
+    input wire  [1:0]   AXI_EXP_SYS_arburst,
+    input wire          AXI_EXP_SYS_arlock,
+    input wire  [3:0]   AXI_EXP_SYS_arcache,
+    input wire  [2:0]   AXI_EXP_SYS_arprot,
+    input wire          AXI_EXP_SYS_arvalid,
+    output wire         AXI_EXP_SYS_arready,
+    output wire         AXI_EXP_SYS_rid,
+    output wire [63:0]  AXI_EXP_SYS_rdata,
+    output wire [1:0]   AXI_EXP_SYS_rresp,
+    output wire         AXI_EXP_SYS_rlast,
+    output wire         AXI_EXP_SYS_rvalid,
+    input wire          AXI_EXP_SYS_rready,
 
     // QSPI Signals
     output wire         QSPI_SCLK,
@@ -152,7 +152,7 @@ wire  [ 15: 0]      CPU_WSTRBM;
 wire                CPU_WLASTM;
 wire                CPU_BREADYM;
 wire                CPU_BVALIDM;
-wire  [  4: 0]      CPU_BIDM;
+wire  [  5: 0]      CPU_BIDM;
 wire  [  1: 0]      CPU_BRESPM;
 wire                CPU_ARREADYM;
 wire                CPU_ARVALIDM;
@@ -172,7 +172,7 @@ wire  [  1: 0]      CPU_RRESPM;
 wire                CPU_RLASTM;
 
 wire [ID_W-1:0] GIC_ARID;
-wire                [14:0] GIC_ARADDR;
+wire                [31:0] GIC_ARADDR;
 wire                 [7:0] GIC_ARLEN;
 wire                 [2:0] GIC_ARSIZE;
 wire                 [1:0] GIC_ARBURST;
@@ -187,7 +187,7 @@ wire                 [1:0] GIC_RRESP;
 wire                       GIC_RVALID;
 wire                       GIC_RREADY;
 wire [ID_W-1:0] GIC_AWID;
-wire                [14:0] GIC_AWADDR;
+wire                [31:0] GIC_AWADDR;
 wire                 [7:0] GIC_AWLEN;
 wire                 [2:0] GIC_AWSIZE;
 wire                 [1:0] GIC_AWBURST;
@@ -445,7 +445,7 @@ megasoc_cpu_ss #(
     .SWDOEN(SWDOEN),
 
     .GIC_ARID(GIC_ARID),
-    .GIC_ARADDR(GIC_ARADDR),
+    .GIC_ARADDR(GIC_ARADDR[14:0]),
     .GIC_ARLEN(GIC_ARLEN),
     .GIC_ARSIZE(GIC_ARSIZE),
     .GIC_ARBURST(GIC_ARBURST),
@@ -462,7 +462,7 @@ megasoc_cpu_ss #(
     .GIC_RREADY(GIC_RREADY),
 
     .GIC_AWID(GIC_AWID),
-    .GIC_AWADDR(GIC_AWADDR),
+    .GIC_AWADDR(GIC_AWADDR[14:0]),
     .GIC_AWLEN(GIC_AWLEN),
     .GIC_AWSIZE(GIC_AWSIZE),
     .GIC_AWBURST(GIC_AWBURST),
@@ -540,14 +540,14 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .AWLEN_GIC(GIC_AWLEN),
     .AWSIZE_GIC(GIC_AWSIZE),
     .AWBURST_GIC(GIC_AWBURST),
-    .AWLOCK_GIC(GIC_AWLOCK),
-    .AWCACHE_GIC(GIC_AWCACHE),
+    .AWLOCK_GIC(),
+    .AWCACHE_GIC(),
     .AWPROT_GIC(GIC_AWPROT),
     .AWVALID_GIC(GIC_AWVALID),
     .AWREADY_GIC(GIC_AWREADY),
     .WDATA_GIC(GIC_WDATA),
     .WSTRB_GIC(GIC_WSTRB),
-    .WLAST_GIC(GIC_WLAST),
+    .WLAST_GIC(),
     .WVALID_GIC(GIC_WVALID),
     .WREADY_GIC(GIC_WREADY),
     .BID_GIC(GIC_BID),
@@ -559,8 +559,8 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .ARLEN_GIC(GIC_ARLEN),
     .ARSIZE_GIC(GIC_ARSIZE),
     .ARBURST_GIC(GIC_ARBURST),
-    .ARLOCK_GIC(GIC_ARLOCK),
-    .ARCACHE_GIC(GIC_ARCACHE),
+    .ARLOCK_GIC(),
+    .ARCACHE_GIC(),
     .ARPROT_GIC(GIC_ARPROT),
     .ARVALID_GIC(GIC_ARVALID),
     .ARREADY_GIC(GIC_ARREADY),
@@ -787,7 +787,7 @@ top_ahb_qspi #(.DATA_W(32)) u_sl_ahb_qspi(
     .HREADY(HREADY_FLASH),
     .HREADYOUT(HREADYOUT_FLASH),
     .HRESP(HRESP_FLASH),
-    .PADDR(PADDR_FLASH_CTRL),
+    .PADDR(PADDR_FLASH_CTRL[15:0]),
     .PPROT(PPROT_FLASH_CTRL),
     .PSEL(PSELx_FLASH_CTRL),
     .PENABLE(PENABLE_FLASH_CTRL),
