@@ -186,7 +186,7 @@ module megasoc_cpu_ss #(
   assign AWIDM[5] = 1'b0;
   assign WIDM[5] = 1'b0;
   assign BIDM[5] = 1'b0;
-  CortexA53_1
+  CORTEXA53
     u_cortexa53
       (// Clocks and resets
        .CLKIN                       (CPU_CLK),

@@ -11,130 +11,18 @@
 # permitted to do so under the terms of a subsisting license agreement
 # from Arm Limited or its affiliates.
 #----------------------------------------------------------------------------
-#
-#      Version Information
-#
-#      Checked In          : Mon Jul 15 17:15:15 2019 +0100
-#
-#      Revision            : 828f11fd
-#
-#      Release Information : CoreLink SIE-300 Generic Global Bundle r1p2-00rel0
-#
-#----------------------------------------------------------------------------
-#  Abstract : Configuration file for SIE-300 AXI5 SRAM Controller
-#----------------------------------------------------------------------------
-
-# -----------------------------
-# User Configuration
-# -----------------------------
-
-
-#
-# COMPONENT: Name of the component to configure.
-#     Valid values:
-#         [sie300_axi5_sram_ctrl]
-#
-COMPONENT: sie300_axi5_sram_ctrl
-
-
-#
-# CONFIG_NAME: Name of the configuration.
-#     Each unifiqued element and top is suffixed with
-#     _${CONFIG_NAME}
-#
-CONFIG_NAME: millisoc_sys
-
-
-#
-# ADDR_WIDTH: AXI5 Address Bus width
-#     Valid values:
-#         14-24
-ADDR_WIDTH: 14
-
-
-#
-# DATA_WIDTH: AXI5 Data Bus width
-#     Valid values:
-#         [32,64,128,256]
-DATA_WIDTH: 64
-
-
-#
-# ID_WIDTH: AXI5 ID width for all channels
-#     Valid values:
-#         2-32
-ID_WIDTH: 5
-
-
-#
-# QCLK_SYNC_EN: Add 2 DFF synchronizer on inputs of clock Q-channel
-#     Valid values:
-#         - 0 : no synchronizer
-#         - 1 : added synchronizer
-QCLK_SYNC_EN: 1
-
-
-#
-# QPWR_SYNC_EN: Add 2 DFF synchronizer on inputs of power Q-channel
-#     Valid values:
-#         - 0 : no synchronizer
-#         - 1 : added synchronizer
-QPWR_SYNC_EN: 1
-
-
-#
-# QEXT_SYNC_EN: Add 2 DFF synchronizer on inputs of external gating Q-channel
-#     Valid values:
-#         - 0 : no synchronizer
-#         - 1 : added synchronizer
-QEXT_SYNC_EN: 1
-
-
-#
-# EXCLUSIVE_MONITORS: Number of Exclusive Access Monitors to observe
-#     and track AXI locked transactions
-#     Valid values:
-#         0-16 (0 means no locked transaction support)
-EXCLUSIVE_MONITORS: 2
-
-
-#
-# AR_BUF_SIZE: Size of FIFO on AR channel
-#     Valid values:
-#         1-16
-AR_BUF_SIZE: 1
-
-
-#
-# AW_BUF_SIZE: Size of FIFO on AW channel
-#     Valid values:
-#         1-16
-AW_BUF_SIZE: 2
-
-
-#
-# W_BUF_SIZE: Size of FIFO on W channel
-#     Valid values:
-#         1-16
-W_BUF_SIZE: 8
-
-
-#
-# REGISTER_AXI_AR: Enables / disables register stage at the AR FIFO
-#     Valid values:
-#         [BYPASS,FULL]
-REGISTER_AXI_AR: BYPASS
-
-
-#
-# REGISTER_AXI_R: Enables / disables register stage at the R FIFO
-#     Valid values:
-#         [BYPASS,FULL]
-REGISTER_AXI_R: BYPASS
-
-
-#
-# AXI5_POISON_EN: Enables / disables AXI5 Data Poisoning support
-#     Valid values:
-#         [0,1]
-AXI5_POISON_EN: 0
+COMPONENT      : sie300_axi5_sram_ctrl
+CONFIG_NAME    : 1
+ADDR_WIDTH : 20
+DATA_WIDTH : 64
+ID_WIDTH : 7
+QCLK_SYNC_EN : 1
+QPWR_SYNC_EN : 1
+QEXT_SYNC_EN : 1
+EXCLUSIVE_MONITORS : 2
+AR_BUF_SIZE : 1
+AW_BUF_SIZE : 2
+W_BUF_SIZE : 8
+AXI5_POISON_EN : 1
+REGISTER_AXI_AR : BYPASS
+REGISTER_AXI_R : BYPASS
