@@ -14,15 +14,303 @@
 //  these peripherals to DRAM
 //-----------------------------------------------------------------------------
 // Modules instantiated:
-//
+//  - ada_top_sldma350_megasoc
 //-----------------------------------------------------------------------------
 // To Do
 //  - Everything
 
 module megasoc_tech_system_wrapper(
+    input  wire             CLK,
+    input  wire             RESETn,
+
+    input  wire             DMA350_PWAKEUP,
+    input  wire             DMA350_PDEBUG,
+    input  wire             DMA350_PSEL,
+    input  wire             DMA350_PENABLE,
+    input  wire [2:0]       DMA350_PPROT,
+    input  wire             DMA350_PWRITE,
+    input  wire [12:0]      DMA350_PADDR,
+    input  wire [31:0]      DMA350_PWDATA,
+    input  wire [3:0]       DMA350_PSTRB,
+    output wire             DMA350_PREADY,
+    output wire             DMA350_PSLVERR,
+    output wire [31:0]      DMA350_PRDATA,
+
+    output wire             DMA350_AWAKEUP_M0,
+    output wire             DMA350_AWVALID_M0,
+    output wire [44-1:0]    DMA350_AWADDR_M0,
+    output wire [1:0]       DMA350_AWBURST_M0,
+    output wire [2-1:0]     DMA350_AWID_M0,
+    output wire [7:0]       DMA350_AWLEN_M0,
+    output wire [2:0]       DMA350_AWSIZE_M0,
+    output wire [3:0]       DMA350_AWQOS_M0,
+    output wire [2:0]       DMA350_AWPROT_M0,
+    input  wire             DMA350_AWREADY_M0,
+    output wire [3:0]       DMA350_AWCACHE_M0,
+    output wire [3:0]       DMA350_AWINNER_M0,
+    output wire [1:0]       DMA350_AWDOMAIN_M0,
+
+    output wire             DMA350_ARVALID_M0,
+    output wire [44-1:0]    DMA350_ARADDR_M0,
+    output wire [1:0]       DMA350_ARBURST_M0,
+    output wire [2-1:0]     DMA350_ARID_M0,
+    output wire [7:0]       DMA350_ARLEN_M0,
+    output wire [2:0]       DMA350_ARSIZE_M0,
+    output wire [3:0]       DMA350_ARQOS_M0,
+    output wire [2:0]       DMA350_ARPROT_M0,
+    input  wire             DMA350_ARREADY_M0,
+    output wire [3:0]       DMA350_ARCACHE_M0,
+    output wire [3:0]       DMA350_ARINNER_M0,
+    output wire [1:0]       DMA350_ARDOMAIN_M0,
+    output wire             DMA350_ARCMDLINK_M0,
+
+    output wire             DMA350_WVALID_M0,
+    output wire             DMA350_WLAST_M0,
+    output wire [16-1:0]    DMA350_WSTRB_M0,
+    output wire [128-1:0]   DMA350_WDATA_M0,
+    input  wire             DMA350_WREADY_M0,
+
+    input  wire             DMA350_RVALID_M0,
+    input  wire  [2-1:0]    DMA350_RID_M0,
+    input  wire             DMA350_RLAST_M0,
+    input  wire  [128-1:0]  DMA350_RDATA_M0,
+    input  wire  [2-1:0]    DMA350_RPOISON_M0,
+    input  wire  [1:0]      DMA350_RRESP_M0,
+    output wire             DMA350_RREADY_M0,
+
+    input  wire             DMA350_BVALID_M0,
+    input  wire  [2-1:0]    DMA350_BID_M0,
+    input  wire  [1:0]      DMA350_BRESP_M0,
+    output wire             DMA350_BREADY_M0,
+
+    output wire [4-1:0]     DMA350_irq_channel,
+    output wire             DMA350_irq_comb_nonsec
+
 
 );
 
+wire             DMA350_AWAKEUP_M1;
+wire             DMA350_AWVALID_M1;
+wire [44-1:0]    DMA350_AWADDR_M1;
+wire [1:0]       DMA350_AWBURST_M1;
+wire [2-1:0]     DMA350_AWID_M1;
+wire [7:0]       DMA350_AWLEN_M1;
+wire [2:0]       DMA350_AWSIZE_M1;
+wire [3:0]       DMA350_AWQOS_M1;
+wire [2:0]       DMA350_AWPROT_M1;
+wire             DMA350_AWREADY_M1;
+wire [3:0]       DMA350_AWCACHE_M1;
+wire [3:0]       DMA350_AWINNER_M1;
+wire [1:0]       DMA350_AWDOMAIN_M1;
+wire             DMA350_ARVALID_M1;
+wire [44-1:0]    DMA350_ARADDR_M1;
+wire [1:0]       DMA350_ARBURST_M1;
+wire [2-1:0]     DMA350_ARID_M1;
+wire [7:0]       DMA350_ARLEN_M1;
+wire [2:0]       DMA350_ARSIZE_M1;
+wire [3:0]       DMA350_ARQOS_M1;
+wire [2:0]       DMA350_ARPROT_M1;
+wire             DMA350_ARREADY_M1;
+wire [3:0]       DMA350_ARCACHE_M1;
+wire [3:0]       DMA350_ARINNER_M1;
+wire [1:0]       DMA350_ARDOMAIN_M1;
+wire             DMA350_ARCMDLINK_M1;
+wire             DMA350_WVALID_M1;
+wire             DMA350_WLAST_M1;
+wire [16-1:0]    DMA350_WSTRB_M1;
+wire [128-1:0]   DMA350_WDATA_M1;
+wire             DMA350_WREADY_M1;
+wire             DMA350_RVALID_M1;
+wire  [2-1:0]    DMA350_RID_M1;
+wire             DMA350_RLAST_M1;
+wire  [128-1:0]  DMA350_RDATA_M1;
+wire  [2-1:0]    DMA350_RPOISON_M1;
+wire  [1:0]      DMA350_RRESP_M1;
+wire             DMA350_RREADY_M1;
+wire             DMA350_BVALID_M1;
+wire  [2-1:0]    DMA350_BID_M1;
+wire  [1:0]      DMA350_BRESP_M1;
+wire             DMA350_BREADY_M1;
+
+
+ada_top_sldma350_megasoc u_megasoc_dma350(
+    .clk(CLK),
+    .resetn(RESETn),
+    .aclken_m0(1'b1),
+    .aclken_m1(1'b1),
+    .pclken(1'b1),
+
+    .clk_qreqn(),
+    .clk_qacceptn(),
+    .clk_qdeny(),
+    .clk_qactive(),
+
+    .preq(),
+    .pstate(),
+    .paccept(),
+    .pdeny(),
+    .pactive(),
+
+    .pwakeup        (DMA350_PWAKEUP),
+    .pdebug         (DMA350_PDEBUG),
+    .psel           (DMA350_PSEL),
+    .penable        (DMA350_PENABLE),
+    .pprot          (DMA350_PPROT),
+    .pwrite         (DMA350_PWRITE),
+    .paddr          (DMA350_PADDR),
+    .pwdata         (DMA350_PWDATA),
+    .pstrb          (DMA350_PSTRB),
+    .pready         (DMA350_PREADY),
+    .pslverr        (DMA350_PSLVERR),
+    .prdata         (DMA350_PRDATA),
+
+    .awakeup_m0     (DMA350_AWAKEUP_M0),
+    .awvalid_m0     (DMA350_AWVALID_M0),
+    .awaddr_m0      (DMA350_AWADDR_M0),
+    .awburst_m0     (DMA350_AWBURST_M0),
+    .awid_m0        (DMA350_AWID_M0),
+    .awlen_m0       (DMA350_AWLEN_M0),
+    .awsize_m0      (DMA350_AWSIZE_M0),
+    .awqos_m0       (DMA350_AWQOS_M0),
+    .awprot_m0      (DMA350_AWPROT_M0),
+    .awready_m0     (DMA350_AWREADY_M0),
+    .awcache_m0     (DMA350_AWCACHE_M0),
+    .awinner_m0     (DMA350_AWINNER_M0),
+    .awdomain_m0    (DMA350_AWDOMAIN_M0),
+    .arvalid_m0     (DMA350_ARVALID_M0),
+    .araddr_m0      (DMA350_ARADDR_M0),
+    .arburst_m0     (DMA350_ARBURST_M0),
+    .arid_m0        (DMA350_ARID_M0),
+    .arlen_m0       (DMA350_ARLEN_M0),
+    .arsize_m0      (DMA350_ARSIZE_M0),
+    .arqos_m0       (DMA350_ARQOS_M0),
+    .arprot_m0      (DMA350_ARPROT_M0),
+    .arready_m0     (DMA350_ARREADY_M0),
+    .arcache_m0     (DMA350_ARCACHE_M0),
+    .arinner_m0     (DMA350_ARINNER_M0),
+    .ardomain_m0    (DMA350_ARDOMAIN_M0),
+    .arcmdlink_m0   (DMA350_ARCMDLINK_M0),
+    .wvalid_m0      (DMA350_WVALID_M0),
+    .wlast_m0       (DMA350_WLAST_M0),
+    .wstrb_m0       (DMA350_WSTRB_M0),
+    .wdata_m0       (DMA350_WDATA_M0),
+    .wready_m0      (DMA350_WREADY_M0),
+    .rvalid_m0      (DMA350_RVALID_M0),
+    .rid_m0         (DMA350_RID_M0),
+    .rlast_m0       (DMA350_RLAST_M0),
+    .rdata_m0       (DMA350_RDATA_M0),
+    .rpoison_m0     (DMA350_RPOISON_M0),
+    .rresp_m0       (DMA350_RRESP_M0),
+    .rready_m0      (DMA350_RREADY_M0),
+    .bvalid_m0      (DMA350_BVALID_M0),
+    .bid_m0         (DMA350_BID_M0),
+    .bresp_m0       (DMA350_BRESP_M0),
+    .bready_m0      (DMA350_BREADY_M0),
+
+    .awakeup_m1     (DMA350_AWAKEUP_M1),
+    .awvalid_m1     (DMA350_AWVALID_M1),
+    .awaddr_m1      (DMA350_AWADDR_M1),
+    .awburst_m1     (DMA350_AWBURST_M1),
+    .awid_m1        (DMA350_AWID_M1),
+    .awlen_m1       (DMA350_AWLEN_M1),
+    .awsize_m1      (DMA350_AWSIZE_M1),
+    .awqos_m1       (DMA350_AWQOS_M1),
+    .awprot_m1      (DMA350_AWPROT_M1),
+    .awready_m1     (DMA350_AWREADY_M1),
+    .awcache_m1     (DMA350_AWCACHE_M1),
+    .awinner_m1     (DMA350_AWINNER_M1),
+    .awdomain_m1    (DMA350_AWDOMAIN_M1),
+    .arvalid_m1     (DMA350_ARVALID_M1),
+    .araddr_m1      (DMA350_ARADDR_M1),
+    .arburst_m1     (DMA350_ARBURST_M1),
+    .arid_m1        (DMA350_ARID_M1),
+    .arlen_m1       (DMA350_ARLEN_M1),
+    .arsize_m1      (DMA350_ARSIZE_M1),
+    .arqos_m1       (DMA350_ARQOS_M1),
+    .arprot_m1      (DMA350_ARPROT_M1),
+    .arready_m1     (DMA350_ARREADY_M1),
+    .arcache_m1     (DMA350_ARCACHE_M1),
+    .arinner_m1     (DMA350_ARINNER_M1),
+    .ardomain_m1    (DMA350_ARDOMAIN_M1),
+    .arcmdlink_m1   (DMA350_ARCMDLINK_M1),
+    .wvalid_m1      (DMA350_WVALID_M1),
+    .wlast_m1       (DMA350_WLAST_M1),
+    .wstrb_m1       (DMA350_WSTRB_M1),
+    .wdata_m1       (DMA350_WDATA_M1),
+    .wready_m1      (DMA350_WREADY_M1),
+    .rvalid_m1      (DMA350_RVALID_M1),
+    .rid_m1         (DMA350_RID_M1),
+    .rlast_m1       (DMA350_RLAST_M1),
+    .rdata_m1       (DMA350_RDATA_M1),
+    .rpoison_m1     (DMA350_RPOISON_M1),
+    .rresp_m1       (DMA350_RRESP_M1),
+    .rready_m1      (DMA350_RREADY_M1),
+    .bvalid_m1      (DMA350_BVALID_M1),
+    .bid_m1         (DMA350_BID_M1),
+    .bresp_m1       (DMA350_BRESP_M1),
+    .bready_m1      (DMA350_BREADY_M1),
+
+    .trig_in_0_req(),
+    .trig_in_0_req_type(),
+    .trig_in_0_ack(),
+    .trig_in_0_ack_type(),
+    .trig_in_1_req(),
+    .trig_in_1_req_type(),
+    .trig_in_1_ack(),
+    .trig_in_1_ack_type(),
+    .trig_out_0_req(),
+    .trig_out_0_ack(),
+    .trig_out_1_req(),
+    .trig_out_1_ack(),
+
+    .irq_channel(),
+    .irq_comb_nonsec(),
+
+    .str_out_0_tvalid(),
+    .str_out_0_tready(),
+    .str_out_0_tdata(),
+    .str_out_0_tstrb(),
+    .str_out_0_tlast(),
+    .str_in_0_tvalid(),
+    .str_in_0_tready(),
+    .str_in_0_tdata(),
+    .str_in_0_tstrb(),
+    .str_in_0_tlast(),
+    .str_in_0_flush(),
+    .str_out_1_tvalid(),
+    .str_out_1_tready(),
+    .str_out_1_tdata(),
+    .str_out_1_tstrb(),
+    .str_out_1_tlast(),
+    .str_in_1_tvalid(),
+    .str_in_1_tready(),
+    .str_in_1_tdata(),
+    .str_in_1_tstrb(),
+    .str_in_1_tlast(),
+    .str_in_1_flush(),
+
+    .gpo_ch_0(),
+    .gpo_ch_1(),
+
+    .allch_stop_req_nonsec(),
+    .allch_stop_ack_nonsec(),
+    .allch_pause_req_nonsec(),
+    .allch_pause_ack_nonsec(),
+
+    .ch_enabled(),
+    .ch_err(),
+    .ch_stopped(),
+    .ch_paused(),
+    .ch_priv(),
+
+    .halt_req(),
+    .restart_req(),
+    .halted(),
+    .boot_en(),
+    .boot_addr(),
+    .boot_memattr(),
+    .boot_shareattr()
+);
 
 
 endmodule

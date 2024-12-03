@@ -13,22 +13,11 @@
 // Abstract : Verilog Command File for MegaSoC Tech IP
 //-----------------------------------------------------------------------------
 
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_wrapper.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_cpu_ss.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_irq_sync.v
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/megasoc_tech.flist
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/ROM/behavioural/ROM_wrapper.v 
 $(SOCLABS_PROJECT_DIR)/system/src/bootrom/verilog/bootrom.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/logical/SRAM.v 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/fpga/SRAM_wrapper.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_subsystem.v
 
 -f $(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/flist/Top/ahb_QSPI_SIM.flist
-// ARM IP
--f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/ARM_Cortex_A53.flist
--f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/CA53_tarmac.flist
--f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/GIC400.flist
--f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/nic400_megasoc_main.flist
--f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SIE300_SRAM_controller.flist
-// -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PL011.flist
--f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/Corstone101.flist 
