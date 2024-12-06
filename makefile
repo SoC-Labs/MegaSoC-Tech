@@ -17,6 +17,7 @@ build_sie300_sram_ctrl:
 	@$(SIE300_IP_LOGICAL_DIR)/generate --config ./socrates/BP301_SRAM/config/SYS_SRAM_ctrl.yaml --output ./logical/sie300/
 build_nic400:
 	socrates_cli --project megasoc_tech -data ../ --flow build.configured.component configuredComponentName=nic400_megasoc_main
+	socrates_cli --project megasoc_tech -data ../ --flow build.configured.component configuredComponentName=nic400_megasoc_system
 build_cortex_a53:
 	mkdir $(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/
 	mkdir $(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/verilog
