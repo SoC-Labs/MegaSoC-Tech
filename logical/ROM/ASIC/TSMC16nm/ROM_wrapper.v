@@ -15,13 +15,14 @@
 // ToDo
 //  -replace SRAM with TSMC ROM
 
-module ROM_wrapper(
+module ROM_wrapper #(
+    parameter ID_W=8)(
     input  wire             ACLK,
     input  wire             ARESETn,
 
     input  wire             AWVALID,
     output wire             AWREADY,
-    input  wire [6:0]       AWID,
+    input  wire [ID_W-1:0]       AWID,
     input  wire [31:0]      AWADDR,
     input  wire [7:0]       AWLEN,
     input  wire [2:0]       AWSIZE,
@@ -39,12 +40,12 @@ module ROM_wrapper(
 
     output wire             BVALID,
     input  wire             BREADY,
-    output wire [6:0]       BID,
+    output wire [ID_W-1:0]       BID,
     output wire [1:0]       BRESP,
     
     input  wire             ARVALID,
     output wire             ARREADY,
-    input  wire [6:0]       ARID,
+    input  wire [ID_W-1:0]       ARID,
     input  wire [31:0]      ARADDR,
     input  wire [7:0]       ARLEN,
     input  wire [2:0]       ARSIZE,
@@ -55,7 +56,7 @@ module ROM_wrapper(
     
     output wire             RVALID,
     input  wire             RREADY,
-    output wire [6:0]       RID,
+    output wire [ID_W-1:0]       RID,
     output wire [63:0]      RDATA,
     output wire [1:0]       RRESP,
     output wire             RLAST,

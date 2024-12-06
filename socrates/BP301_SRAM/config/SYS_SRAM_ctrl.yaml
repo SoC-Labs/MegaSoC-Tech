@@ -12,10 +12,10 @@
 # from Arm Limited or its affiliates.
 #----------------------------------------------------------------------------
 COMPONENT      : sie300_axi5_sram_ctrl
-CONFIG_NAME    : 1
+CONFIG_NAME    : sys
 ADDR_WIDTH : 20
 DATA_WIDTH : 64
-ID_WIDTH : 8
+ID_WIDTH : 2
 QCLK_SYNC_EN : 1
 QPWR_SYNC_EN : 1
 QEXT_SYNC_EN : 1

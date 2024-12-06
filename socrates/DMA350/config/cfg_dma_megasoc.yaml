@@ -165,4 +165,4 @@ SECEXT_PRESENT: 0
 #
 #     Valid values:
 #         relative path to logical
-AXI5_M1_ADDR_MAP: models/modules/generic/address_map_m1_example1.sv
+AXI5_M1_ADDR_MAP: models/modules/generic/address_map_m1_megasoc.sv

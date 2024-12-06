@@ -4,6 +4,7 @@ logical/sie300
 logical/SMC
 logical/shared
 logical/nic400_megasoc_main
+logical/nic400_megasoc_system
 logical/dma350
 
 software/build

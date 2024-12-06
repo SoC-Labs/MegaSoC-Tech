@@ -95,12 +95,13 @@ APP_SRC += $(SW_LIB_PATH)/apps/src/irq.s
 APP_SRC += $(SW_LIB_PATH)/apps/src/vect_64.s  
 APP_SRC += $(SW_LIB_PATH)/apps/src/page_table.s  
 
-# APP_SRC += $(SW_LIB_PATH)/devices/src/dma_350_command_lib.c
 # APP_SRC += $(SW_LIB_PATH)/devices/src/pl011_uart.c
 # APP_SRC += $(SW_LIB_PATH)/devices/src/intr_rtr_1.c
-# APP_SRC += $(SW_LIB_PATH)/devices/src/firewall_1.c
-APP_SRC += $(SW_LIB_PATH)/devices/src/gic400.c
 # APP_SRC += $(SW_LIB_PATH)/devices/src/watchdog_generic.c
+
+APP_SRC += $(SW_LIB_PATH)/devices/src/gic400.c
+APP_SRC += $(SW_LIB_PATH)/devices/src/dma_350_command_lib.c
+
 APP_SRC += $(SW_LIB_PATH)/host/src/sys_utils.c
 APP_SRC += $(SW_LIB_PATH)/devices/src/qspi_flash.c
 APP_SRC += $(SW_LIB_PATH)/common/src/system_level_functions.c
@@ -213,7 +214,7 @@ endif
 
 $(BUILD_DIR)/app_ram.v8-a.hex: $(BUILD_DIR)/app.v8-a.elf
 	@echo -e "\n------------------- Executing make target $(@F) -------------------"
-	$(EM) window,0x00800000,0x600000,0x00800000:vmem,64,1 $^ --compact -v 3 --output $@
+	$(EM) window,0x00800000,0x800000,0x00800000:vmem,64,1 $^ --compact -v 3 --output $@
 
 $(BUILD_DIR)/app_flash.v8-a.hex: $(BUILD_DIR)/app.v8-a.elf
 	@echo -e "\n------------------- Executing make target $(@F) -------------------"

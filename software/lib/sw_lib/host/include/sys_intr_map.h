@@ -21,9 +21,14 @@
 #define CNTPS_INTR                    29
 #define CNTPNS_INTR                   30
 //SPIs
-#define UART0_TX_INTR                   32
-#define UART0_RX_INTR                   33
-#define UART0_TX_OVR_INTR               34
-#define UART0_RX_OVR_INTR               35
-#define UART0_COMB_INTR                 36
-#define TIMER0_INTR                     37
+#define DMA350_CH0_INTR                 32
+#define DMA350_CH1_INTR                 33
+#define DMA350_CH2_INTR                 34
+#define DMA350_CH3_INTR                 35
+#define DMA350_COM_INTR                 36
+#define UART0_TX_INTR                   37
+#define UART0_RX_INTR                   38
+#define UART0_TX_OVR_INTR               39
+#define UART0_RX_OVR_INTR               40
+#define UART0_COMB_INTR                 41
+#define TIMER0_INTR                     42

@@ -16,10 +16,27 @@
 //  cmsdk_apb_slave_mux (u_apb_slave_mux)
 //  cmsdk_apb_uart      (u_apb_uart_0)
 //  cmsdk_apb_timer     (u_apb_timer0)
+//  megasoc_peripheral_debug (u_megasoc_peripheral_debug)
 
 module megasoc_peripheral_subsystem(
     input  wire         PCLK,
     input  wire         PRESETn,
+    input  wire         HCLK,
+    input  wire         HRESETn,
+    input  wire         RT_CLK, // 32kHz real time clock
+
+
+    // ADP AHB bus interface
+    output wire  [31:0] HADDR_ADP,
+    output wire  [1:0]  HTRANS_ADP,
+    output wire         HWRITE_ADP,
+    output wire  [2:0]  HSIZE_ADP,
+    output wire  [2:0]  HBURST_ADP,
+    output wire  [3:0]  HPROT_ADP,
+    output wire  [31:0] HWDATA_ADP,
+    input  wire [31:0]  HRDATA_ADP,
+    input  wire         HREADY_ADP,
+    input  wire         HRESP_ADP,
 
     // APB bus interface
     input  wire [31:0]  PADDR,
@@ -34,6 +51,15 @@ module megasoc_peripheral_subsystem(
     input  wire         UARTRXD,
     output wire         UARTTXD,
     output wire         UARTTXEN,   
+
+    output wire         FT_CLK_O,    // SCLK
+    output wire         FT_SSN_O,    // SS_N
+    input  wire         FT_MISO_I,   // MISO
+    output wire         FT_MIOSIO_O, // MIOSIO tristate output when enabled
+    output wire         FT_MIOSIO_E, // MIOSIO tristate output enable (active hi)
+    output wire         FT_MIOSIO_Z, // MIOSIO tristate output enable (active lo)
+    input  wire         FT_MIOSIO_I, // MIOSIO tristate input
+
 
     output wire [5:0]   PERI_IRQS   // Peripheral interrupts to GIC
 );
@@ -53,11 +79,17 @@ wire        PREADY_TIMER0;
 wire [31:0] PRDATA_TIMER0;
 wire        PSLVERR_TIMER0;
 
+// Internal APB signals for Timer0
+wire        PSEL_USRT;
+wire        PREADY_USRT;
+wire [31:0] PRDATA_USRT;
+wire        PSLVERR_USRT;
+
 // CMSDK APB Slave Mux (from Corstone 101) 
 cmsdk_apb_slave_mux #(
     .PORT0_ENABLE(1),
     .PORT1_ENABLE(1),
-    .PORT2_ENABLE(0),
+    .PORT2_ENABLE(1),
     .PORT3_ENABLE(0),
     .PORT4_ENABLE(0),
     .PORT5_ENABLE(0),
@@ -85,10 +117,10 @@ cmsdk_apb_slave_mux #(
     .PRDATA1(PRDATA_TIMER0),
     .PSLVERR1(PSLVERR_TIMER0),  
 
-    .PSEL2(),
-    .PREADY2(1'b0),
-    .PRDATA2(32'd0),
-    .PSLVERR2(1'b0),   
+    .PSEL2(PSEL_USRT),
+    .PREADY2(PREADY_USRT),
+    .PRDATA2(PRDATA_USRT),
+    .PSLVERR2(PSLVERR_USRT),   
 
     .PSEL3(),
     .PREADY3(1'b0),
@@ -223,5 +255,41 @@ cmsdk_apb_timer u_apb_timer0(
 );
 
 assign PERI_IRQS[5] = timer0_int;
+
+megasoc_peripheral_debug #(
+    .FT1248_WIDTH(1)
+) u_megasoc_peripheral_debug(
+    .HCLK(HCLK),
+    .HRESETn(HRESETn),
+    .HADDR_ADP(HADDR_ADP),
+    .HTRANS_ADP(HTRANS_ADP),
+    .HWRITE_ADP(HWRITE_ADP),
+    .HSIZE_ADP(HSIZE_ADP),
+    .HBURST_ADP(HBURST_ADP),
+    .HPROT_ADP(HPROT_ADP),
+    .HWDATA_ADP(HWDATA_ADP),
+    .HRDATA_ADP(HRDATA_ADP),
+    .HREADY_ADP(HREADY_ADP),
+    .HRESP_ADP(HRESP_ADP),
+
+    .PCLK(PCLK),
+    .PRESETn(PRESETn),
+    .USRT_PSEL(PSEL_USRT),
+    .USRT_PADDRm(PADDR[11:0]),
+    .USRT_PENABLE(PENABLE),
+    .USRT_PWRITE(PWRITE),
+    .USRT_PWDATA(PWDATA),
+    .USRT_PRDATA(PRDATA_USRT),
+    .USRT_PREADY(PREADY_USRT),
+    .USRT_PSLVERR(PSLVERR_USRT),
+
+    .FT_CLK_O(FT_CLK_O),
+    .FT_SSN_O(FT_SSN_O),
+    .FT_MISO_I(FT_MISO_I),
+    .FT_MIOSIO_O(FT_MIOSIO_O),
+    .FT_MIOSIO_E(FT_MIOSIO_E),
+    .FT_MIOSIO_Z(FT_MIOSIO_Z),
+    .FT_MIOSIO_I(FT_MIOSIO_I)
+);
 
 endmodule

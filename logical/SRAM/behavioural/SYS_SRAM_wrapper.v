@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Expansion Subsystem SRAM Wrapper
+// Megasoc SRAM Wrapper
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
@@ -12,14 +12,14 @@
 //  sie300_axi5_sram_ctrl_expansion_subsystem
 //  SRAM
 
-module ROM_wrapper #(
-    parameter ID_W=8)(
+module SYS_SRAM_wrapper#(
+    parameter ID_W=2)(
     input  wire             ACLK,
     input  wire             ARESETn,
 
     input  wire             AWVALID,
     output wire             AWREADY,
-    input  wire [ID_W-1:0]       AWID,
+    input  wire [ID_W-1:0]  AWID,
     input  wire [31:0]      AWADDR,
     input  wire [7:0]       AWLEN,
     input  wire [2:0]       AWSIZE,
@@ -37,12 +37,12 @@ module ROM_wrapper #(
 
     output wire             BVALID,
     input  wire             BREADY,
-    output wire [ID_W-1:0]       BID,
+    output wire [ID_W-1:0]  BID,
     output wire [1:0]       BRESP,
     
     input  wire             ARVALID,
     output wire             ARREADY,
-    input  wire [ID_W-1:0]       ARID,
+    input  wire [ID_W-1:0]  ARID,
     input  wire [31:0]      ARADDR,
     input  wire [7:0]       ARLEN,
     input  wire [2:0]       ARSIZE,
@@ -53,11 +53,11 @@ module ROM_wrapper #(
     
     output wire             RVALID,
     input  wire             RREADY,
-    output wire [ID_W-1:0]       RID,
+    output wire [ID_W-1:0]  RID,
     output wire [63:0]      RDATA,
     output wire [1:0]       RRESP,
     output wire             RLAST,
-    output wire             RPOISON,
+    output wire [1:0]       RPOISON,
     input  wire             AWAKEUP,
 
     input  wire             clk_qreqn,
@@ -76,13 +76,13 @@ module ROM_wrapper #(
 );
 
 
-wire [19:0]    memaddr;
-wire [64:0]    memd;
-wire [64:0]    memq;
-wire           memcen;
+wire [19:0]     memaddr;
+wire [63:0]    memd;
+wire [63:0]    memq;
+wire            memcen;
 wire [7:0]     memwen;
 
-sie300_axi5_sram_ctrl_1 u_SMC(
+sie300_axi5_sram_ctrl_sys u_SMC(
     .aclk(ACLK),
     .aresetn(ARESETn),
     .awvalid_s(AWVALID),
@@ -141,7 +141,7 @@ sie300_axi5_sram_ctrl_1 u_SMC(
     .memwen(memwen)
 );
 
-SRAM #(.MEM_DEPTH(1<<14)) u_ROM (
+SRAM u_SRAM(
     .clk(ACLK),
     .memaddr(memaddr),
     .memd(memd),

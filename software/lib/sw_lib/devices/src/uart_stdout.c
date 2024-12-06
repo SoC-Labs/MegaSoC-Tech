@@ -39,6 +39,8 @@ void UartStdOutInit(void)
   CMSDK_UART2->CTRL    = 0x00;       // disable whie reprogramming
   CMSDK_UART2->BAUDDIV = BAUDCLKDIV; // (100MHz/BAUDRATE) in 16.4 format
   CMSDK_UART2->CTRL    = 0x01;       // TX, standard UART2
+  CMSDK_USRT2->BAUDDIV =    3;       // (prescaler value)
+  CMSDK_USRT2->CTRL    = 0x03;       // RX+TX, FT1248 USRT
   return;
 }
 
@@ -46,15 +48,22 @@ void UartStdOutInit(void)
 // Output a character
 unsigned char UartPutc(unsigned char my_ch)
 {
+  if ((CMSDK_USRT2->CTRL & 1)==0) {
     while (CMSDK_UART2->STATE & 1); // Wait if Transmit Holding register full
     CMSDK_UART2->DATA = my_ch; // write to transmit holding register
-    return (my_ch);
+    CMSDK_USRT2->DATA = my_ch; // (also write to transmit holding register)
+  } else {
+    while (CMSDK_USRT2->STATE & 1); // Wait if Transmit Holding register full
+    CMSDK_USRT2->DATA = my_ch; // write to transmit holding register
+  }
+  return (my_ch);
 }
 // Get a character
 unsigned char UartGetc(void)
 {
-  while (((CMSDK_UART2->STATE & 2)==0));
-  return (CMSDK_UART2->DATA);
+  while (((CMSDK_UART2->STATE & 2)==0) & ((CMSDK_USRT2->STATE & 2)==0));
+  if ((CMSDK_UART2->STATE & 2)==2) return (CMSDK_UART2->DATA);
+  if ((CMSDK_USRT2->STATE & 2)==2) return (CMSDK_USRT2->DATA);
 }
 
 void UartEndSimulation(void)

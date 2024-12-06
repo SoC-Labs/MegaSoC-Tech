@@ -28,110 +28,176 @@
 `timescale 1ns/1ps
 
 module megasoc_tech_wrapper(
-    input  wire           SYS_CLK,
-    input  wire           SYS_CLKEN,
-    input  wire           SYS_RESETn,
+    input  wire             SYS_CLK,
+    input  wire             SYS_CLKEN,
+    input  wire             RT_CLK, // 32kHz real time clock
+    input  wire             SYS_RESETn,
 
     // Millisoc system AXI Manager
-    output wire [1:0]     AXI_SYS_EXP_awid,
-    output wire [31:0]    AXI_SYS_EXP_awaddr,
-    output wire [7:0]     AXI_SYS_EXP_awlen,
-    output wire [2:0]     AXI_SYS_EXP_awsize,
-    output wire [1:0]     AXI_SYS_EXP_awburst,
-    output wire           AXI_SYS_EXP_awlock,
-    output wire [3:0]     AXI_SYS_EXP_awcache,
-    output wire [2:0]     AXI_SYS_EXP_awprot,
-    output wire           AXI_SYS_EXP_awvalid,
-    input wire            AXI_SYS_EXP_awready,
-    output wire [63:0]    AXI_SYS_EXP_wdata,
-    output wire [7:0]     AXI_SYS_EXP_wstrb,
-    output wire           AXI_SYS_EXP_wlast,
-    output wire           AXI_SYS_EXP_wvalid,
-    input wire            AXI_SYS_EXP_wready,
-    input wire  [1:0]     AXI_SYS_EXP_bid,
-    input wire  [1:0]     AXI_SYS_EXP_bresp,
-    input wire            AXI_SYS_EXP_bvalid,
-    output wire           AXI_SYS_EXP_bready,
-    output wire [1:0]     AXI_SYS_EXP_arid,
-    output wire [31:0]    AXI_SYS_EXP_araddr,
-    output wire [7:0]     AXI_SYS_EXP_arlen,
-    output wire [2:0]     AXI_SYS_EXP_arsize,
-    output wire [1:0]     AXI_SYS_EXP_arburst,
-    output wire           AXI_SYS_EXP_arlock,
-    output wire [3:0]     AXI_SYS_EXP_arcache,
-    output wire [2:0]     AXI_SYS_EXP_arprot,
-    output wire           AXI_SYS_EXP_arvalid,
-    input wire            AXI_SYS_EXP_arready,
-    input wire  [1:0]     AXI_SYS_EXP_rid,
-    input wire  [63:0]    AXI_SYS_EXP_rdata,
-    input wire  [1:0]     AXI_SYS_EXP_rresp,
-    input wire            AXI_SYS_EXP_rlast,
-    input wire            AXI_SYS_EXP_rvalid,
-    output wire           AXI_SYS_EXP_rready,
+    output wire [1:0]       AXI_SYS_EXP_awid,
+    output wire [31:0]      AXI_SYS_EXP_awaddr,
+    output wire [7:0]       AXI_SYS_EXP_awlen,
+    output wire [2:0]       AXI_SYS_EXP_awsize,
+    output wire [1:0]       AXI_SYS_EXP_awburst,
+    output wire             AXI_SYS_EXP_awlock,
+    output wire [3:0]       AXI_SYS_EXP_awcache,
+    output wire [2:0]       AXI_SYS_EXP_awprot,
+    output wire             AXI_SYS_EXP_awvalid,
+    input wire              AXI_SYS_EXP_awready,
+    output wire [63:0]      AXI_SYS_EXP_wdata,
+    output wire [7:0]       AXI_SYS_EXP_wstrb,
+    output wire             AXI_SYS_EXP_wlast,
+    output wire             AXI_SYS_EXP_wvalid,
+    input wire              AXI_SYS_EXP_wready,
+    input wire  [1:0]       AXI_SYS_EXP_bid,
+    input wire  [1:0]       AXI_SYS_EXP_bresp,
+    input wire              AXI_SYS_EXP_bvalid,
+    output wire             AXI_SYS_EXP_bready,
+    output wire [1:0]       AXI_SYS_EXP_arid,
+    output wire [31:0]      AXI_SYS_EXP_araddr,
+    output wire [7:0]       AXI_SYS_EXP_arlen,
+    output wire [2:0]       AXI_SYS_EXP_arsize,
+    output wire [1:0]       AXI_SYS_EXP_arburst,
+    output wire             AXI_SYS_EXP_arlock,
+    output wire [3:0]       AXI_SYS_EXP_arcache,
+    output wire [2:0]       AXI_SYS_EXP_arprot,
+    output wire             AXI_SYS_EXP_arvalid,
+    input wire              AXI_SYS_EXP_arready,
+    input wire  [1:0]       AXI_SYS_EXP_rid,
+    input wire  [63:0]      AXI_SYS_EXP_rdata,
+    input wire  [1:0]       AXI_SYS_EXP_rresp,
+    input wire              AXI_SYS_EXP_rlast,
+    input wire              AXI_SYS_EXP_rvalid,
+    output wire             AXI_SYS_EXP_rready,
     
 
     // Millisoc system AXI Subordinate
-    input wire          AXI_EXP_SYS_awid,
-    input wire  [31:0]  AXI_EXP_SYS_awaddr,
-    input wire  [7:0]   AXI_EXP_SYS_awlen,
-    input wire  [2:0]   AXI_EXP_SYS_awsize,
-    input wire  [1:0]   AXI_EXP_SYS_awburst,
-    input wire          AXI_EXP_SYS_awlock,
-    input wire  [3:0]   AXI_EXP_SYS_awcache,
-    input wire  [2:0]   AXI_EXP_SYS_awprot,
-    input wire          AXI_EXP_SYS_awvalid,
-    output wire         AXI_EXP_SYS_awready,
-    input wire  [63:0]  AXI_EXP_SYS_wdata,
-    input wire  [7:0]   AXI_EXP_SYS_wstrb,
-    input wire          AXI_EXP_SYS_wlast,
-    input wire          AXI_EXP_SYS_wvalid,
-    output wire         AXI_EXP_SYS_wready,
-    output wire         AXI_EXP_SYS_bid,
-    output wire [1:0]   AXI_EXP_SYS_bresp,
-    output wire         AXI_EXP_SYS_bvalid,
-    input wire          AXI_EXP_SYS_bready,
-    input wire          AXI_EXP_SYS_arid,
-    input wire  [31:0]  AXI_EXP_SYS_araddr,
-    input wire  [7:0]   AXI_EXP_SYS_arlen,
-    input wire  [2:0]   AXI_EXP_SYS_arsize,
-    input wire  [1:0]   AXI_EXP_SYS_arburst,
-    input wire          AXI_EXP_SYS_arlock,
-    input wire  [3:0]   AXI_EXP_SYS_arcache,
-    input wire  [2:0]   AXI_EXP_SYS_arprot,
-    input wire          AXI_EXP_SYS_arvalid,
-    output wire         AXI_EXP_SYS_arready,
-    output wire         AXI_EXP_SYS_rid,
-    output wire [63:0]  AXI_EXP_SYS_rdata,
-    output wire [1:0]   AXI_EXP_SYS_rresp,
-    output wire         AXI_EXP_SYS_rlast,
-    output wire         AXI_EXP_SYS_rvalid,
-    input wire          AXI_EXP_SYS_rready,
+    input wire              AXI_EXP_SYS_awid,
+    input wire  [31:0]      AXI_EXP_SYS_awaddr,
+    input wire  [7:0]       AXI_EXP_SYS_awlen,
+    input wire  [2:0]       AXI_EXP_SYS_awsize,
+    input wire  [1:0]       AXI_EXP_SYS_awburst,
+    input wire              AXI_EXP_SYS_awlock,
+    input wire  [3:0]       AXI_EXP_SYS_awcache,
+    input wire  [2:0]       AXI_EXP_SYS_awprot,
+    input wire              AXI_EXP_SYS_awvalid,
+    output wire             AXI_EXP_SYS_awready,
+    input wire  [63:0]      AXI_EXP_SYS_wdata,
+    input wire  [7:0]       AXI_EXP_SYS_wstrb,
+    input wire              AXI_EXP_SYS_wlast,
+    input wire              AXI_EXP_SYS_wvalid,
+    output wire             AXI_EXP_SYS_wready,
+    output wire             AXI_EXP_SYS_bid,
+    output wire [1:0]       AXI_EXP_SYS_bresp,
+    output wire             AXI_EXP_SYS_bvalid,
+    input wire              AXI_EXP_SYS_bready,
+    input wire              AXI_EXP_SYS_arid,
+    input wire  [31:0]      AXI_EXP_SYS_araddr,
+    input wire  [7:0]       AXI_EXP_SYS_arlen,
+    input wire  [2:0]       AXI_EXP_SYS_arsize,
+    input wire  [1:0]       AXI_EXP_SYS_arburst,
+    input wire              AXI_EXP_SYS_arlock,
+    input wire  [3:0]       AXI_EXP_SYS_arcache,
+    input wire  [2:0]       AXI_EXP_SYS_arprot,
+    input wire              AXI_EXP_SYS_arvalid,
+    output wire             AXI_EXP_SYS_arready,
+    output wire             AXI_EXP_SYS_rid,
+    output wire [63:0]      AXI_EXP_SYS_rdata,
+    output wire [1:0]       AXI_EXP_SYS_rresp,
+    output wire             AXI_EXP_SYS_rlast,
+    output wire             AXI_EXP_SYS_rvalid,
+    input wire              AXI_EXP_SYS_rready,
+
+    // DMA 350 APB Interface Wires
+    output wire [31:0]      PADDR_DMA_CTRL,
+    output wire [31:0]      PWDATA_DMA_CTRL,
+    output wire             PWRITE_DMA_CTRL,
+    output wire [2:0]       PPROT_DMA_CTRL,
+    output wire [3:0]       PSTRB_DMA_CTRL,
+    output wire             PENABLE_DMA_CTRL,
+    output wire             PSELx_DMA_CTRL,
+    input  wire [31:0]      PRDATA_DMA_CTRL,
+    input  wire             PSLVERR_DMA_CTRL,
+    input  wire             PREADY_DMA_CTRL,
+
+    // DMA 350 AXI Interface Wires
+    input  wire [1:0]       AWID_DMA350,
+    input  wire [43:0]      AWADDR_DMA350,
+    input  wire [7:0]       AWLEN_DMA350,
+    input  wire [2:0]       AWSIZE_DMA350,
+    input  wire [1:0]       AWBURST_DMA350,
+    input  wire             AWLOCK_DMA350,
+    input  wire [3:0]       AWCACHE_DMA350,
+    input  wire [2:0]       AWPROT_DMA350,
+    input  wire             AWVALID_DMA350,
+    output wire             AWREADY_DMA350,
+
+    input  wire [127:0]     WDATA_DMA350,
+    input  wire [15:0]      WSTRB_DMA350,
+    input  wire             WLAST_DMA350,
+    input  wire             WVALID_DMA350,
+    output wire             WREADY_DMA350,
+
+    output wire [1:0]       BID_DMA350,
+    output wire [1:0]       BRESP_DMA350,
+    output wire             BVALID_DMA350,
+    input  wire             BREADY_DMA350,
+
+    input  wire [1:0]       ARID_DMA350,
+    input  wire [43:0]      ARADDR_DMA350,
+    input  wire [7:0]       ARLEN_DMA350,
+    input  wire [2:0]       ARSIZE_DMA350,
+    input  wire [1:0]       ARBURST_DMA350,
+    input  wire             ARLOCK_DMA350,
+    input  wire [3:0]       ARCACHE_DMA350,
+    input  wire [2:0]       ARPROT_DMA350,
+    input  wire             ARVALID_DMA350,
+    output wire             ARREADY_DMA350,
+
+    output wire [1:0]       RID_DMA350,
+    output wire [127:0]     RDATA_DMA350,
+    output wire [1:0]       RRESP_DMA350,
+    output wire             RLAST_DMA350,
+    output wire             RVALID_DMA350,
+    input  wire             RREADY_DMA350,
+
+    input  wire [3:0]       DMA350_irq_channel,
+    input  wire             DMA350_irq_comb_nonsec,
 
     // QSPI Signals
-    output wire         QSPI_SCLK,
-    output wire         QSPI_nCS,
-    output wire [3:0]   QSPI_IO_o,
-    input  wire [3:0]   QSPI_IO_i,
-    output wire [3:0]   QSPI_IO_e,
+    output wire             QSPI_SCLK,
+    output wire             QSPI_nCS,
+    output wire [3:0]       QSPI_IO_o,
+    input  wire [3:0]       QSPI_IO_i,
+    output wire [3:0]       QSPI_IO_e,
 
     // UART signals
-    input  wire         UARTRXD,
-    output wire         UARTTXD,
-    output wire         UARTTXEN,
+    input  wire             UARTRXD,
+    output wire             UARTTXD,
+    output wire             UARTTXEN,
+
+    // FT1248 Signals
+    output wire             FT_CLK_O,    // SCLK
+    output wire             FT_SSN_O,    // SS_N
+    input  wire             FT_MISO_I,   // MISO
+    output wire             FT_MIOSIO_O, // MIOSIO tristate output when enabled
+    output wire             FT_MIOSIO_E, // MIOSIO tristate output enable (active hi)
+    output wire             FT_MIOSIO_Z, // MIOSIO tristate output enable (active lo)
+    input  wire             FT_MIOSIO_I, // MIOSIO tristate input
 
     // DAP-LITE external signals
-    input  wire         nTRST,
-    input  wire         SWCLKTCK,
-    input  wire         SWDITMS,
-    input  wire         TDI,
-    output wire         TDO,
-    output wire         nTDOEN,
-    output wire         SWDO,
-    output wire         SWDOEN
+    input  wire             nTRST,
+    input  wire             SWCLKTCK,
+    input  wire             SWDITMS,
+    input  wire             TDI,
+    output wire             TDO,
+    output wire             nTDOEN,
+    output wire             SWDO,
+    output wire             SWDOEN
 );
 
 
-parameter ID_W=7;
+parameter ID_W=8;
 parameter NUM_SPIS=480;
 
 wire                CPU_AWREADYM;
@@ -361,58 +427,17 @@ wire  [ 31: 0]      CPU_PRDATADBG;
 wire                CPU_PREADYDBG;
 wire                CPU_PSLVERRDBG;
 
-// DMA 350 APB Interface Wires
-wire [31:0]         PADDR_DMA_CTRL;
-wire [31:0]         PWDATA_DMA_CTRL;
-wire                PWRITE_DMA_CTRL;
-wire [2:0]          PPROT_DMA_CTRL;
-wire [3:0]          PSTRB_DMA_CTRL;
-wire                PENABLE_DMA_CTRL;
-wire                PSELx_DMA_CTRL;
-wire [31:0]         PRDATA_DMA_CTRL;
-wire                PSLVERR_DMA_CTRL;
-wire                PREADY_DMA_CTRL;
-
-// DMA 350 AXI Interface Wires
-wire [1:0]          AWID_DMA350;
-wire [43:0]         AWADDR_DMA350;
-wire [7:0]          AWLEN_DMA350;
-wire [2:0]          AWSIZE_DMA350;
-wire [1:0]          AWBURST_DMA350;
-wire                AWLOCK_DMA350;
-wire [3:0]          AWCACHE_DMA350;
-wire [2:0]          AWPROT_DMA350;
-wire                AWVALID_DMA350;
-wire                AWREADY_DMA350;
-
-wire [127:0]        WDATA_DMA350;
-wire [15:0]         WSTRB_DMA350;
-wire                WLAST_DMA350;
-wire                WVALID_DMA350;
-wire                WREADY_DMA350;
-
-wire [1:0]          BID_DMA350;
-wire [1:0]          BRESP_DMA350;
-wire                BVALID_DMA350;
-wire                BREADY_DMA350;
-
-wire [1:0]          ARID_DMA350;
-wire [43:0]         ARADDR_DMA350;
-wire [7:0]          ARLEN_DMA350;
-wire [2:0]          ARSIZE_DMA350;
-wire [1:0]          ARBURST_DMA350;
-wire                ARLOCK_DMA350;
-wire [3:0]          ARCACHE_DMA350;
-wire [2:0]          ARPROT_DMA350;
-wire                ARVALID_DMA350;
-wire                ARREADY_DMA350;
-
-wire [1:0]          RID_DMA350;
-wire [127:0]        RDATA_DMA350;
-wire [1:0]          RRESP_DMA350;
-wire                RLAST_DMA350;
-wire                RVALID_DMA350;
-wire                RREADY_DMA350;
+// ADP debug AHB port
+wire [31:0]         HADDR_ADP;
+wire [1:0]          HTRANS_ADP;
+wire                HWRITE_ADP;
+wire [2:0]          HSIZE_ADP;
+wire [2:0]          HBURST_ADP;
+wire [3:0]          HPROT_ADP;
+wire [31:0]         HWDATA_ADP;
+wire [31:0]         HRDATA_ADP;
+wire                HREADY_ADP;
+wire                HRESP_ADP;
 
 assign CPU_nPRESETDBG = SYS_RESETn;
 assign CPU_PCLKENDBG = 1'b1;
@@ -421,7 +446,7 @@ assign CPU_PADDRDBG31 = 1'b0;
 wire [(NUM_SPIS-1):0]   CPU_IRQS;
 wire [5:0]              PERI_IRQS;
 
-assign CPU_IRQS={{(NUM_SPIS-38){1'b0}}, PERI_IRQS};
+assign CPU_IRQS={{(NUM_SPIS-38){1'b0}}, PERI_IRQS, DMA350_irq_comb_nonsec, DMA350_irq_channel};
 
 megasoc_cpu_ss #(
     .NUM_GICRID_BITS(ID_W-1),
@@ -774,6 +799,17 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .RVALID_A53(CPU_RVALIDM),
     .RREADY_A53(CPU_RREADYM),
 
+    .HADDR_ADP(HADDR_ADP),
+    .HTRANS_ADP(HTRANS_ADP),
+    .HWRITE_ADP(HWRITE_ADP),
+    .HSIZE_ADP(HSIZE_ADP),
+    .HBURST_ADP(HBURST_ADP),
+    .HPROT_ADP(HPROT_ADP),
+    .HWDATA_ADP(HWDATA_ADP),
+    .HRDATA_ADP(HRDATA_ADP),
+    .HREADY_ADP(HREADY_ADP),
+    .HRESP_ADP(HRESP_ADP),
+
     .AWID_DMA350(AWID_DMA350),
     .AWADDR_DMA350(AWADDR_DMA350),
     .AWLEN_DMA350(AWLEN_DMA350),
@@ -961,6 +997,21 @@ SRAM_wrapper u_SRAM_wrapper(
 megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
     .PCLK(SYS_CLK),
     .PRESETn(SYS_RESETn),
+    .HCLK(SYS_CLK),
+    .HRESETn(SYS_RESETn),
+    .RT_CLK(RT_CLK),
+
+    .HADDR_ADP(HADDR_ADP),
+    .HTRANS_ADP(HTRANS_ADP),
+    .HWRITE_ADP(HWRITE_ADP),
+    .HSIZE_ADP(HSIZE_ADP),
+    .HBURST_ADP(HBURST_ADP),
+    .HPROT_ADP(HPROT_ADP),
+    .HWDATA_ADP(HWDATA_ADP),
+    .HRDATA_ADP(HRDATA_ADP),
+    .HREADY_ADP(HREADY_ADP),
+    .HRESP_ADP(HRESP_ADP),
+
     .PADDR(PADDR_PERIPHERAL),
     .PENABLE(PENABLE_PERIPHERAL),
     .PWRITE(PWRITE_PERIPHERAL),
@@ -969,78 +1020,21 @@ megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
     .PRDATA(PRDATA_PERIPHERAL),
     .PREADY(PREADY_PERIPHERAL),
     .PSLVERR(PSLVERR_PERIPHERAL),
+
     .UARTRXD(UARTRXD),
     .UARTTXD(UARTTXD),
     .UARTTXEN(UARTTXEN),
+
+    .FT_CLK_O(FT_CLK_O),
+    .FT_SSN_O(FT_SSN_O),
+    .FT_MISO_I(FT_MISO_I),
+    .FT_MIOSIO_O(FT_MIOSIO_O),
+    .FT_MIOSIO_E(FT_MIOSIO_E),
+    .FT_MIOSIO_Z(FT_MIOSIO_Z),
+    .FT_MIOSIO_I(FT_MIOSIO_I),
+
     .PERI_IRQS(PERI_IRQS)
 );
 
-megasoc_tech_system_wrapper u_megasoc_tech_system_wrapper(
-    .CLK(SYS_CLK),
-    .RESETn(SYS_RESETn),
-
-    .DMA350_PWAKEUP(1'b1),
-    .DMA350_PDEBUG(1'b0),
-    .DMA350_PSEL(PSELx_DMA_CTRL),
-    .DMA350_PENABLE(PENABLE_DMA_CTRL),
-    .DMA350_PPROT(PPROT_DMA_CTRL),
-    .DMA350_PWRITE(PWRITE_DMA_CTRL),
-    .DMA350_PADDR(PADDR_DMA_CTRL),
-    .DMA350_PWDATA(PWDATA_DMA_CTRL),
-    .DMA350_PSTRB(PSTRB_DMA_CTRL),
-    .DMA350_PREADY(PREADY_DMA_CTRL),
-    .DMA350_PSLVERR(PSLVERR_DMA_CTRL),
-    .DMA350_PRDATA(PRDATA_DMA_CTRL),
-
-    .DMA350_AWAKEUP_M0(),
-    .DMA350_AWVALID_M0(AWVALID_DMA350),
-    .DMA350_AWADDR_M0(AWADDR_DMA350),
-    .DMA350_AWBURST_M0(AWBURST_DMA350),
-    .DMA350_AWID_M0(AWID_DMA350),
-    .DMA350_AWLEN_M0(AWLEN_DMA350),
-    .DMA350_AWSIZE_M0(AWSIZE_DMA350),
-    .DMA350_AWQOS_M0(),
-    .DMA350_AWPROT_M0(AWPROT_DMA350),
-    .DMA350_AWREADY_M0(AWREADY_DMA350),
-    .DMA350_AWCACHE_M0(AWCACHE_DMA350),
-    .DMA350_AWINNER_M0(),
-    .DMA350_AWDOMAIN_M0(),
-
-    .DMA350_ARVALID_M0(ARVALID_DMA350),
-    .DMA350_ARADDR_M0(ARADDR_DMA350),
-    .DMA350_ARBURST_M0(ARBURST_DMA350),
-    .DMA350_ARID_M0(ARID_DMA350),
-    .DMA350_ARLEN_M0(ARLEN_DMA350),
-    .DMA350_ARSIZE_M0(ARSIZE_DMA350),
-    .DMA350_ARQOS_M0(),
-    .DMA350_ARPROT_M0(ARPROT_DMA350),
-    .DMA350_ARREADY_M0(ARREADY_DMA350),
-    .DMA350_ARCACHE_M0(ARCACHE_DMA350),
-    .DMA350_ARINNER_M0(),
-    .DMA350_ARDOMAIN_M0(),
-    .DMA350_ARCMDLINK_M0(),
-
-    .DMA350_WVALID_M0(WVALID_DMA350),
-    .DMA350_WLAST_M0(WLAST_DMA350),
-    .DMA350_WSTRB_M0(WSTRB_DMA350),
-    .DMA350_WDATA_M0(WDATA_DMA350),
-    .DMA350_WREADY_M0(WREADY_DMA350),
-
-    .DMA350_RVALID_M0(RVALID_DMA350),
-    .DMA350_RID_M0(RID_DMA350),
-    .DMA350_RLAST_M0(RLAST_DMA350),
-    .DMA350_RDATA_M0(RDATA_DMA350),
-    .DMA350_RPOISON_M0(2'b00),
-    .DMA350_RRESP_M0(RRESP_DMA350),
-    .DMA350_RREADY_M0(RREADY_DMA350),
-
-    .DMA350_BVALID_M0(BVALID_DMA350),
-    .DMA350_BID_M0(BID_DMA350),
-    .DMA350_BRESP_M0(BRESP_DMA350),
-    .DMA350_BREADY_M0(BREADY_DMA350),
-
-    .DMA350_irq_channel(),
-    .DMA350_irq_comb_nonsec()
-);
 
 endmodule

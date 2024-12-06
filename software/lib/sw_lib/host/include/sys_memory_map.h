@@ -26,6 +26,7 @@
 #define PERIPHERAL_BASE                     0x40000000UL
 #define SYS_UART0_BASE                      PERIPHERAL_BASE
 #define TIMER0_BASE                         0x40001000UL
+#define SYS_USRT0_BASE                      0x40002000UL
 
 #define DAP_DBG_BASE                        0x60000000UL
 

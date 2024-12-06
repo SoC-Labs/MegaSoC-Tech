@@ -15,6 +15,7 @@
 //-----------------------------------------------------------------------------
 // Modules instantiated:
 //  - ada_top_sldma350_megasoc
+//  - nic400_megasoc_system
 //-----------------------------------------------------------------------------
 // To Do
 //  - Everything
@@ -89,6 +90,7 @@ module megasoc_tech_system_wrapper(
 
 );
 
+// DMA AXI Manager 1
 wire             DMA350_AWAKEUP_M1;
 wire             DMA350_AWVALID_M1;
 wire [44-1:0]    DMA350_AWADDR_M1;
@@ -132,6 +134,43 @@ wire  [2-1:0]    DMA350_BID_M1;
 wire  [1:0]      DMA350_BRESP_M1;
 wire             DMA350_BREADY_M1;
 
+// SRAM AXI Signals
+wire [1:0]      AWID_SYS_SRAM;
+wire [31:0]     AWADDR_SYS_SRAM;
+wire [7:0]      AWLEN_SYS_SRAM;
+wire [2:0]      AWSIZE_SYS_SRAM;
+wire [1:0]      AWBURST_SYS_SRAM;
+wire            AWLOCK_SYS_SRAM;
+wire [3:0]      AWCACHE_SYS_SRAM;
+wire [2:0]      AWPROT_SYS_SRAM;
+wire            AWVALID_SYS_SRAM;
+wire            AWREADY_SYS_SRAM;
+wire [63:0]     WDATA_SYS_SRAM;
+wire [7:0]      WSTRB_SYS_SRAM;
+wire            WLAST_SYS_SRAM;
+wire            WVALID_SYS_SRAM;
+wire            WREADY_SYS_SRAM;
+wire [1:0]      BID_SYS_SRAM;
+wire [1:0]      BRESP_SYS_SRAM;
+wire            BVALID_SYS_SRAM;
+wire            BREADY_SYS_SRAM;
+wire [1:0]      ARID_SYS_SRAM;
+wire [31:0]     ARADDR_SYS_SRAM;
+wire [7:0]      ARLEN_SYS_SRAM;
+wire [2:0]      ARSIZE_SYS_SRAM;
+wire [1:0]      ARBURST_SYS_SRAM;
+wire            ARLOCK_SYS_SRAM;
+wire [3:0]      ARCACHE_SYS_SRAM;
+wire [2:0]      ARPROT_SYS_SRAM;
+wire            ARVALID_SYS_SRAM;
+wire            ARREADY_SYS_SRAM;
+wire [1:0]      RID_SYS_SRAM;
+wire [63:0]     RDATA_SYS_SRAM;
+wire [1:0]      RRESP_SYS_SRAM;
+wire            RLAST_SYS_SRAM;
+wire            RVALID_SYS_SRAM;
+wire            RREADY_SYS_SRAM;
+
 
 ada_top_sldma350_megasoc u_megasoc_dma350(
     .clk(CLK),
@@ -140,13 +179,13 @@ ada_top_sldma350_megasoc u_megasoc_dma350(
     .aclken_m1(1'b1),
     .pclken(1'b1),
 
-    .clk_qreqn(),
+    .clk_qreqn(1'b1),
     .clk_qacceptn(),
     .clk_qdeny(),
     .clk_qactive(),
 
-    .preq(),
-    .pstate(),
+    .preq(1'b1),
+    .pstate(4'b1000),
     .paccept(),
     .pdeny(),
     .pactive(),
@@ -263,8 +302,8 @@ ada_top_sldma350_megasoc u_megasoc_dma350(
     .trig_out_1_req(),
     .trig_out_1_ack(),
 
-    .irq_channel(),
-    .irq_comb_nonsec(),
+    .irq_channel(DMA350_irq_channel),
+    .irq_comb_nonsec(DMA350_irq_comb_nonsec),
 
     .str_out_0_tvalid(),
     .str_out_0_tready(),
@@ -292,9 +331,9 @@ ada_top_sldma350_megasoc u_megasoc_dma350(
     .gpo_ch_0(),
     .gpo_ch_1(),
 
-    .allch_stop_req_nonsec(),
+    .allch_stop_req_nonsec(1'b0),
     .allch_stop_ack_nonsec(),
-    .allch_pause_req_nonsec(),
+    .allch_pause_req_nonsec(1'b0),
     .allch_pause_ack_nonsec(),
 
     .ch_enabled(),
@@ -303,14 +342,147 @@ ada_top_sldma350_megasoc u_megasoc_dma350(
     .ch_paused(),
     .ch_priv(),
 
-    .halt_req(),
-    .restart_req(),
+    .halt_req(1'b0),
+    .restart_req(1'b0),
     .halted(),
-    .boot_en(),
-    .boot_addr(),
-    .boot_memattr(),
-    .boot_shareattr()
+    .boot_en(1'b0),
+    .boot_addr({42{1'b0}}),
+    .boot_memattr({8{1'b0}}),
+    .boot_shareattr({2{1'b0}})
 );
 
+
+nic400_megasoc_system u_nic400_megasoc_system(
+    .AWID_SYS_SRAM(AWID_SYS_SRAM),
+    .AWADDR_SYS_SRAM(AWADDR_SYS_SRAM),
+    .AWLEN_SYS_SRAM(AWLEN_SYS_SRAM),
+    .AWSIZE_SYS_SRAM(AWSIZE_SYS_SRAM),
+    .AWBURST_SYS_SRAM(AWBURST_SYS_SRAM),
+    .AWLOCK_SYS_SRAM(AWLOCK_SYS_SRAM),
+    .AWCACHE_SYS_SRAM(AWCACHE_SYS_SRAM),
+    .AWPROT_SYS_SRAM(AWPROT_SYS_SRAM),
+    .AWVALID_SYS_SRAM(AWVALID_SYS_SRAM),
+    .AWREADY_SYS_SRAM(AWREADY_SYS_SRAM),
+    .WDATA_SYS_SRAM(WDATA_SYS_SRAM),
+    .WSTRB_SYS_SRAM(WSTRB_SYS_SRAM),
+    .WLAST_SYS_SRAM(WLAST_SYS_SRAM),
+    .WVALID_SYS_SRAM(WVALID_SYS_SRAM),
+    .WREADY_SYS_SRAM(WREADY_SYS_SRAM),
+    .BID_SYS_SRAM(BID_SYS_SRAM),
+    .BRESP_SYS_SRAM(BRESP_SYS_SRAM),
+    .BVALID_SYS_SRAM(BVALID_SYS_SRAM),
+    .BREADY_SYS_SRAM(BREADY_SYS_SRAM),
+    .ARID_SYS_SRAM(ARID_SYS_SRAM),
+    .ARADDR_SYS_SRAM(ARADDR_SYS_SRAM),
+    .ARLEN_SYS_SRAM(ARLEN_SYS_SRAM),
+    .ARSIZE_SYS_SRAM(ARSIZE_SYS_SRAM),
+    .ARBURST_SYS_SRAM(ARBURST_SYS_SRAM),
+    .ARLOCK_SYS_SRAM(ARLOCK_SYS_SRAM),
+    .ARCACHE_SYS_SRAM(ARCACHE_SYS_SRAM),
+    .ARPROT_SYS_SRAM(ARPROT_SYS_SRAM),
+    .ARVALID_SYS_SRAM(ARVALID_SYS_SRAM),
+    .ARREADY_SYS_SRAM(ARREADY_SYS_SRAM),
+    .RID_SYS_SRAM(RID_SYS_SRAM),
+    .RDATA_SYS_SRAM(RDATA_SYS_SRAM),
+    .RRESP_SYS_SRAM(RRESP_SYS_SRAM),
+    .RLAST_SYS_SRAM(RLAST_SYS_SRAM),
+    .RVALID_SYS_SRAM(RVALID_SYS_SRAM),
+    .RREADY_SYS_SRAM(RREADY_SYS_SRAM),
+
+    .AWID_DMA(DMA350_AWID_M1),
+    .AWADDR_DMA(DMA350_AWADDR_M1),
+    .AWLEN_DMA(DMA350_AWLEN_M1),
+    .AWSIZE_DMA(DMA350_AWSIZE_M1),
+    .AWBURST_DMA(DMA350_AWBURST_M1),
+    .AWLOCK_DMA(DMA350_AWLOCK_M1),
+    .AWCACHE_DMA(DMA350_AWCACHE_M1),
+    .AWPROT_DMA(DMA350_AWPROT_M1),
+    .AWVALID_DMA(DMA350_AWVALID_M1),
+    .AWREADY_DMA(DMA350_AWREADY_M1),
+    .WDATA_DMA(DMA350_WDATA_M1),
+    .WSTRB_DMA(DMA350_WSTRB_M1),
+    .WLAST_DMA(DMA350_WLAST_M1),
+    .WVALID_DMA(DMA350_WVALID_M1),
+    .WREADY_DMA(DMA350_WREADY_M1),
+    .BID_DMA(DMA350_BID_M1),
+    .BRESP_DMA(DMA350_BRESP_M1),
+    .BVALID_DMA(DMA350_BVALID_M1),
+    .BREADY_DMA(DMA350_BREADY_M1),
+    .ARID_DMA(DMA350_ARID_M1),
+    .ARADDR_DMA(DMA350_ARADDR_M1),
+    .ARLEN_DMA(DMA350_ARLEN_M1),
+    .ARSIZE_DMA(DMA350_ARSIZE_M1),
+    .ARBURST_DMA(DMA350_ARBURST_M1),
+    .ARLOCK_DMA(DMA350_ARLOCK_M1),
+    .ARCACHE_DMA(DMA350_ARCACHE_M1),
+    .ARPROT_DMA(DMA350_ARPROT_M1),
+    .ARVALID_DMA(DMA350_ARVALID_M1),
+    .ARREADY_DMA(DMA350_ARREADY_M1),
+    .RID_DMA(DMA350_RID_M1),
+    .RDATA_DMA(DMA350_RDATA_M1),
+    .RRESP_DMA(DMA350_RRESP_M1),
+    .RLAST_DMA(DMA350_RLAST_M1),
+    .RVALID_DMA(DMA350_RVALID_M1),
+    .RREADY_DMA(DMA350_RREADY_M1),
+
+    .clk0clk(CLK),
+    .clk0resetn(RESETn)
+);
+
+SYS_SRAM_wrapper #(
+    .ID_W(2)
+) u_SYS_SRAM_wrapper(
+    .ACLK(CLK),
+    .ARESETn(RESETn),
+    .AWVALID(AWVALID_SYS_SRAM),
+    .AWREADY(AWREADY_SYS_SRAM),
+    .AWID(AWID_SYS_SRAM),
+    .AWADDR(AWADDR_SYS_SRAM),
+    .AWLEN(AWLEN_SYS_SRAM),
+    .AWSIZE(AWSIZE_SYS_SRAM),
+    .AWBURST(AWBURST_SYS_SRAM),
+    .AWLOCK(AWLOCK_SYS_SRAM),
+    .AWPROT(AWPROT_SYS_SRAM),
+    .AWQOS(4'h0),
+    .WVALID(WVALID_SYS_SRAM),
+    .WREADY(WREADY_SYS_SRAM),
+    .WDATA(WDATA_SYS_SRAM),
+    .WSTRB(WSTRB_SYS_SRAM),
+    .WLAST(WLAST_SYS_SRAM),
+    .WPOISON(1'b0),
+    .BVALID(BVALID_SYS_SRAM),
+    .BREADY(BREADY_SYS_SRAM),
+    .BID(BID_SYS_SRAM),
+    .BRESP(BRESP_SYS_SRAM),
+    .ARVALID(ARVALID_SYS_SRAM),
+    .ARREADY(ARREADY_SYS_SRAM),
+    .ARID(ARID_SYS_SRAM),
+    .ARADDR(ARADDR_SYS_SRAM),
+    .ARLEN(ARLEN_SYS_SRAM),
+    .ARSIZE(ARSIZE_SYS_SRAM),
+    .ARBURST(ARBURST_SYS_SRAM),
+    .ARLOCK(ARLOCK_SYS_SRAM),
+    .ARPROT(ARPROT_SYS_SRAM),
+    .ARQOS(4'h0),
+    .RVALID(RVALID_SYS_SRAM),
+    .RREADY(RREADY_SYS_SRAM),
+    .RID(RID_SYS_SRAM),
+    .RDATA(RDATA_SYS_SRAM),
+    .RRESP(RRESP_SYS_SRAM),
+    .RLAST(RLAST_SYS_SRAM),
+    .RPOISON(),
+    .AWAKEUP(1'b1),
+    .clk_qreqn(1'b1),
+    .clk_qacceptn(),
+    .clk_qdeny(),
+    .clk_qactive(),
+    .pwr_qreqn(1'b1),
+    .pwr_qacceptn(),
+    .pwr_qdeny(),
+    .pwr_qactive(),
+    .ext_gt_qreqn(1'b1),
+    .ext_gt_qacceptn(),
+    .cfg_gate_resp(1'b0)
+);
 
 endmodule

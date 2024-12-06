@@ -19,14 +19,17 @@ $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/meg
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_irq_sync.v
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_subsystem.v
-
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_debug.v
 
 // ARM IP
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/ARM_Cortex_A53.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/CA53_tarmac.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/GIC400.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/nic400_megasoc_main.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/nic400_megasoc_system.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SIE300_SRAM_controller.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SIE300_SYS_SRAM_controller.flist
 // -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PL011.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/Corstone101.flist 
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/DMA350.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SoCDebug_tech.flist
