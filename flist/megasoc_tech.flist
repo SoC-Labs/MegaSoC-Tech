@@ -18,6 +18,7 @@ $(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_system_wrapper
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_cpu_ss.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_irq_sync.v
 
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_addr_decode.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_subsystem.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_debug.v
 

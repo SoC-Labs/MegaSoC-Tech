@@ -193,7 +193,18 @@ module megasoc_tech_wrapper(
     output wire             TDO,
     output wire             nTDOEN,
     output wire             SWDO,
-    output wire             SWDOEN
+    output wire             SWDOEN,
+
+    input  wire [15:0]      P0_IN,
+    output wire [15:0]      P0_OUT,
+    output wire [15:0]      P0_EN,
+    output wire [15:0]      P0_FUNC,
+
+    input  wire [15:0]      P1_IN,
+    output wire [15:0]      P1_OUT,
+    output wire [15:0]      P1_EN,
+    output wire [15:0]      P1_FUNC
+
 );
 
 
@@ -323,14 +334,18 @@ wire                HREADYOUT_FLASH;
 wire                HREADY_FLASH;
 wire                HRESP_FLASH;
 
-wire [31:0]         PADDR_PERIPHERAL;
-wire [31:0]         PWDATA_PERIPHERAL;
-wire                PWRITE_PERIPHERAL;
-wire                PENABLE_PERIPHERAL;
-wire                PSELx_PERIPHERAL;
-wire [31:0]         PRDATA_PERIPHERAL;
-wire                PSLVERR_PERIPHERAL;
-wire                PREADY_PERIPHERAL;
+wire                HSELx_PERIPHERAL;
+wire [31:0]         HADDR_PERIPHERAL;
+wire [1:0]          HTRANS_PERIPHERAL;
+wire                HWRITE_PERIPHERAL;
+wire [2:0]          HSIZE_PERIPHERAL;
+wire [2:0]          HBURST_PERIPHERAL;
+wire [3:0]          HPROT_PERIPHERAL;
+wire [31:0]         HWDATA_PERIPHERAL;
+wire [31:0]         HRDATA_PERIPHERAL;
+wire                HREADYOUT_PERIPHERAL;
+wire                HREADY_PERIPHERAL;
+wire                HRESP_PERIPHERAL;
 
 wire [ID_W-1:0]     AWID_RAM;
 wire [31:0]         AWADDR_RAM;
@@ -649,15 +664,18 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .RVALID_GIC(GIC_RVALID),
     .RREADY_GIC(GIC_RREADY),
 
-    .PADDR_PERIPHERAL(PADDR_PERIPHERAL),
-    .PWDATA_PERIPHERAL(PWDATA_PERIPHERAL),
-    .PWRITE_PERIPHERAL(PWRITE_PERIPHERAL),
-    .PENABLE_PERIPHERAL(PENABLE_PERIPHERAL),
-    .PSELx_PERIPHERAL(PSELx_PERIPHERAL),
-    .PRDATA_PERIPHERAL(PRDATA_PERIPHERAL),
-    .PSLVERR_PERIPHERAL(PSLVERR_PERIPHERAL),
-    .PREADY_PERIPHERAL(PREADY_PERIPHERAL),
-
+    .HSELx_PERIPHERAL(HSELx_PERIPHERAL),
+    .HADDR_PERIPHERAL(HADDR_PERIPHERAL),
+    .HTRANS_PERIPHERAL(HTRANS_PERIPHERAL),
+    .HWRITE_PERIPHERAL(HWRITE_PERIPHERAL),
+    .HSIZE_PERIPHERAL(HSIZE_PERIPHERAL),
+    .HBURST_PERIPHERAL(HBURST_PERIPHERAL),
+    .HPROT_PERIPHERAL(HPROT_PERIPHERAL),
+    .HWDATA_PERIPHERAL(HWDATA_PERIPHERAL),
+    .HRDATA_PERIPHERAL(HRDATA_PERIPHERAL),
+    .HREADYOUT_PERIPHERAL(HREADYOUT_PERIPHERAL),
+    .HREADY_PERIPHERAL(HREADY_PERIPHERAL),
+    .HRESP_PERIPHERAL(HRESP_PERIPHERAL),
 
     .AWID_RAM(AWID_RAM),
     .AWADDR_RAM(AWADDR_RAM),
@@ -1012,14 +1030,18 @@ megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
     .HREADY_ADP(HREADY_ADP),
     .HRESP_ADP(HRESP_ADP),
 
-    .PADDR(PADDR_PERIPHERAL),
-    .PENABLE(PENABLE_PERIPHERAL),
-    .PWRITE(PWRITE_PERIPHERAL),
-    .PWDATA(PWDATA_PERIPHERAL),
-    .PSEL(PSELx_PERIPHERAL),
-    .PRDATA(PRDATA_PERIPHERAL),
-    .PREADY(PREADY_PERIPHERAL),
-    .PSLVERR(PSLVERR_PERIPHERAL),
+    .HSEL(HSELx_PERIPHERAL),
+    .HADDR(HADDR_PERIPHERAL),
+    .HTRANS(HTRANS_PERIPHERAL),
+    .HWRITE(HWRITE_PERIPHERAL),
+    .HSIZE(HSIZE_PERIPHERAL),
+    .HBURST(HBURST_PERIPHERAL),
+    .HPROT(HPROT_PERIPHERAL),
+    .HWDATA(HWDATA_PERIPHERAL),
+    .HREADY(HREADY_PERIPHERAL),
+    .HRDATA(HRDATA_PERIPHERAL),
+    .HREADYOUT(HREADYOUT_PERIPHERAL),
+    .HRESP(HRESP_PERIPHERAL),
 
     .UARTRXD(UARTRXD),
     .UARTTXD(UARTTXD),
@@ -1032,6 +1054,15 @@ megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
     .FT_MIOSIO_E(FT_MIOSIO_E),
     .FT_MIOSIO_Z(FT_MIOSIO_Z),
     .FT_MIOSIO_I(FT_MIOSIO_I),
+
+    .p0_in(P0_IN),
+    .p0_out(P0_OUT),
+    .p0_en(P0_EN),
+    .p0_func(P0_FUNC),
+    .p1_in(P1_IN),
+    .p1_out(P1_OUT),
+    .p1_en(P1_EN),
+    .p1_func(P1_FUNC),
 
     .PERI_IRQS(PERI_IRQS)
 );

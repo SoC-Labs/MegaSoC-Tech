@@ -4,3 +4,10 @@ $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_uart/verilog/cmsdk_
 // $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_slave_mux/verilog/cmsdk_apb_slave_mux.v
 // $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_to_apb/verilog/cmsdk_ahb_to_apb.v
 $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_timer/verilog/cmsdk_apb_timer.v
+
+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_gpio/verilog/cmsdk_ahb_to_iop.v
+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_iop_gpio/verilog/cmsdk_iop_gpio.v
+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_gpio/verilog/cmsdk_ahb_gpio.v
+
+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_slave_mux/verilog/cmsdk_ahb_slave_mux.v
+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_default_slave/verilog/cmsdk_ahb_default_slave.v
