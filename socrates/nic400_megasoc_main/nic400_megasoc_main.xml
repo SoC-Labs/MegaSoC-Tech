@@ -289,6 +289,17 @@
         <CyclicDependencyAvoidanceScheme>single_slave</CyclicDependencyAvoidanceScheme>
         <LowLatency>false</LowLatency>
       </SlaveInterface>
+      <MasterInterface>
+        <Name>PCK_CTRL</Name>
+        <APBMasterProtocol>
+          <AddressWidth>32</AddressWidth>
+          <DataWidth>32</DataWidth>
+          <TrustZoneMasterAPB>non_secure</TrustZoneMasterAPB>
+          <APBGroupRef>apb_group0</APBGroupRef>
+        </APBMasterProtocol>
+        <GeographicDomainRef>gd0</GeographicDomainRef>
+        <ClockRef>clk0</ClockRef>
+      </MasterInterface>
     </Interfaces>
     <MemoryMaps>
       <MemoryMap>
@@ -351,6 +362,12 @@
           <InterfaceRef>DMA_CTRL</InterfaceRef>
           <Offset>16842752</Offset>
           <Range>8192</Range>
+          <Visibility>true</Visibility>
+        </MappedBlock>
+        <MappedBlock>
+          <InterfaceRef>PCK_CTRL</InterfaceRef>
+          <Offset>18874368</Offset>
+          <Range>32768</Range>
           <Visibility>true</Visibility>
         </MappedBlock>
       </MemoryMap>
@@ -430,6 +447,9 @@
           <Target>
             <InterfaceRef>DMA_CTRL</InterfaceRef>
           </Target>
+          <Target>
+            <InterfaceRef>PCK_CTRL</InterfaceRef>
+          </Target>
         </Targets>
       </Path>
       <Path>
@@ -488,6 +508,9 @@
           </Target>
           <Target>
             <InterfaceRef>DMA_CTRL</InterfaceRef>
+          </Target>
+          <Target>
+            <InterfaceRef>PCK_CTRL</InterfaceRef>
           </Target>
         </Targets>
       </Path>
@@ -619,6 +642,16 @@
                     &lt;present&gt;true&lt;/present&gt;
                     &lt;region&gt;0&lt;/region&gt;
                     &lt;target&gt;DMA_CTRL&lt;/target&gt;
+                &lt;/remap&gt;
+            &lt;/range&gt;
+            &lt;range&gt;
+                &lt;addr_max&gt;0x1207FFF&lt;/addr_max&gt;
+                &lt;addr_min&gt;0x1200000&lt;/addr_min&gt;
+                &lt;remap&gt;
+                    &lt;bit&gt;default&lt;/bit&gt;
+                    &lt;present&gt;true&lt;/present&gt;
+                    &lt;region&gt;0&lt;/region&gt;
+                    &lt;target&gt;PCK_CTRL&lt;/target&gt;
                 &lt;/remap&gt;
             &lt;/range&gt;
         &lt;/address_ranges&gt;
@@ -1033,6 +1066,16 @@
                     &lt;present&gt;true&lt;/present&gt;
                     &lt;region&gt;0&lt;/region&gt;
                     &lt;target&gt;DMA_CTRL&lt;/target&gt;
+                &lt;/remap&gt;
+            &lt;/range&gt;
+            &lt;range&gt;
+                &lt;addr_max&gt;0x1207FFF&lt;/addr_max&gt;
+                &lt;addr_min&gt;0x1200000&lt;/addr_min&gt;
+                &lt;remap&gt;
+                    &lt;bit&gt;default&lt;/bit&gt;
+                    &lt;present&gt;true&lt;/present&gt;
+                    &lt;region&gt;0&lt;/region&gt;
+                    &lt;target&gt;PCK_CTRL&lt;/target&gt;
                 &lt;/remap&gt;
             &lt;/range&gt;
         &lt;/address_ranges&gt;
@@ -1837,6 +1880,13 @@
             &lt;x&gt;0&lt;/x&gt;
             &lt;y&gt;0&lt;/y&gt;
         &lt;/apb_port&gt;
+        &lt;apb_port&gt;
+            &lt;clock_domain&gt;clk0&lt;/clock_domain&gt;
+            &lt;name&gt;PCK_CTRL&lt;/name&gt;
+            &lt;trustzone&gt;nsec&lt;/trustzone&gt;
+            &lt;x&gt;0&lt;/x&gt;
+            &lt;y&gt;0&lt;/y&gt;
+        &lt;/apb_port&gt;
         &lt;apb_slave_no&gt;59&lt;/apb_slave_no&gt;
         &lt;clock_boundary&gt;none&lt;/clock_boundary&gt;
         &lt;clock_domain_name_master_if&gt;clk0&lt;/clock_domain_name_master_if&gt;
@@ -1927,7 +1977,7 @@
         &lt;vn_external_bridge def=&quot;true&quot;&gt;none&lt;/vn_external_bridge&gt;
         &lt;x&gt;0&lt;/x&gt;
         &lt;y&gt;140&lt;/y&gt;
-        &lt;master_if_port_name&gt;FLASH_CTRL,DEBUG,DMA_CTRL&lt;/master_if_port_name&gt;
+        &lt;master_if_port_name&gt;FLASH_CTRL,DEBUG,DMA_CTRL,PCK_CTRL&lt;/master_if_port_name&gt;
         &lt;slave_if_port_name&gt;apb_group0_s&lt;/slave_if_port_name&gt;
     &lt;/amib&gt;
     &lt;inter&gt;
@@ -3289,6 +3339,22 @@
         &lt;wuser&gt;false&lt;/wuser&gt;
     &lt;/connect&gt;
     &lt;connect&gt;
+        &lt;aruser&gt;false&lt;/aruser&gt;
+        &lt;awuser&gt;false&lt;/awuser&gt;
+        &lt;buser&gt;false&lt;/buser&gt;
+        &lt;dest&gt;external&lt;/dest&gt;
+        &lt;dest_port&gt;PCK_CTRL&lt;/dest_port&gt;
+        &lt;lock&gt;false&lt;/lock&gt;
+        &lt;out_reads&gt;1&lt;/out_reads&gt;
+        &lt;out_trans&gt;1&lt;/out_trans&gt;
+        &lt;out_writes&gt;1&lt;/out_writes&gt;
+        &lt;protocol&gt;apb3&lt;/protocol&gt;
+        &lt;ruser&gt;false&lt;/ruser&gt;
+        &lt;src&gt;apb_group0&lt;/src&gt;
+        &lt;src_port&gt;PCK_CTRL&lt;/src_port&gt;
+        &lt;wuser&gt;false&lt;/wuser&gt;
+    &lt;/connect&gt;
+    &lt;connect&gt;
         &lt;dest&gt;FLASH&lt;/dest&gt;
         &lt;dest_port&gt;FLASH_s&lt;/dest_port&gt;
         &lt;lock&gt;false&lt;/lock&gt;
@@ -3490,12 +3556,12 @@
         &lt;link&gt;
             &lt;slave_if&gt;
                 &lt;name&gt;A53&lt;/name&gt;
+                &lt;master_if&gt;ROM&lt;/master_if&gt;
                 &lt;master_if&gt;FLASH_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
-                &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
-                &lt;master_if&gt;ROM&lt;/master_if&gt;
                 &lt;master_if&gt;FLASH&lt;/master_if&gt;
                 &lt;master_if&gt;RAM&lt;/master_if&gt;
+                &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
                 &lt;master_if&gt;DRAM&lt;/master_if&gt;
                 &lt;master_if&gt;GIC&lt;/master_if&gt;
                 &lt;master_if&gt;apb_group0&lt;/master_if&gt;
@@ -3503,15 +3569,17 @@
                 &lt;/master_if&gt;
                 &lt;master_if&gt;DMA_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
+                &lt;master_if&gt;PCK_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;/master_if&gt;
             &lt;/slave_if&gt;
         &lt;/link&gt;
         &lt;link&gt;
             &lt;slave_if&gt;
                 &lt;name&gt;DMA350&lt;/name&gt;
-                &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
                 &lt;master_if&gt;ROM&lt;/master_if&gt;
                 &lt;master_if&gt;FLASH&lt;/master_if&gt;
                 &lt;master_if&gt;RAM&lt;/master_if&gt;
+                &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
                 &lt;master_if&gt;DRAM&lt;/master_if&gt;
                 &lt;master_if&gt;apb_group0&lt;/master_if&gt;
                 &lt;master_if&gt;DEBUG&lt;parent&gt;apb_group0&lt;/parent&gt;
@@ -3521,18 +3589,20 @@
         &lt;link&gt;
             &lt;slave_if&gt;
                 &lt;name&gt;ADP&lt;/name&gt;
+                &lt;master_if&gt;ROM&lt;/master_if&gt;
                 &lt;master_if&gt;FLASH_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
-                &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
-                &lt;master_if&gt;ROM&lt;/master_if&gt;
                 &lt;master_if&gt;FLASH&lt;/master_if&gt;
                 &lt;master_if&gt;RAM&lt;/master_if&gt;
+                &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
                 &lt;master_if&gt;DRAM&lt;/master_if&gt;
                 &lt;master_if&gt;GIC&lt;/master_if&gt;
                 &lt;master_if&gt;apb_group0&lt;/master_if&gt;
                 &lt;master_if&gt;DEBUG&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
                 &lt;master_if&gt;DMA_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;/master_if&gt;
+                &lt;master_if&gt;PCK_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
             &lt;/slave_if&gt;
         &lt;/link&gt;

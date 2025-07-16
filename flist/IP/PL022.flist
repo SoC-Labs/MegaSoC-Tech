@@ -1,0 +1,36 @@
+//-----------------------------------------------------------------------------
+// MegaSoC PL022 SPI Controller Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// Daniel Newbrook (d.newbrook@soton.ac.uk)
+//
+// Copyright � 2021-5, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for PL022 SPI Controller
+//-----------------------------------------------------------------------------
+
++incdir+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/
+
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspMTxRxCntl.v  
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspRxFCntl.v    
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspScaleCntr.v   
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspSynctoSSPCLK.v  
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspTxFIFO.v      
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/Ssp.v
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspApbif.v    
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspDMA.v     
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspRegCore.v    
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspRxFIFO.v     
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspSTxRxCntl.v   
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspTest.v          
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspTxLJustify.v
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspDataStp.v  
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspIntGen.v  
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspRevAnd.v     
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspRxRegFile.v  
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspSynctoPCLK.v  
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspTxFCntl.v       
+$(ARM_IP_LIBRARY_PATH)/PL022/PL022-BU-00000-r1p4-00rel0/ssp_pl022/verilog/rtl_source/SspTxRegFile.v

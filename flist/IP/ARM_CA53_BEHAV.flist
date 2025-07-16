@@ -1,0 +1,10 @@
+
+
+$(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_clkgate.v
+$(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_inter_clkgate.v
+$(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_sync.v
+$(CORTEX_A53_IP_LOGICAL_DIR)/models/rams/generic/ca53_caches_tlb_rams.v
+$(CORTEX_A53_IP_LOGICAL_DIR)/models/rams/generic/ca53_generic_ram.v
+$(CORTEX_A53_IP_LOGICAL_DIR)/models/rams/generic/ca53_l2_datarams.v
+$(CORTEX_A53_IP_LOGICAL_DIR)/models/rams/generic/ca53_l2_tagrams.v
+$(CORTEX_A53_IP_LOGICAL_DIR)/models/rams/generic/ca53scu_l1d_tagrams.v

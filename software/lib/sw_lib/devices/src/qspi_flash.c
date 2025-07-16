@@ -1,72 +1,134 @@
+
 #include "qspi_flash.h"
 
-void spi_reset(){
-  SL_AHB_QSPI->QSPI_CMD = 0x066;
-  SL_AHB_QSPI->QSPI_CMD = 0x166;
-  while(SL_AHB_QSPI->QSPI_STATUS&1){
-    ;
-  }
-  SL_AHB_QSPI->QSPI_CMD = 0x099;
-  SL_AHB_QSPI->QSPI_CMD = 0x199;
-  while(SL_AHB_QSPI->QSPI_STATUS&1){ ;}
+uint8_t SET_QIO_MODE_CMD = 0x38;
+
+uint32_t SPI_READ_JEDIC(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+int SPI_STARTUP(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+void SPI_WAIT_BUSY(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+void SPI_RESET(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+void SET_QPI_MODE(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+void QPI_READ_WORDS_no_data(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI, uint32_t addr, uint8_t n_words, uint32_t n_dummy, uint8_t cont_read);
+void QPI_SET_CONT_READ(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+void QPI_SET_CONT_READ_MICRON(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+void QPI_SET_AHB_MODE(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+
+void CACHE_STARTUP(CG092_TypeDef *CACHE);
+
+void CACHE_STARTUP(CG092_TypeDef *CACHE){
+    CACHE->CCR=0;
+    CACHE->CCR=0x1; //DON'T USE PREFETCH
+    while((CACHE->SR)&0x3 != 2){;}
 }
 
-void SET_QPI_MODE(){
-  SL_AHB_QSPI->QSPI_CMD = 0x038;
-  SL_AHB_QSPI->QSPI_CMD = 0x138;
-  while(SL_AHB_QSPI->QSPI_STATUS&1){ ;}
-  int32_t tmp_QSPI_CONTROL;
-  tmp_QSPI_CONTROL = SL_AHB_QSPI->QSPI_CONTROL;
-  tmp_QSPI_CONTROL = tmp_QSPI_CONTROL | 1;
-  SL_AHB_QSPI->QSPI_CONTROL=tmp_QSPI_CONTROL;
-  return;
+int SPI_STARTUP(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
+    uint32_t ID;
+    // Check first if warm reset
+    if(SL_AHB_QSPI->CTRL == 0){
+        SPI_RESET(SL_AHB_QSPI);
+        ID=SPI_READ_JEDIC(SL_AHB_QSPI);
+        if((ID==0xFFFFFFFF)||(ID==0x00000000)){
+            return 1;
+        } else {
+            if((ID&0xFF)!=0xBF){
+                SET_QIO_MODE_CMD = 0x35;
+                SL_AHB_QSPI->AHB_CMD = (8<<SL_AHB_QSPI_SPI_CMD_N_Dummy_Pos) + 0x0B;
+                SET_QPI_MODE(SL_AHB_QSPI);
+                QPI_SET_CONT_READ_MICRON(SL_AHB_QSPI);
+                QPI_READ_WORDS_no_data(SL_AHB_QSPI, 0x00000000, 1, 10, 0);
+                SL_AHB_QSPI->CTRL |= (1<<25);
+                QPI_READ_WORDS_no_data(SL_AHB_QSPI, 0x00001000, 1, 8, 1);
+                QPI_SET_AHB_MODE(SL_AHB_QSPI);        
+            } else{
+                SL_AHB_QSPI->AHB_CMD = (4<<SL_AHB_QSPI_SPI_CMD_N_Dummy_Pos) + 0x0B;
+                SET_QPI_MODE(SL_AHB_QSPI);
+                QPI_READ_WORDS_no_data(SL_AHB_QSPI, 0x00000000, 1, 6, 0);
+                QPI_SET_CONT_READ(SL_AHB_QSPI);
+                QPI_READ_WORDS_no_data(SL_AHB_QSPI, 0x00001000, 1, 4, 1);
+                QPI_SET_AHB_MODE(SL_AHB_QSPI);        
+            }
+            return 0;
+        }
+    }
+    else {
+        return 0;
+    }
 }
 
-void qspi_enable_cache(){
-  // Don't enable prefetch, this causes problems for some reason
-    CACHE_CTRL->CCR = 0x00;
-    uint32_t QSPI_CTRL_tmp;
-    QSPI_CTRL_tmp=SL_AHB_QSPI->QSPI_CONTROL;
-    QSPI_CTRL_tmp = QSPI_CTRL_tmp | 1<<8;
-    SL_AHB_QSPI->QSPI_CONTROL = QSPI_CTRL_tmp;
-
-    CACHE_CTRL->CCR = 0x01;
-    while((CACHE_CTRL->SR&0x3)!=2){;}
-
-    return;
+void QPI_SET_CONT_READ(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
+    SL_AHB_QSPI->CTRL |= (1<<25);
 }
 
-void qspi_xip_enable(){
-    uint32_t QSPI_CTRL_tmp;
-      // Setup continuous reading
-    QSPI_CTRL_tmp=SL_AHB_QSPI->QSPI_CONTROL;
-    QSPI_CTRL_tmp = QSPI_CTRL_tmp | 1<<8;
-    SL_AHB_QSPI->QSPI_CONTROL = QSPI_CTRL_tmp;
+void QPI_SET_CONT_READ_MICRON(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
+    uint32_t CMD=0;
+    // Write Enable
+    SL_AHB_QSPI->SPI_CMD = 0x06;
+    SL_AHB_QSPI->SPI_CMD = 0x106;
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
 
-    QSPI_CTRL_tmp=SL_AHB_QSPI->QSPI_CONTROL;
-    QSPI_CTRL_tmp = QSPI_CTRL_tmp | ((1<<24) + (0x0A0<<16));
-    SL_AHB_QSPI->QSPI_CONTROL = QSPI_CTRL_tmp;
-    // 1 read with op code
-    uint32_t rdata;
-    rdata = QSPI_CACHE->DATA[0];
-    // set no-opcode mode
-    QSPI_CTRL_tmp=SL_AHB_QSPI->QSPI_CONTROL;
-    QSPI_CTRL_tmp = QSPI_CTRL_tmp | (1<<25);
-    SL_AHB_QSPI->QSPI_CONTROL = QSPI_CTRL_tmp;
-    return;
+    // Write to volatile register
+    SL_AHB_QSPI->WRITE_DATA[0]=0xF3;
+    CMD = 0x81;
+    CMD |= SL_AHB_QSPI_SPI_CMD_Wr_Enable_Msk;
+    SL_AHB_QSPI->SPI_CMD = CMD;
+    SL_AHB_QSPI->SPI_CMD |= SL_AHB_QSPI_SPI_CMD_Enable_Msk;
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
+
+    // Write disable
+    SL_AHB_QSPI->SPI_CMD = 0x04;
+    SL_AHB_QSPI->SPI_CMD = 0x104;
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
 }
 
-int32_t SPI_READ_JEDIC(){
-  SL_AHB_QSPI->QSPI_CMD = 0x0002009F;
-  SL_AHB_QSPI->QSPI_CMD = 0x0002039F;
-  while(SL_AHB_QSPI->QSPI_STATUS&1){ ;}
-  return SL_AHB_QSPI->QSPI_RDATA0;
+void QPI_SET_AHB_MODE(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
+    SL_AHB_QSPI->CTRL |= (1<<8);
 }
 
-int32_t QPI_READ_JEDIC(){
-  SL_AHB_QSPI->QSPI_CMD = 0x000210AF;
-  SL_AHB_QSPI->QSPI_CMD = 0x000213AF;
-  while(SL_AHB_QSPI->QSPI_STATUS&1){ ;}
-  return SL_AHB_QSPI->QSPI_RDATA0;
+void SPI_WAIT_BUSY(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
+    while(((SL_AHB_QSPI->STATUS)&SL_AHB_QSPI_STATUS_Busy_Msk)!=0){;}
 }
 
+void SPI_RESET(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
+    SL_AHB_QSPI->SPI_CMD = 0x66;
+    SL_AHB_QSPI->SPI_CMD = 0x166;
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
+    SL_AHB_QSPI->SPI_CMD = 0x99;
+    SL_AHB_QSPI->SPI_CMD = 0x199;
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
+}
+
+uint32_t SPI_READ_JEDIC(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
+    SL_AHB_QSPI->SPI_CMD = 0x0003009F;
+    SL_AHB_QSPI->SPI_CMD = 0x0003039F;
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
+    return SL_AHB_QSPI->READ_DATA[0];
+}
+
+void QPI_READ_WORDS_no_data(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI, uint32_t addr, uint8_t n_words, uint32_t n_dummy, uint8_t cont_read){
+    uint32_t CMD = 0;
+
+    SL_AHB_QSPI->SPI_ADDR = addr;
+
+    if(cont_read==0){
+        SL_AHB_QSPI->CTRL |= SL_AHB_QSPI_CTRL_Cont_Rd_Msk;
+        SL_AHB_QSPI->CTRL |= (SL_AHB_QSPI_CTRL_Mode_Code_Msk & (0xA0<<16));
+    }
+    CMD |= (SL_AHB_QSPI_SPI_CMD_N_Dummy_Msk & (n_dummy<<12));
+    CMD |= 0x0B;
+    CMD |= SL_AHB_QSPI_SPI_CMD_Rd_Enable_Msk;
+    CMD |= SL_AHB_QSPI_SPI_CMD_Addr_Enable_Msk;
+    CMD |= (SL_AHB_QSPI_SPI_CMD_N_RW_Bytes_Msk & (n_words << 16));
+    SL_AHB_QSPI->SPI_CMD = CMD;
+
+    SL_AHB_QSPI->SPI_CMD |= SL_AHB_QSPI_SPI_CMD_Enable_Msk;
+
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
+
+}
+
+void SET_QPI_MODE(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
+    SL_AHB_QSPI->SPI_CMD = SET_QIO_MODE_CMD;
+    SL_AHB_QSPI->SPI_CMD = 0x100 + SET_QIO_MODE_CMD;
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
+    SL_AHB_QSPI->CTRL |= SL_AHB_QSPI_CTRL_QIO_Msk;
+}

@@ -101,6 +101,7 @@ APP_SRC += $(SW_LIB_PATH)/apps/src/page_table.s
 
 APP_SRC += $(SW_LIB_PATH)/devices/src/gic400.c
 APP_SRC += $(SW_LIB_PATH)/devices/src/dma_350_command_lib.c
+APP_SRC += $(SW_LIB_PATH)/devices/src/ppu.c
 
 APP_SRC += $(SW_LIB_PATH)/host/src/sys_utils.c
 APP_SRC += $(SW_LIB_PATH)/devices/src/qspi_flash.c

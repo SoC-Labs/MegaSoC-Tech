@@ -1,0 +1,22 @@
+//-----------------------------------------------------------------------------
+// MegaSoC PL031 Real Time Clock Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// Daniel Newbrook (d.newbrook@soton.ac.uk)
+//
+// Copyright � 2021-5, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for PL031 Real Time Clock
+//-----------------------------------------------------------------------------
++incdir+$(ARM_IP_LIBRARY_PATH)/PL031/PL031-BU-00000-r1p3-00rel0/PL031_VC/rtc_pl031/verilog/rtl_source/
+$(ARM_IP_LIBRARY_PATH)/PL031/PL031-BU-00000-r1p3-00rel0/PL031_VC/rtc_pl031/verilog/rtl_source/RtcApbif.v  
+$(ARM_IP_LIBRARY_PATH)/PL031/PL031-BU-00000-r1p3-00rel0/PL031_VC/rtc_pl031/verilog/rtl_source/RtcControl.v  
+$(ARM_IP_LIBRARY_PATH)/PL031/PL031-BU-00000-r1p3-00rel0/PL031_VC/rtc_pl031/verilog/rtl_source/RtcCounter.v  
+$(ARM_IP_LIBRARY_PATH)/PL031/PL031-BU-00000-r1p3-00rel0/PL031_VC/rtc_pl031/verilog/rtl_source/RtcInterrupt.v  
+$(ARM_IP_LIBRARY_PATH)/PL031/PL031-BU-00000-r1p3-00rel0/PL031_VC/rtc_pl031/verilog/rtl_source/RtcRevAnd.v  
+$(ARM_IP_LIBRARY_PATH)/PL031/PL031-BU-00000-r1p3-00rel0/PL031_VC/rtc_pl031/verilog/rtl_source/RtcSynctoPCLK.v  
+$(ARM_IP_LIBRARY_PATH)/PL031/PL031-BU-00000-r1p3-00rel0/PL031_VC/rtc_pl031/verilog/rtl_source/RtcUpdate.v  
+$(ARM_IP_LIBRARY_PATH)/PL031/PL031-BU-00000-r1p3-00rel0/PL031_VC/rtc_pl031/verilog/rtl_source/Rtc.v

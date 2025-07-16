@@ -14,17 +14,9 @@ int main(void) {
   printf("\n***SoCLabs MegaSoC***\n");
   enable_caches();
   enable_caches_el1();
-  spi_reset();
-  int32_t rID = SPI_READ_JEDIC();
-  SET_QPI_MODE();
-  rID = QPI_READ_JEDIC();
-  qspi_enable_cache();
-  qspi_xip_enable();
 
-  // uint32_t rdata[16];
-  // for (int i=0;i<16;i++){
-  //   rdata[i]= QSPI_CACHE->DATA[i];
-  // }
+
+  SPI_STARTUP(SL_QSPI);
 
   printf("***Flash Enabled...Booting***\n\n\n");
 

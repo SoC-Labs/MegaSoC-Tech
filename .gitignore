@@ -6,7 +6,8 @@ logical/shared
 logical/nic400_megasoc_main
 logical/nic400_megasoc_system
 logical/dma350
-
+logical/power_control/logical
+logical/power_control/*.log
 software/build
 
 socrates/CortexA53_1/build.log

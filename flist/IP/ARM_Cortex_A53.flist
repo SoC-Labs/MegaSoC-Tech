@@ -40,12 +40,14 @@ $(CORTEX_A53_IP_LOGICAL_DIR)/ca53biu/verilog/ca53biu_dvm_enc.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53biu/verilog/ca53biu_linefill_descriptor.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53biu/verilog/ca53biu_linefills_mngmt.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53biu/verilog/ca53biu_prefetch_stream_mngmt.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53cti/verilog/ca53cti.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53cti/verilog/ca53cti_apbif.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53cti/verilog/ca53cti_ci.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53cti/verilog/ca53cti_clkgate.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53cti/verilog/ca53cti_mapper.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53cti/verilog/ca53cti_ti.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dcu/verilog/ca53dcu.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dcu/verilog/ca53dcu_cachearb.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dcu/verilog/ca53dcu_cachearb_seq_state.v
@@ -54,6 +56,7 @@ $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dcu/verilog/ca53dcu_cp15.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dcu/verilog/ca53dcu_dvm.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dcu/verilog/ca53dcu_ecc_correction.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dcu/verilog/ca53dcu_lspipe.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dpu/verilog/ca53dpu.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dpu/verilog/ca53dpu_fp_unpack_opb.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dpu/verilog/ca53dpu_agu.v
@@ -152,6 +155,7 @@ $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dpu/verilog/ca53dpu_fp_clz106.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dpu/verilog/ca53dpu_utlb_intf_entry.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dpu/verilog/ca53dpu_fp_clz24.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53dpu/verilog/ca53dpu_utlb_main_entry.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53etm/verilog/ca53etm.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53etm/verilog/ca53etm_apb.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53etm/verilog/ca53etm_clk.v
@@ -170,6 +174,7 @@ $(CORTEX_A53_IP_LOGICAL_DIR)/ca53etm/verilog/ca53etm_rsrc_sel_pair.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53etm/verilog/ca53etm_trace_gen.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53etm/verilog/ca53etm_traceout.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53etm/verilog/ca53etm_viewinst.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gic/verilog/ca53gic_arb.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gic/verilog/ca53gic_arb_m.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gic/verilog/ca53gic_arb_s.v
@@ -179,6 +184,7 @@ $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gic/verilog/ca53gic_cpu_cpo.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gic/verilog/ca53gic_cpu_dpacket.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gic/verilog/ca53gic_cpu_pcpu.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gic/verilog/ca53gic_cpu_vcpu.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gov/verilog/ca53governor.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gov/verilog/ca53governor_apb_bridge.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gov/verilog/ca53governor_apb_dec.v
@@ -193,6 +199,7 @@ $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gov/verilog/ca53governor_ctm.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gov/verilog/ca53governor_power.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gov/verilog/ca53governor_romtable.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53gov/verilog/ca53governor_slice.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53ifu/verilog/ca53ifu.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53ifu/verilog/ca53ifu_cp15.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53ifu/verilog/ca53ifu_ctl.v
@@ -230,6 +237,7 @@ $(CORTEX_A53_IP_LOGICAL_DIR)/ca53ifu/verilog/ca53ifu_pf_throttle.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53ifu/verilog/ca53ifu_pf_utlb.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53ifu/verilog/ca53ifu_pf_utlb_intf_entry.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53ifu/verilog/ca53ifu_pf_utlb_main_entry.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53scu/verilog/ca53scu.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53scu/verilog/ca53scu_acpslv.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53scu/verilog/ca53scu_afb.v
@@ -256,8 +264,10 @@ $(CORTEX_A53_IP_LOGICAL_DIR)/ca53scu/verilog/ca53scu_snpslv.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53scu/verilog/ca53scu_tagctl.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53scu/verilog/ca53scu_tagctl_ecc.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53scu/verilog/ca53scu_victimctl.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53stb/verilog/ca53stb.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53stb/verilog/ca53stb_slot.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53tlb/verilog/ca53tlb.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53tlb/verilog/ca53tlb_cp_regs.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53tlb/verilog/ca53tlb_dbg.v
@@ -267,12 +277,14 @@ $(CORTEX_A53_IP_LOGICAL_DIR)/ca53tlb/verilog/ca53tlb_lookup.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53tlb/verilog/ca53tlb_pagewalk.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53tlb/verilog/ca53tlb_ramctl.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/ca53tlb/verilog/ca53tlb_remap.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/cortexa53/verilog/ca53_cpu.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/cortexa53/verilog/ca53_cpu_reset.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/cortexa53/verilog/ca53_l2.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/cortexa53/verilog/ca53_l2noram.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/cortexa53/verilog/ca53_noram.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/verilog/CORTEXA53.v
+
 $(CORTEX_A53_IP_LOGICAL_DIR)/dapapbap/verilog/DAPAPBAP.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/dapapbap/verilog/DAPApbApApbIf.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/dapapbap/verilog/DAPApbApDapIf.v
@@ -301,14 +313,6 @@ $(CORTEX_A53_IP_LOGICAL_DIR)/dapswjdp/verilog/DAPSwDpApbIf.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/dapswjdp/verilog/DAPSwDpProtocol.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/dapswjdp/verilog/DAPSwDpSync.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/dapswjdp/verilog/DAPSwjWatcher.v
-$(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_clkgate.v
-$(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_inter_clkgate.v
-$(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_sync.v
-$(CORTEX_A53_IP_LOGICAL_DIR)/models/rams/generic/ca53_caches_tlb_rams.v
-$(CORTEX_A53_IP_LOGICAL_DIR)/models/rams/generic/ca53_generic_ram.v
-$(CORTEX_A53_IP_LOGICAL_DIR)/models/rams/generic/ca53_l2_datarams.v
-$(CORTEX_A53_IP_LOGICAL_DIR)/models/rams/generic/ca53_l2_tagrams.v
-$(CORTEX_A53_IP_LOGICAL_DIR)/models/rams/generic/ca53scu_l1d_tagrams.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/shared/verilog/ca53_gic_ext.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/shared/verilog/ca53_biu_dpu.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/shared/verilog/ca53_gic_gov.v

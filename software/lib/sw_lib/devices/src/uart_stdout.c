@@ -38,7 +38,7 @@ void UartStdOutInit(void)
 {
   CMSDK_UART2->CTRL    = 0x00;       // disable whie reprogramming
   CMSDK_UART2->BAUDDIV = BAUDCLKDIV; // (100MHz/BAUDRATE) in 16.4 format
-  CMSDK_UART2->CTRL    = 0x01;       // TX, standard UART2
+  CMSDK_UART2->CTRL    = 0x00;       // TX, standard UART2
   CMSDK_USRT2->BAUDDIV =    3;       // (prescaler value)
   CMSDK_USRT2->CTRL    = 0x03;       // RX+TX, FT1248 USRT
   return;

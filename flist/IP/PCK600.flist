@@ -1,0 +1,15 @@
++libext+.v+.vlib
++incdir+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/pck600_ppu_smc_q/verilog
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/shared/verilog/pck600_or_tree.v
+-y $(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/models/cells/generic
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/pck600_ppu_smc_q/verilog/pck600_ppu_ccu_smc_q.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/pck600_ppu_smc_q/verilog/pck600_ppu_ccu_async_smc_q.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/pck600_ppu_smc_q/verilog/pck600_ppu_diu_smc_q.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/pck600_ppu_smc_q/verilog/pck600_ppu_edge_detector_smc_q.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/pck600_ppu_smc_q/verilog/pck600_ppu_input_block_smc_q.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/pck600_ppu_smc_q/verilog/pck600_ppu_mtu_smc_q.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/pck600_ppu_smc_q/verilog/pck600_ppu_piu_smc_q.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/pck600_ppu_smc_q/verilog/pck600_ppu_psm_smc_q.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/pck600_ppu_smc_q/verilog/pck600_ppu_reg_smc_q.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/pck600_ppu_smc_q/verilog/pck600_ppu_smc_q.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical/logical/models/modules/generic/pck600_ppu_pcsm_smc_q.v

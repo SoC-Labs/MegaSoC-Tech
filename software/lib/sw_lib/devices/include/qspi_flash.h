@@ -1,61 +1,82 @@
 #include <stdint.h>
 
-extern void qspi_enable_cache();
-extern void qspi_xip_enable();
-extern int32_t SPI_READ_JEDIC();
-extern void spi_reset();
-extern void SET_QPI_MODE();
-extern int32_t QPI_READ_JEDIC();
+#define QSPI_BASEADDR 0x01000000UL
+#define CG092_BASEADDR 0x01001000UL
 
 
-#define QSPI_CONFIG_BASEADDR (0x01000000UL)
+typedef struct{
+    volatile    uint32_t    CTRL;
+    volatile    uint32_t    STATUS;
+    volatile    uint32_t    SPI_CMD;
+    volatile    uint32_t    SPI_ADDR;
+    volatile    uint32_t    READ_DATA[4];
+    volatile    uint32_t    WRITE_DATA[4];
+    volatile    uint32_t    AHB_CMD;
+} SL_AHB_QSPI_TypeDef;
 
-/*------------- SL AHB QSPI --------------------------------------*/
-/** @addtogroup SL AHB QSPI
-  @{
-*/
-typedef struct
-{
-  volatile  uint32_t  QSPI_CONTROL;
-  volatile  uint32_t  QSPI_STATUS;
-  volatile  uint32_t  QSPI_CMD;
-  volatile  uint32_t  QSPI_ADDR;
-  volatile  uint32_t  QSPI_RDATA0;
-  volatile  uint32_t  QSPI_RDATA1;
-  volatile  uint32_t  QSPI_RDATA2;
-  volatile  uint32_t  QSPI_RDATA3;
-  volatile  uint32_t  QSPI_WDATA0;
-  volatile  uint32_t  QSPI_WDATA1;
-  volatile  uint32_t  QSPI_WDATA2;
-  volatile  uint32_t  QSPI_WDATA3;
-} AHB_QSPI_TypeDef;
+#define SL_AHB_QSPI_CTRL_QIO_Pos        0
+#define SL_AHB_QSPI_CTRL_QIO_Msk        (0x1UL << SL_AHB_QSPI_CTRL_QIO_Pos)
 
-#define SL_AHB_QSPI ((AHB_QSPI_TypeDef *) QSPI_CONFIG_BASEADDR)
+#define SL_AHB_QSPI_CTRL_XiP_Pos        8
+#define SL_AHB_QSPI_CTRL_XiP_Msk        (0x1UL << SL_AHB_QSPI_CTRL_XiP_Pos)
 
-#define QSPI_CACHE_CONFIG_ADDR (0x01001000UL)
+#define SL_AHB_QSPI_CTRL_Mode_Code_Pos  16
+#define SL_AHB_QSPI_CTRL_Mode_Code_Msk  (0xFFUL << SL_AHB_QSPI_CTRL_Mode_Code_Pos)
 
-/*------------- Arm Flash Cache --------------------------------------*/
-/** @addtogroup Arm Flash Cache
-  @{
-*/
-typedef struct
-{
-  volatile  uint32_t  CCR;
-  volatile  uint32_t  SR;
-  volatile  uint32_t  IRQMASK;
-  volatile  uint32_t  IRQSTAT;
-  volatile  uint32_t  HWPARAMS;
-  volatile  uint32_t  CSHR;
-  volatile  uint32_t  CSMR;
-} Arm_Flash_Cache_TypeDef;
+#define SL_AHB_QSPI_CTRL_Cont_Rd_Pos    24
+#define SL_AHB_QSPI_CTRL_Cont_Rd_Msk    (0x1UL << SL_AHB_QSPI_CTRL_Cont_Rd_Pos)
 
-#define CACHE_CTRL ((Arm_Flash_Cache_TypeDef *) QSPI_CACHE_CONFIG_ADDR)
+#define SL_AHB_QSPI_CTRL_No_CMD_Pos     25
+#define SL_AHB_QSPI_CTRL_No_CMD_Msk     (0x1UL << SL_AHB_QSPI_CTRL_No_CMD_Pos)
 
-#define QSPI_DATA_BASEADDR (0x00400000UL)
+#define SL_AHB_QSPI_STATUS_Busy_Pos     0
+#define SL_AHB_QSPI_STATUS_Busy_Msk     (0x1UL << SL_AHB_QSPI_STATUS_Busy_Pos)
 
-typedef struct
-{
-  volatile uint32_t DATA[512];
-} QSPI_CACHE_TypeDef;
+#define SL_AHB_QSPI_SPI_CMD_Pos         0
+#define SL_AHB_QSPI_SPI_CMD_Msk         (0xFFUL << SL_AHB_QSPI_SPI_CMD_Pos)
 
-#define QSPI_CACHE ((QSPI_CACHE_TypeDef *) QSPI_DATA_BASEADDR)
+#define SL_AHB_QSPI_SPI_CMD_Enable_Pos  8
+#define SL_AHB_QSPI_SPI_CMD_Enable_Msk  (0x1UL << SL_AHB_QSPI_SPI_CMD_Enable_Pos)
+
+#define SL_AHB_QSPI_SPI_CMD_Rd_Enable_Pos  9
+#define SL_AHB_QSPI_SPI_CMD_Rd_Enable_Msk  (0x1UL << SL_AHB_QSPI_SPI_CMD_Rd_Enable_Pos)
+
+#define SL_AHB_QSPI_SPI_CMD_Wr_Enable_Pos  10
+#define SL_AHB_QSPI_SPI_CMD_Wr_Enable_Msk  (0x1UL << SL_AHB_QSPI_SPI_CMD_Wr_Enable_Pos)
+
+#define SL_AHB_QSPI_SPI_CMD_Addr_Enable_Pos  11
+#define SL_AHB_QSPI_SPI_CMD_Addr_Enable_Msk  (0x1UL << SL_AHB_QSPI_SPI_CMD_Addr_Enable_Pos)
+
+#define SL_AHB_QSPI_SPI_CMD_N_Dummy_Pos  12
+#define SL_AHB_QSPI_SPI_CMD_N_Dummy_Msk  (0xFUL << SL_AHB_QSPI_SPI_CMD_N_Dummy_Pos)
+
+#define SL_AHB_QSPI_SPI_CMD_N_RW_Bytes_Pos  16
+#define SL_AHB_QSPI_SPI_CMD_N_RW_Bytes_Msk  (0xFUL << SL_AHB_QSPI_SPI_CMD_N_RW_Bytes_Pos)
+
+
+typedef struct{
+    volatile    uint32_t    CCR;
+    volatile    uint32_t    SR;
+    volatile    uint32_t    IRQMASK;
+    volatile    uint32_t    IRQSTAT;
+    volatile    uint32_t    HWPARAMS;
+    volatile    uint32_t    CSHR;
+    volatile    uint32_t    CSMR;
+} CG092_TypeDef;
+
+
+#define SL_QSPI         ((SL_AHB_QSPI_TypeDef *) QSPI_BASEADDR)
+#define CG092           ((CG092_TypeDef *) CG092_BASEADDR)
+
+extern uint32_t SPI_READ_JEDIC(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+extern int SPI_STARTUP(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+extern void SPI_WAIT_BUSY(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+extern void SPI_RESET(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+extern void SET_QPI_MODE(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+extern void QPI_READ_WORDS_no_data(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI, uint32_t addr, uint8_t n_words, uint32_t n_dummy, uint8_t cont_read);
+extern void QPI_SET_CONT_READ(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+extern void QPI_SET_CONT_READ_MICRON(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+extern void QPI_SET_AHB_MODE(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
+
+extern void CACHE_STARTUP(CG092_TypeDef *CACHE);
+

@@ -13,7 +13,13 @@
 // Abstract : Verilog Command File for MegaSoC Tech IP
 //-----------------------------------------------------------------------------
 
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_wrapper.v
+// Interfaces
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/apb3_if.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/apb4_if.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/qchannel_if.sv
+
+
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_wrapper.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_system_wrapper.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_cpu_ss.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_irq_sync.v
@@ -21,6 +27,12 @@ $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/meg
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_addr_decode.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_subsystem.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_debug.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/extio8x4_axis_initiator.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/extio8x4_ifsm.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/extio8x4_sync.v
+
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_power_control/megasoc_power_control.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/megasoc_ROM_power_control.sv
 
 // ARM IP
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/ARM_Cortex_A53.flist
@@ -30,7 +42,10 @@ $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/mega
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/nic400_megasoc_system.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SIE300_SRAM_controller.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SIE300_SYS_SRAM_controller.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PCK600.flist
 // -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PL011.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/Corstone101.flist 
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/DMA350.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SoCDebug_tech.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PL031.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PL022.flist

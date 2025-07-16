@@ -17,23 +17,41 @@ module megasoc_peripheral_debug #(
 
     input  wire                     PCLK,
     input  wire                     PRESETn,
-    input  wire                     USRT_PSEL,
+
+    input  wire                     USRT0_PSEL,
+    output wire [31:0]              USRT0_PRDATA,
+    output wire                     USRT0_PREADY,
+    output wire                     USRT0_PSLVERR,
+
+    input  wire                     USRT1_PSEL,
+    output wire [31:0]              USRT1_PRDATA,
+    output wire                     USRT1_PREADY,
+    output wire                     USRT1_PSLVERR,
+
     input  wire [11:0]              USRT_PADDRm,
     input  wire                     USRT_PENABLE,
     input  wire                     USRT_PWRITE,
     input  wire [31:0]              USRT_PWDATA,
-    output wire [31:0]              USRT_PRDATA,
-    output wire                     USRT_PREADY,
-    output wire                     USRT_PSLVERR,
 
-    output wire                     FT_CLK_O,    // SCLK
-    output wire                     FT_SSN_O,    // SS_N
-    input  wire                     FT_MISO_I,   // MISO
-    output wire  [FT1248_WIDTH-1:0] FT_MIOSIO_O, // MIOSIO tristate output when enabled
-    output wire  [FT1248_WIDTH-1:0] FT_MIOSIO_E, // MIOSIO tristate output enable (active hi)
-    output wire  [FT1248_WIDTH-1:0] FT_MIOSIO_Z, // MIOSIO tristate output enable (active lo)
-    input  wire  [FT1248_WIDTH-1:0] FT_MIOSIO_I // MIOSIO tristate input
+    input  wire [3:0]               iodata4_i,
+    output wire [3:0]               iodata4_o,
+    output wire [3:0]               iodata4_e,
+    output wire [3:0]               iodata4_t,
+    output wire                     ioreq1_o,
+    output wire                     ioreq2_o,
+    input  wire                     ioack_i,
 
+    output wire                     usrt0_txint,
+    output wire                     usrt0_rxint,
+    output wire                     usrt0_txovrint,
+    output wire                     usrt0_rxovrint,
+    output wire                     usrt0_combined_int,
+
+    output wire                     usrt1_txint,
+    output wire                     usrt1_rxint,
+    output wire                     usrt1_txovrint,
+    output wire                     usrt1_rxovrint,
+    output wire                     usrt1_combined_int
 );
 
 
@@ -45,6 +63,15 @@ wire                     STD_RXD_TREADY;
 wire                     STD_TXD_TVALID;
 wire             [ 7:0]  STD_TXD_TDATA;
 wire                     STD_TXD_TREADY;
+
+ // DATIN to ADP controller
+wire                     DAT_RXD_TVALID;
+wire             [ 7:0]  DAT_RXD_TDATA;
+wire                     DAT_RXD_TREADY;
+// DATOUT to ADP controller
+wire                     DAT_TXD_TVALID;
+wire             [ 7:0]  DAT_TXD_TDATA;
+wire                     DAT_TXD_TREADY;
 
 wire                     ADP_RXD_TVALID;
 wire            [ 7:0]   ADP_RXD_TDATA ;
@@ -88,21 +115,21 @@ socdebug_ahb u_socdebug_ahb(
 );
 
 // Instantiation of USRT Controller
-socdebug_usrt_control u_usrt_control (
+socdebug_usrt_control u_usrt0_control (
     // APB Clock and Reset Signals
     .PCLK              (PCLK),
     .PCLKG             (PCLK),    // Gated PCLK for bus
     .PRESETn           (PRESETn),
 
     // APB Interface Signals
-    .PSEL              (USRT_PSEL),
+    .PSEL              (USRT0_PSEL),
     .PADDR             (USRT_PADDRm[11:2]),
     .PENABLE           (USRT_PENABLE),
     .PWRITE            (USRT_PWRITE),
     .PWDATA            (USRT_PWDATA),
-    .PRDATA            (USRT_PRDATA),
-    .PREADY            (USRT_PREADY),
-    .PSLVERR           (USRT_PSLVERR),
+    .PRDATA            (USRT0_PRDATA),
+    .PREADY            (USRT0_PREADY),
+    .PSLVERR           (USRT0_PSLVERR),
 
     .ECOREVNUM         (4'h0),
 
@@ -117,40 +144,83 @@ socdebug_usrt_control u_usrt_control (
     .RX_READY_o        (STD_RXD_TREADY),
 
     // Interrupt Interfaces
-    .TXINT             ( ),       // Transmit Interrupt
-    .RXINT             ( ),       // Receive  Interrupt
-    .TXOVRINT          ( ),       // Transmit Overrun Interrupt
-    .RXOVRINT          ( ),       // Receive  Overrun Interrupt
-    .UARTINT           ( )        // Combined Interrupt
+    .TXINT             (usrt0_txint ),       // Transmit Interrupt
+    .RXINT             (usrt0_rxint ),       // Receive  Interrupt
+    .TXOVRINT          (usrt0_txovrint ),       // Transmit Overrun Interrupt
+    .RXOVRINT          (usrt0_rxovrint ),       // Receive  Overrun Interrupt
+    .UARTINT           (usrt0_combined_int )        // Combined Interrupt
 );
 
-// Instantiation of FT1248 Controller
-socdebug_ft1248_control #(
-    .FT1248_WIDTH (FT1248_WIDTH),
-    .FT1248_CLKON (1)
-) u_ft1248_control (
-    .clk              (HCLK),
-    .resetn           (HRESETn),
-    .ft_clkdiv        (8'd15),
-    .ft_clk_o         (FT_CLK_O),
-    .ft_ssn_o         (FT_SSN_O),
-    .ft_miso_i        (FT_MISO_I),
-    .ft_miosio_o      (FT_MIOSIO_O),
-    .ft_miosio_e      (FT_MIOSIO_E),
-    .ft_miosio_z      (FT_MIOSIO_Z),
-    .ft_miosio_i      (FT_MIOSIO_I),
+socdebug_usrt_control u_usrt1_control (
+    // APB Clock and Reset Signals
+    .PCLK              (PCLK),
+    .PCLKG             (PCLK),    // Gated PCLK for bus
+    .PRESETn           (PRESETn),
 
-    // ADP Interface - FT1248 to ADP
-    .txd_tvalid       (ADP_TXD_TVALID),
-    .txd_tdata        (ADP_TXD_TDATA ),
-    .txd_tready       (ADP_TXD_TREADY),
-    .txd_tlast        ( ),
+    // APB Interface Signals
+    .PSEL              (USRT1_PSEL),
+    .PADDR             (USRT_PADDRm[11:2]),
+    .PENABLE           (USRT_PENABLE),
+    .PWRITE            (USRT_PWRITE),
+    .PWDATA            (USRT_PWDATA),
+    .PRDATA            (USRT1_PRDATA),
+    .PREADY            (USRT1_PREADY),
+    .PSLVERR           (USRT1_PSLVERR),
 
-    // ADP Interface - FT_ADP to FT1248
-    .rxd_tvalid       (ADP_RXD_TVALID),
-    .rxd_tdata        (ADP_RXD_TDATA ),
-    .rxd_tready       (ADP_RXD_TREADY),
-    .rxd_tlast        (1'b0)
+    .ECOREVNUM         (4'h0),
+
+    // ADP Interface - From USRT to ADP
+    .TX_VALID_o        (DAT_TXD_TVALID),
+    .TX_DATA8_o        (DAT_TXD_TDATA ),
+    .TX_READY_i        (DAT_TXD_TREADY),
+
+    // ADP Interface - From ADP to USRT
+    .RX_VALID_i        (DAT_RXD_TVALID),
+    .RX_DATA8_i        (DAT_RXD_TDATA ),
+    .RX_READY_o        (DAT_RXD_TREADY),
+
+    // Interrupt Interfaces
+    .TXINT             (usrt1_txint ),       // Transmit Interrupt
+    .RXINT             (usrt1_rxint ),       // Receive  Interrupt
+    .TXOVRINT          (usrt1_txovrint ),       // Transmit Overrun Interrupt
+    .RXOVRINT          (usrt1_rxovrint ),       // Receive  Overrun Interrupt
+    .UARTINT           (usrt1_combined_int )        // Combined Interrupt
 );
+
+
+
+
+
+extio8x4_axis_initiator u_extio8x4_axis_initiator(
+  .clk             ( HCLK          ),
+  .resetn          ( HRESETn       ),
+  .testmode        ( 1'b0      ),
+// RX 4-channel AXIS interface
+  .axis_rx0_tvalid ( ADP_RXD_TVALID ),
+  .axis_rx0_tdata8 ( ADP_RXD_TDATA  ),
+  .axis_rx0_tready ( ADP_RXD_TREADY ),
+
+  .axis_rx1_tvalid ( DAT_RXD_TVALID ),
+  .axis_rx1_tdata8 ( DAT_RXD_TDATA  ),
+  .axis_rx1_tready ( DAT_RXD_TREADY ),
+
+  .axis_tx0_tvalid ( ADP_TXD_TVALID ),
+  .axis_tx0_tdata8 ( ADP_TXD_TDATA  ),
+  .axis_tx0_tready ( ADP_TXD_TREADY ),
+
+  .axis_tx1_tvalid ( DAT_TXD_TVALID ),
+  .axis_tx1_tdata8 ( DAT_TXD_TDATA  ),
+  .axis_tx1_tready ( DAT_TXD_TREADY ),
+// external io interface
+  .iodata4_a       ( iodata4_i       ),
+  .iodata4_o       ( iodata4_o       ),
+  .iodata4_e       ( iodata4_e       ),
+  .iodata4_t       ( iodata4_t       ),
+  .ioreq1_o        ( ioreq1_o        ),
+  .ioreq2_o        ( ioreq2_o        ),
+  .ioack_a         ( ioack_i         )
+
+);
+
 
 endmodule

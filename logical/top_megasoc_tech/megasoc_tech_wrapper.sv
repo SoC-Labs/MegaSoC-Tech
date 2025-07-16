@@ -33,7 +33,7 @@ module megasoc_tech_wrapper(
     input  wire             RT_CLK, // 32kHz real time clock
     input  wire             SYS_RESETn,
 
-    // Millisoc system AXI Manager
+    // MegaSoC system AXI Manager
     output wire [1:0]       AXI_SYS_EXP_awid,
     output wire [31:0]      AXI_SYS_EXP_awaddr,
     output wire [7:0]       AXI_SYS_EXP_awlen,
@@ -71,7 +71,7 @@ module megasoc_tech_wrapper(
     output wire             AXI_SYS_EXP_rready,
     
 
-    // Millisoc system AXI Subordinate
+    // MegaSoC system AXI Subordinate
     input wire              AXI_EXP_SYS_awid,
     input wire  [31:0]      AXI_EXP_SYS_awaddr,
     input wire  [7:0]       AXI_EXP_SYS_awlen,
@@ -177,13 +177,13 @@ module megasoc_tech_wrapper(
     output wire             UARTTXEN,
 
     // FT1248 Signals
-    output wire             FT_CLK_O,    // SCLK
-    output wire             FT_SSN_O,    // SS_N
-    input  wire             FT_MISO_I,   // MISO
-    output wire             FT_MIOSIO_O, // MIOSIO tristate output when enabled
-    output wire             FT_MIOSIO_E, // MIOSIO tristate output enable (active hi)
-    output wire             FT_MIOSIO_Z, // MIOSIO tristate output enable (active lo)
-    input  wire             FT_MIOSIO_I, // MIOSIO tristate input
+    input  wire [3:0]               iodata4_i,
+    output wire [3:0]               iodata4_o,
+    output wire [3:0]               iodata4_e,
+    output wire [3:0]               iodata4_t,
+    output wire                     ioreq1_o,
+    output wire                     ioreq2_o,
+    input  wire                     ioack_i,
 
     // DAP-LITE external signals
     input  wire             nTRST,
@@ -194,6 +194,12 @@ module megasoc_tech_wrapper(
     output wire             nTDOEN,
     output wire             SWDO,
     output wire             SWDOEN,
+
+    // SPI Bus to Pads
+    output wire             SPI_SSn,
+    output wire             SPI_SCLK,
+    output wire             SPI_MOSI,
+    input  wire             SPI_MISO,
 
     input  wire [15:0]      P0_IN,
     output wire [15:0]      P0_OUT,
@@ -210,6 +216,14 @@ module megasoc_tech_wrapper(
 
 parameter ID_W=8;
 parameter NUM_SPIS=480;
+
+
+// Power Control
+apb3 PCK_APB();
+qchannel ROM_qchan_q();
+qchannel ROM_qchan_p();
+
+
 
 wire                CPU_AWREADYM;
 wire                CPU_AWVALIDM;
@@ -419,16 +433,18 @@ wire                RLAST_ROM;
 wire                RVALID_ROM;
 wire                RREADY_ROM;
 
-wire [31:0]         PADDR_FLASH_CTRL;
-wire [31:0]         PWDATA_FLASH_CTRL;
-wire                PWRITE_FLASH_CTRL;
-wire [2:0]          PPROT_FLASH_CTRL;
-wire [3:0]          PSTRB_FLASH_CTRL;
-wire                PENABLE_FLASH_CTRL;
-wire                PSELx_FLASH_CTRL;
-wire [31:0]         PRDATA_FLASH_CTRL;
-wire                PSLVERR_FLASH_CTRL;
-wire                PREADY_FLASH_CTRL;
+
+apb4    FLASH_CTRL_APB();
+//wire [31:0]         PADDR_FLASH_CTRL;
+//wire [31:0]         PWDATA_FLASH_CTRL;
+//wire                PWRITE_FLASH_CTRL;
+//wire [2:0]          PPROT_FLASH_CTRL;
+//wire [3:0]          PSTRB_FLASH_CTRL;
+//wire                PENABLE_FLASH_CTRL;
+//wire                PSELx_FLASH_CTRL;
+//wire [31:0]         PRDATA_FLASH_CTRL;
+//wire                PSLVERR_FLASH_CTRL;
+//wire                PREADY_FLASH_CTRL;
 
 wire                CPU_nPRESETDBG;
 wire                CPU_PCLKENDBG;
@@ -459,9 +475,9 @@ assign CPU_PCLKENDBG = 1'b1;
 assign CPU_PADDRDBG31 = 1'b0;
 
 wire [(NUM_SPIS-1):0]   CPU_IRQS;
-wire [5:0]              PERI_IRQS;
+wire [65:0]             PERI_IRQS;
 
-assign CPU_IRQS={{(NUM_SPIS-38){1'b0}}, PERI_IRQS, DMA350_irq_comb_nonsec, DMA350_irq_channel};
+assign CPU_IRQS={{(NUM_SPIS-64){1'b0}}, PERI_IRQS, DMA350_irq_comb_nonsec, DMA350_irq_channel};
 
 megasoc_cpu_ss #(
     .NUM_GICRID_BITS(ID_W-1),
@@ -770,16 +786,25 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .PREADY_DMA_CTRL(PREADY_DMA_CTRL),
 
 
-    .PADDR_FLASH_CTRL(PADDR_FLASH_CTRL),
-    .PWDATA_FLASH_CTRL(PWDATA_FLASH_CTRL),
-    .PWRITE_FLASH_CTRL(PWRITE_FLASH_CTRL),
-    .PPROT_FLASH_CTRL(PPROT_FLASH_CTRL),
-    .PSTRB_FLASH_CTRL(PSTRB_FLASH_CTRL),
-    .PENABLE_FLASH_CTRL(PENABLE_FLASH_CTRL),
-    .PSELx_FLASH_CTRL(PSELx_FLASH_CTRL),
-    .PRDATA_FLASH_CTRL(PRDATA_FLASH_CTRL),
-    .PSLVERR_FLASH_CTRL(PSLVERR_FLASH_CTRL),
-    .PREADY_FLASH_CTRL(PREADY_FLASH_CTRL),
+    .PADDR_FLASH_CTRL(FLASH_CTRL_APB.paddr),
+    .PWDATA_FLASH_CTRL(FLASH_CTRL_APB.pwdata),
+    .PWRITE_FLASH_CTRL(FLASH_CTRL_APB.pwrite),
+    .PPROT_FLASH_CTRL(FLASH_CTRL_APB.pprot),
+    .PSTRB_FLASH_CTRL(FLASH_CTRL_APB.pstrb),
+    .PENABLE_FLASH_CTRL(FLASH_CTRL_APB.penable),
+    .PSELx_FLASH_CTRL(FLASH_CTRL_APB.psel),
+    .PRDATA_FLASH_CTRL(FLASH_CTRL_APB.prdata),
+    .PSLVERR_FLASH_CTRL(FLASH_CTRL_APB.pslverr),
+    .PREADY_FLASH_CTRL(FLASH_CTRL_APB.pready),
+
+    .PADDR_PCK_CTRL(PCK_APB.paddr),
+    .PWDATA_PCK_CTRL(PCK_APB.pwdata),
+    .PWRITE_PCK_CTRL(PCK_APB.pwrite),
+    .PENABLE_PCK_CTRL(PCK_APB.penable),
+    .PSELx_PCK_CTRL(PCK_APB.psel),
+    .PRDATA_PCK_CTRL(PCK_APB.prdata),
+    .PSLVERR_PCK_CTRL(PCK_APB.pslverr),
+    .PREADY_PCK_CTRL(PCK_APB.pready),
 
     .AWID_A53(CPU_AWIDM),
     .AWADDR_A53(CPU_AWADDRM),
@@ -911,14 +936,14 @@ ROM_wrapper u_ROM_wrapper(
     .RLAST(RLAST_ROM),
     .RPOISON(),
     .AWAKEUP(1'b1),
-    .clk_qreqn(SYS_CLKEN),
-    .clk_qacceptn(),
-    .clk_qdeny(),
-    .clk_qactive(),
-    .pwr_qreqn(SYS_CLKEN),
-    .pwr_qacceptn(),
-    .pwr_qdeny(),
-    .pwr_qactive(),
+    .clk_qreqn(ROM_qchan_q.qreqn),
+    .clk_qacceptn(ROM_qchan_q.qacceptn),
+    .clk_qdeny(ROM_qchan_q.qdeny),
+    .clk_qactive(ROM_qchan_q.qactive),
+    .pwr_qreqn(ROM_qchan_p.qreqn),
+    .pwr_qacceptn(ROM_qchan_p.qacceptn),
+    .pwr_qdeny(ROM_qchan_p.qdeny),
+    .pwr_qactive(ROM_qchan_p.qactive),
     .ext_gt_qreqn(1'b1),
     .ext_gt_qacceptn(),
     .cfg_gate_resp(1'b0)
@@ -941,16 +966,18 @@ top_ahb_qspi #(.DATA_W(32)) u_sl_ahb_qspi(
     .HREADY(HREADY_FLASH),
     .HREADYOUT(HREADYOUT_FLASH),
     .HRESP(HRESP_FLASH),
-    .PADDR(PADDR_FLASH_CTRL[15:0]),
-    .PPROT(PPROT_FLASH_CTRL),
-    .PSEL(PSELx_FLASH_CTRL),
-    .PENABLE(PENABLE_FLASH_CTRL),
-    .PWRITE(PWRITE_FLASH_CTRL),
-    .PWDATA(PWDATA_FLASH_CTRL),
-    .PSTRB(PSTRB_FLASH_CTRL),
-    .PRDATA(PRDATA_FLASH_CTRL),
-    .PREADY(PREADY_FLASH_CTRL),
-    .PSLVERR(PSLVERR_FLASH_CTRL),   
+
+    .PADDR(FLASH_CTRL_APB.paddr[15:0]),
+    .PPROT(FLASH_CTRL_APB.pprot),
+    .PSEL(FLASH_CTRL_APB.psel),
+    .PENABLE(FLASH_CTRL_APB.penable),
+    .PWRITE(FLASH_CTRL_APB.pwrite),
+    .PWDATA(FLASH_CTRL_APB.pwdata),
+    .PSTRB(FLASH_CTRL_APB.pstrb),
+    .PRDATA(FLASH_CTRL_APB.prdata),
+    .PREADY(FLASH_CTRL_APB.pready),
+    .PSLVERR(FLASH_CTRL_APB.pslverr),   
+
     .QSPI_SCLK(QSPI_SCLK),
     .QSPI_nCS(QSPI_nCS),
     .QSPI_IO_o(QSPI_IO_o),
@@ -1047,13 +1074,13 @@ megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
     .UARTTXD(UARTTXD),
     .UARTTXEN(UARTTXEN),
 
-    .FT_CLK_O(FT_CLK_O),
-    .FT_SSN_O(FT_SSN_O),
-    .FT_MISO_I(FT_MISO_I),
-    .FT_MIOSIO_O(FT_MIOSIO_O),
-    .FT_MIOSIO_E(FT_MIOSIO_E),
-    .FT_MIOSIO_Z(FT_MIOSIO_Z),
-    .FT_MIOSIO_I(FT_MIOSIO_I),
+    .iodata4_i(iodata4_i),
+    .iodata4_o(iodata4_o),
+    .iodata4_e(iodata4_e),
+    .iodata4_t(iodata4_t),
+    .ioreq1_o(ioreq1_o),
+    .ioreq2_o(ioreq2_o),
+    .ioack_i(ioack_i),
 
     .p0_in(P0_IN),
     .p0_out(P0_OUT),
@@ -1064,8 +1091,20 @@ megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
     .p1_en(P1_EN),
     .p1_func(P1_FUNC),
 
+    .SPI_SSn(SPI_SSn),
+    .SPI_SCLK(SPI_SCLK),
+    .SPI_MOSI(SPI_MOSI),
+    .SPI_MISO(SPI_MISO),
+
     .PERI_IRQS(PERI_IRQS)
 );
 
+megasoc_power_control u_megasoc_power_control(
+    .PCLK(SYS_CLK),
+    .PRESETn(SYS_RESETn),
+    .PCK_APB(PCK_APB),
+    .ROM_qchan_q(ROM_qchan_q),
+    .ROM_qchan_p(ROM_qchan_p)
+);
 
 endmodule

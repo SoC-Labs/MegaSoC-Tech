@@ -24,6 +24,8 @@ build_cortex_a53:
 	@$(CORTEX_A53_IP_LOGICAL_DIR)/shared/tools/bin/RenderCORTEXA53.pl -config $(SOCLABS_MEGASOC_TECH_DIR)/socrates/CortexA53_1/CORTEXA53.cfg -input $(CORTEX_A53_IP_LOGICAL_DIR)/cortexa53/verilog/CORTEXA53_unconfigured.v -output $(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/verilog/CORTEXA53.v
 build_dma350:
 	@$(DMA350_IP_LOGICAL_DIR)/generate --config ./socrates/DMA350/config/cfg_dma_megasoc.yaml --output ./logical/dma350/
+build_pck:
+	cd $(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control;  $(PCK_600_IP_DIR)/generate --render-clean --config=$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/config/pck600_config.yaml --output=$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical
 
 build_ip: build_nic400 build_cortex_a53 build_sie300_sram_ctrl build_dma350
 
