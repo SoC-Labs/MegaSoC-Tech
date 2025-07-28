@@ -13,12 +13,12 @@
 //-----------------------------------------------------------------------------
 // Modules instantiated:
 //  megasoc_cpu_ss                  (u_megasoc_cpu_ss)
-//  nic400_megasoc_main             (u_nic400_megasoc_main)
 //  ROM_wrapper                     (u_ROM_wrapper)
 //  sl_ahb_sram                     (u_sl_ahb_sram)
 //  SRAM_wrapper                    (u_SRAM_wrapper)
 //  megasoc_peripheral_subsystem    (u_megasoc_peripheral_subsystem)
-//  megasoc_tech_system_wrapper     (u_megasoc_tech_system_wrapper)
+//  megasoc_power_control           (u_megasoc_power_control)
+//  nic400_megasoc_main             (u_nic400_megasoc_main)
 //-----------------------------------------------------------------------------
 // To Do
 //  - Replace sl_ahb_sram with QSPI controller to use external flash
@@ -172,18 +172,22 @@ module megasoc_tech_wrapper(
     output wire [3:0]       QSPI_IO_e,
 
     // UART signals
-    input  wire             UARTRXD,
-    output wire             UARTTXD,
-    output wire             UARTTXEN,
+    input  wire             UARTRXD0,
+    output wire             UARTTXD0,
+    output wire             UARTTXEN0,
 
-    // FT1248 Signals
-    input  wire [3:0]               iodata4_i,
-    output wire [3:0]               iodata4_o,
-    output wire [3:0]               iodata4_e,
-    output wire [3:0]               iodata4_t,
-    output wire                     ioreq1_o,
-    output wire                     ioreq2_o,
-    input  wire                     ioack_i,
+    input  wire             UARTRXD1,
+    output wire             UARTTXD1,
+    output wire             UARTTXEN1,
+
+    // EXTIO Signals
+    input  wire [3:0]       iodata4_i,
+    output wire [3:0]       iodata4_o,
+    output wire [3:0]       iodata4_e,
+    output wire [3:0]       iodata4_t,
+    output wire             ioreq1_o,
+    output wire             ioreq2_o,
+    input  wire             ioack_i,
 
     // DAP-LITE external signals
     input  wire             nTRST,
@@ -218,332 +222,95 @@ parameter ID_W=8;
 parameter NUM_SPIS=480;
 
 
-// Power Control
-apb3 PCK_APB();
+//--------------------------------------
+//  Power Control Interfaces
+//--------------------------------------
 qchannel ROM_qchan_q();
 qchannel ROM_qchan_p();
+wire ROM_RESETn;
+wire AWAKEUP_ROM;
 
+qchannel SRAM_qchan_q();
+qchannel SRAM_qchan_p();
+wire AWAKEUP_SRAM;
+wire SRAM_RESETn;
 
+qchannel CPU_CORE_q();
+qchannel CPU_NEON_q();
+qchannel CPU_L2_q();
+wire     CPU_CORE_PORESETn;
+wire     CPU_CORE_WRMRSTn;
+wire     CPU_L2_RESETn;
 
-wire                CPU_AWREADYM;
-wire                CPU_AWVALIDM;
-wire  [  5: 0]      CPU_AWIDM;
-wire  [ 43: 0]      CPU_AWADDRM;
-wire  [  7: 0]      CPU_AWLENM;
-wire  [  2: 0]      CPU_AWSIZEM;
-wire  [  1: 0]      CPU_AWBURSTM;
-wire                CPU_AWLOCKM;
-wire  [  3: 0]      CPU_AWCACHEM;
-wire  [  2: 0]      CPU_AWPROTM;
-wire                CPU_WREADYM;
-wire                CPU_WVALIDM;
-wire  [  5: 0]      CPU_WIDM;
-wire  [127: 0]      CPU_WDATAM;
-wire  [ 15: 0]      CPU_WSTRBM;
-wire                CPU_WLASTM;
-wire                CPU_BREADYM;
-wire                CPU_BVALIDM;
-wire  [  5: 0]      CPU_BIDM;
-wire  [  1: 0]      CPU_BRESPM;
-wire                CPU_ARREADYM;
-wire                CPU_ARVALIDM;
-wire  [  5: 0]      CPU_ARIDM;
-wire  [ 43: 0]      CPU_ARADDRM;
-wire  [  7: 0]      CPU_ARLENM;
-wire  [  2: 0]      CPU_ARSIZEM;
-wire  [  1: 0]      CPU_ARBURSTM;
-wire                CPU_ARLOCKM;
-wire  [  3: 0]      CPU_ARCACHEM;
-wire  [  2: 0]      CPU_ARPROTM;
-wire                CPU_RREADYM;
-wire                CPU_RVALIDM;
-wire  [  5: 0]      CPU_RIDM;
-wire  [127: 0]      CPU_RDATAM;
-wire  [  1: 0]      CPU_RRESPM;
-wire                CPU_RLASTM;
-
-wire [ID_W-2:0]     GIC_ARID;
-wire   [31:0]       GIC_ARADDR;
-wire    [7:0]       GIC_ARLEN;
-wire    [2:0]       GIC_ARSIZE;
-wire    [1:0]       GIC_ARBURST;
-wire    [2:0]       GIC_ARPROT;
-wire    [2:0]       GIC_ARUSER;
-wire                GIC_ARVALID;
-wire                GIC_ARREADY;
-wire [ID_W-2:0]     GIC_RID;
-wire [31:0]         GIC_RDATA;
-wire                GIC_RLAST;
-wire  [1:0]         GIC_RRESP;
-wire                GIC_RVALID;
-wire                GIC_RREADY;
-wire [ID_W-2:0]     GIC_AWID;
-wire  [31:0]        GIC_AWADDR;
-wire   [7:0]        GIC_AWLEN;
-wire   [2:0]        GIC_AWSIZE;
-wire   [1:0]        GIC_AWBURST;
-wire   [2:0]        GIC_AWPROT;
-wire   [2:0]        GIC_AWUSER;
-wire                GIC_AWVALID;
-wire                GIC_AWREADY;
-wire  [31:0]        GIC_WDATA;
-wire   [3:0]        GIC_WSTRB;
-wire                GIC_WVALID;
-wire                GIC_WREADY;
-wire [ID_W-2:0]     GIC_BID;
-wire [1:0]          GIC_BRESP;
-wire                GIC_BVALID;
-wire                GIC_BREADY;
-
-assign GIC_ARUSER=3'h0;
-assign GIC_AWUSER=3'h0;
-
-
-wire [ID_W-1:0]     AWID_DRAM;
-wire [31:0]         AWADDR_DRAM;
-wire [7:0]          AWLEN_DRAM;
-wire [2:0]          AWSIZE_DRAM;
-wire [1:0]          AWBURST_DRAM;
-wire                AWLOCK_DRAM;
-wire [3:0]          AWCACHE_DRAM;
-wire [2:0]          AWPROT_DRAM;
-wire                AWVALID_DRAM;
-wire                AWREADY_DRAM;
-wire [63:0]         WDATA_DRAM;
-wire [7:0]          WSTRB_DRAM;
-wire                WLAST_DRAM;
-wire                WVALID_DRAM;
-wire                WREADY_DRAM;
-wire [ID_W-1:0]     BID_DRAM;
-wire [1:0]          BRESP_DRAM;
-wire                BVALID_DRAM;
-wire                BREADY_DRAM;
-wire [ID_W-1:0]     ARID_DRAM;
-wire [31:0]         ARADDR_DRAM;
-wire [7:0]          ARLEN_DRAM;
-wire [2:0]          ARSIZE_DRAM;
-wire [1:0]          ARBURST_DRAM;
-wire                ARLOCK_DRAM;
-wire [3:0]          ARCACHE_DRAM;
-wire [2:0]          ARPROT_DRAM;
-wire                ARVALID_DRAM;
-wire                ARREADY_DRAM;
-wire [ID_W-1:0]     RID_DRAM;
-wire [63:0]         RDATA_DRAM;
-wire [1:0]          RRESP_DRAM;
-wire                RLAST_DRAM;
-wire                RVALID_DRAM;
-wire                RREADY_DRAM;
-
-wire                HSELx_FLASH;
-wire [31:0]         HADDR_FLASH;
-wire [1:0]          HTRANS_FLASH;
-wire                HWRITE_FLASH;
-wire [2:0]          HSIZE_FLASH;
-wire [2:0]          HBURST_FLASH;
-wire [3:0]          HPROT_FLASH;
-wire [31:0]         HWDATA_FLASH;
-wire [31:0]         HRDATA_FLASH;
-wire                HREADYOUT_FLASH;
-wire                HREADY_FLASH;
-wire                HRESP_FLASH;
-
-wire                HSELx_PERIPHERAL;
-wire [31:0]         HADDR_PERIPHERAL;
-wire [1:0]          HTRANS_PERIPHERAL;
-wire                HWRITE_PERIPHERAL;
-wire [2:0]          HSIZE_PERIPHERAL;
-wire [2:0]          HBURST_PERIPHERAL;
-wire [3:0]          HPROT_PERIPHERAL;
-wire [31:0]         HWDATA_PERIPHERAL;
-wire [31:0]         HRDATA_PERIPHERAL;
-wire                HREADYOUT_PERIPHERAL;
-wire                HREADY_PERIPHERAL;
-wire                HRESP_PERIPHERAL;
-
-wire [ID_W-1:0]     AWID_RAM;
-wire [31:0]         AWADDR_RAM;
-wire [7:0]          AWLEN_RAM;
-wire [2:0]          AWSIZE_RAM;
-wire [1:0]          AWBURST_RAM;
-wire                AWLOCK_RAM;
-wire [3:0]          AWCACHE_RAM;
-wire [2:0]          AWPROT_RAM;
-wire                AWVALID_RAM;
-wire                AWREADY_RAM;
-wire [63:0]         WDATA_RAM;
-wire [7:0]          WSTRB_RAM;
-wire                WLAST_RAM;
-wire                WVALID_RAM;
-wire                WREADY_RAM;
-wire [ID_W-1:0]     BID_RAM;
-wire [1:0]          BRESP_RAM;
-wire                BVALID_RAM;
-wire                BREADY_RAM;
-wire [ID_W-1:0]     ARID_RAM;
-wire [31:0]         ARADDR_RAM;
-wire [7:0]          ARLEN_RAM;
-wire [2:0]          ARSIZE_RAM;
-wire [1:0]          ARBURST_RAM;
-wire                ARLOCK_RAM;
-wire [3:0]          ARCACHE_RAM;
-wire [2:0]          ARPROT_RAM;
-wire                ARVALID_RAM;
-wire                ARREADY_RAM;
-wire [ID_W-1:0]     RID_RAM;
-wire [63:0]         RDATA_RAM;
-wire [1:0]          RRESP_RAM;
-wire                RLAST_RAM;
-wire                RVALID_RAM;
-wire                RREADY_RAM;
-
-wire [ID_W-1:0]     AWID_ROM;
-wire [31:0]         AWADDR_ROM;
-wire [7:0]          AWLEN_ROM;
-wire [2:0]          AWSIZE_ROM;
-wire [1:0]          AWBURST_ROM;
-wire                AWLOCK_ROM;
-wire [3:0]          AWCACHE_ROM;
-wire [2:0]          AWPROT_ROM;
-wire                AWVALID_ROM;
-wire                AWREADY_ROM;
-wire [63:0]         WDATA_ROM;
-wire [7:0]          WSTRB_ROM;
-wire                WLAST_ROM;
-wire                WVALID_ROM;
-wire                WREADY_ROM;
-wire [ID_W-1:0]     BID_ROM;
-wire [1:0]          BRESP_ROM;
-wire                BVALID_ROM;
-wire                BREADY_ROM;
-wire [ID_W-1:0]     ARID_ROM;
-wire [31:0]         ARADDR_ROM;
-wire [7:0]          ARLEN_ROM;
-wire [2:0]          ARSIZE_ROM;
-wire [1:0]          ARBURST_ROM;
-wire                ARLOCK_ROM;
-wire [3:0]          ARCACHE_ROM;
-wire [2:0]          ARPROT_ROM;
-wire                ARVALID_ROM;
-wire                ARREADY_ROM;
-wire [ID_W-1:0]     RID_ROM;
-wire [63:0]         RDATA_ROM;
-wire [1:0]          RRESP_ROM;
-wire                RLAST_ROM;
-wire                RVALID_ROM;
-wire                RREADY_ROM;
-
-
+//--------------------------------------
+//  Bus Interfaces
+//--------------------------------------
+// AXI
+axi4 #(.DATA_W(128), .ID_W(6), .ADDR_W(44))     CPU_AXI();
+axi4 #(.DATA_W(32), .ID_W(ID_W), .ADDR_W(32))   GIC_AXI();
+axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(32))   DRAM_AXI();
+axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(32))   SRAM_AXI();
+axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(32))   ROM_AXI();
+// AHB
+ahb #(.DATA_W(32), .ADDR_W(32))     FLASH_AHB();
+ahb #(.DATA_W(32), .ADDR_W(32))     PERIPH_AHB();
+ahb #(.DATA_W(32), .ADDR_W(32))     ADP_AHB();
+// APB
+apb3    CPU_DBG_APB();
+apb3    PCK_APB();
 apb4    FLASH_CTRL_APB();
-//wire [31:0]         PADDR_FLASH_CTRL;
-//wire [31:0]         PWDATA_FLASH_CTRL;
-//wire                PWRITE_FLASH_CTRL;
-//wire [2:0]          PPROT_FLASH_CTRL;
-//wire [3:0]          PSTRB_FLASH_CTRL;
-//wire                PENABLE_FLASH_CTRL;
-//wire                PSELx_FLASH_CTRL;
-//wire [31:0]         PRDATA_FLASH_CTRL;
-//wire                PSLVERR_FLASH_CTRL;
-//wire                PREADY_FLASH_CTRL;
+
 
 wire                CPU_nPRESETDBG;
 wire                CPU_PCLKENDBG;
-wire                CPU_PSELDBG;
-wire  [ 31: 0]      CPU_PADDRDBG;
-wire                CPU_PADDRDBG31;
-wire                CPU_PENABLEDBG;
-wire                CPU_PWRITEDBG;
-wire  [ 31: 0]      CPU_PWDATADBG;
-wire  [ 31: 0]      CPU_PRDATADBG;
-wire                CPU_PREADYDBG;
-wire                CPU_PSLVERRDBG;
 
-// ADP debug AHB port
-wire [31:0]         HADDR_ADP;
-wire [1:0]          HTRANS_ADP;
-wire                HWRITE_ADP;
-wire [2:0]          HSIZE_ADP;
-wire [2:0]          HBURST_ADP;
-wire [3:0]          HPROT_ADP;
-wire [31:0]         HWDATA_ADP;
-wire [31:0]         HRDATA_ADP;
-wire                HREADY_ADP;
-wire                HRESP_ADP;
 
 assign CPU_nPRESETDBG = SYS_RESETn;
 assign CPU_PCLKENDBG = 1'b1;
-assign CPU_PADDRDBG31 = 1'b0;
 
 wire [(NUM_SPIS-1):0]   CPU_IRQS;
+wire                    QSPI_IRQ;
 wire [65:0]             PERI_IRQS;
 
-assign CPU_IRQS={{(NUM_SPIS-64){1'b0}}, PERI_IRQS, DMA350_irq_comb_nonsec, DMA350_irq_channel};
+assign CPU_IRQS={{(NUM_SPIS-63){1'b0}}, QSPI_IRQ, PERI_IRQS, DMA350_irq_comb_nonsec, DMA350_irq_channel};
+
+// Subordinate AWAKEUP signal generation
+assign AWAKEUP_ROM = (ROM_AXI.AWVALID | ROM_AXI.ARVALID | ROM_AXI.WVALID);
+assign AWAKEUP_SRAM = (SRAM_AXI.AWVALID | SRAM_AXI.ARVALID | SRAM_AXI.WVALID);
+
 
 megasoc_cpu_ss #(
     .NUM_GICRID_BITS(ID_W-1),
     .NUM_GICWID_BITS(ID_W-1),
     .NUM_SPIS(NUM_SPIS)
     ) u_megasoc_cpu_ss(
+    // Clocks and Reset
     .CPU_CLK(SYS_CLK),
     .RESETn(SYS_RESETn),
+    .nPRESETDBG(CPU_nPRESETDBG),
+    .CPU_CORE_PORESETn(CPU_CORE_PORESETn),
+    .CPU_CORE_WRMRSTn(CPU_CORE_WRMRSTn),
+    .CPU_L2_RESETn(CPU_L2_RESETn),
 
+    // Clock Enable signals
     .ACLKENM(1'b1),
+    .PCLKENDBG(CPU_PCLKENDBG),
+
+    // Power Management interfaces
+    .CPU_CORE_q(CPU_CORE_q),
+    .CPU_NEON_q(CPU_NEON_q),
+    .CPU_L2_q(CPU_L2_q),
+
+    // Bus interfaces
+    .CPU_AXI(CPU_AXI),
+    .GIC_AXI(GIC_AXI),
+    .CPU_DBG_APB(CPU_DBG_APB),
+
     .ACINACTM(),
     .RDMEMATTR(),
     .WRMEMATTR(),
 
-    .AWREADYM(CPU_AWREADYM),
-    .AWVALIDM(CPU_AWVALIDM),
-    .AWIDM(CPU_AWIDM),
-    .AWADDRM(CPU_AWADDRM),
-    .AWLENM(CPU_AWLENM),
-    .AWSIZEM(CPU_AWSIZEM),
-    .AWBURSTM(CPU_AWBURSTM),
-    .AWLOCKM(CPU_AWLOCKM),
-    .AWCACHEM(CPU_AWCACHEM),
-    .AWPROTM(CPU_AWPROTM),
-
-    .WREADYM(CPU_WREADYM),
-    .WVALIDM(CPU_WVALIDM),
-    .WIDM(CPU_WIDM),
-    .WDATAM(CPU_WDATAM),
-    .WSTRBM(CPU_WSTRBM),
-    .WLASTM(CPU_WLASTM),
-
-    .BREADYM(CPU_BREADYM),
-    .BVALIDM(CPU_BVALIDM),
-    .BIDM(CPU_BIDM),
-    .BRESPM(CPU_BRESPM),    
-
-    .ARREADYM(CPU_ARREADYM),
-    .ARVALIDM(CPU_ARVALIDM),
-    .ARIDM(CPU_ARIDM),
-    .ARADDRM(CPU_ARADDRM),
-    .ARLENM(CPU_ARLENM),
-    .ARSIZEM(CPU_ARSIZEM),
-    .ARBURSTM(CPU_ARBURSTM),
-    .ARLOCKM(CPU_ARLOCKM),
-    .ARCACHEM(CPU_ARCACHEM),
-    .ARPROTM(CPU_ARPROTM),
-
-    .RREADYM(CPU_RREADYM),
-    .RVALIDM(CPU_RVALIDM),
-    .RIDM(CPU_RIDM),
-    .RDATAM(CPU_RDATAM),
-    .RRESPM(CPU_RRESPM),
-    .RLASTM(CPU_RLASTM),
-
-    .nPRESETDBG(CPU_nPRESETDBG),
-    .PCLKENDBG(CPU_PCLKENDBG),
-    .PSELDBG(CPU_PSELDBG),
-    .PADDRDBG(CPU_PADDRDBG[30:2]),
-    .PENABLEDBG(CPU_PENABLEDBG),
-    .PWRITEDBG(CPU_PWRITEDBG),
-    .PWDATADBG(CPU_PWDATADBG),
-    .PRDATADBG(CPU_PRDATADBG),
-    .PREADYDBG(CPU_PREADYDBG),
-    .PSLVERRDBG(CPU_PSLVERRDBG),
-
+    // Off-chip Debug interface
     .nTRST(nTRST),
     .SWCLKTCK(SWCLKTCK),
     .SWDITMS(SWDITMS),
@@ -553,44 +320,165 @@ megasoc_cpu_ss #(
     .SWDO(SWDO),
     .SWDOEN(SWDOEN),
 
-    .GIC_ARID(GIC_ARID),
-    .GIC_ARADDR(GIC_ARADDR[14:0]),
-    .GIC_ARLEN(GIC_ARLEN),
-    .GIC_ARSIZE(GIC_ARSIZE),
-    .GIC_ARBURST(GIC_ARBURST),
-    .GIC_ARPROT(GIC_ARPROT),
-    .GIC_ARUSER(GIC_ARUSER),
-    .GIC_ARVALID(GIC_ARVALID),
-    .GIC_ARREADY(GIC_ARREADY),
-
-    .GIC_RID(GIC_RID),
-    .GIC_RDATA(GIC_RDATA),
-    .GIC_RLAST(GIC_RLAST),
-    .GIC_RRESP(GIC_RRESP),
-    .GIC_RVALID(GIC_RVALID),
-    .GIC_RREADY(GIC_RREADY),
-
-    .GIC_AWID(GIC_AWID),
-    .GIC_AWADDR(GIC_AWADDR[14:0]),
-    .GIC_AWLEN(GIC_AWLEN),
-    .GIC_AWSIZE(GIC_AWSIZE),
-    .GIC_AWBURST(GIC_AWBURST),
-    .GIC_AWPROT(GIC_AWPROT),
-    .GIC_AWUSER(GIC_AWUSER),
-    .GIC_AWVALID(GIC_AWVALID),
-    .GIC_AWREADY(GIC_AWREADY),
-
-    .GIC_WDATA(GIC_WDATA),
-    .GIC_WSTRB(GIC_WSTRB),
-    .GIC_WVALID(GIC_WVALID),
-    .GIC_WREADY(GIC_WREADY),
-
-    .GIC_BID(GIC_BID),
-    .GIC_BRESP(GIC_BRESP),
-    .GIC_BVALID(GIC_BVALID),
-    .GIC_BREADY(GIC_BREADY),
-
+    // Interrupts from System
     .IRQs(CPU_IRQS)
+);
+
+
+ROM_wrapper u_ROM_wrapper(
+    .ACLK(SYS_CLK),
+    .ARESETn(ROM_RESETn),
+    .AWAKEUP(AWAKEUP_ROM),
+
+    // AXI Subordinate Interface
+    .ROM_AXI(ROM_AXI),
+
+    // Power Control Q-channels
+    .ROM_qchan_q(ROM_qchan_q),
+    .ROM_qchan_p(ROM_qchan_p),
+
+    // cfg_gate_resp, if low stall mem in power off, if high give error response
+    .cfg_gate_resp(1'b0)
+);
+
+top_ahb_qspi #(.DATA_W(32)) u_sl_ahb_qspi(
+    .HCLK(SYS_CLK),
+    .HRESETn(SYS_RESETn),
+    .PCLK(SYS_CLK),
+    .PRESETn(SYS_RESETn),
+
+    .HADDR(FLASH_AHB.HADDR),
+    .HTRANS(FLASH_AHB.HTRANS),
+    .HWRITE(FLASH_AHB.HWRITE),
+    .HSIZE(FLASH_AHB.HSIZE),
+    .HBURST(FLASH_AHB.HBURST),
+    .HPROT(FLASH_AHB.HPROT),
+    .HWDATA(FLASH_AHB.HWDATA),
+    .HSELx(FLASH_AHB.HSEL),
+    .HRDATA(FLASH_AHB.HRDATA),
+    .HREADY(FLASH_AHB.HREADY),
+    .HREADYOUT(FLASH_AHB.HREADYOUT),
+    .HRESP(FLASH_AHB.HRESP),
+
+    .PADDR(FLASH_CTRL_APB.paddr[15:0]),
+    .PPROT(FLASH_CTRL_APB.pprot),
+    .PSEL(FLASH_CTRL_APB.psel),
+    .PENABLE(FLASH_CTRL_APB.penable),
+    .PWRITE(FLASH_CTRL_APB.pwrite),
+    .PWDATA(FLASH_CTRL_APB.pwdata),
+    .PSTRB(FLASH_CTRL_APB.pstrb),
+    .PRDATA(FLASH_CTRL_APB.prdata),
+    .PREADY(FLASH_CTRL_APB.pready),
+    .PSLVERR(FLASH_CTRL_APB.pslverr),
+
+    .QSPI_SCLK(QSPI_SCLK),
+    .QSPI_nCS(QSPI_nCS),
+    .QSPI_IO_o(QSPI_IO_o),
+    .QSPI_IO_i(QSPI_IO_i),
+    .QSPI_IO_e(QSPI_IO_e),
+
+    .IRQ_QSPI_FINISHED(QSPI_IRQ)
+);
+
+
+SRAM_wrapper u_SRAM_wrapper(
+    // Clock and Reset
+    .ACLK(SYS_CLK),
+    .ARESETn(SRAM_RESETn),
+
+    // AXI Bus interface
+    .SRAM_AXI(SRAM_AXI),
+    // AXI Wakeup
+    .AWAKEUP(AWAKEUP_SRAM),
+
+    // Power Management signals
+    .SRAM_qchan_q(SRAM_qchan_q),
+    .SRAM_qchan_p(SRAM_qchan_p),
+
+    .cfg_gate_resp(1'b0)
+);
+
+megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
+    // Clocks and Resets
+    .PCLK(SYS_CLK),
+    .PRESETn(SYS_RESETn),
+    .HCLK(SYS_CLK),
+    .HRESETn(SYS_RESETn),
+    .RT_CLK(RT_CLK),
+
+    // ADP - AHB manager
+    .ADP_AHB(ADP_AHB),
+    // Peripheral AHB Subordinate
+    .PERIPH_AHB(PERIPH_AHB),
+
+    // UART 0 Off-chip interface
+    .UARTRXD0(UARTRXD0),
+    .UARTTXD0(UARTTXD0),
+    .UARTTXEN0(UARTTXEN0),
+
+    // UART 1 Off-chip interface
+    .UARTRXD1(UARTRXD1),
+    .UARTTXD1(UARTTXD1),
+    .UARTTXEN1(UARTTXEN1),
+
+    // EXTIO Off-chip Debug interface
+    .iodata4_i(iodata4_i),
+    .iodata4_o(iodata4_o),
+    .iodata4_e(iodata4_e),
+    .iodata4_t(iodata4_t),
+    .ioreq1_o(ioreq1_o),
+    .ioreq2_o(ioreq2_o),
+    .ioack_i(ioack_i),
+
+    // GPIO Off-chip interface
+    .p0_in(P0_IN),
+    .p0_out(P0_OUT),
+    .p0_en(P0_EN),
+    .p0_func(P0_FUNC),
+    .p1_in(P1_IN),
+    .p1_out(P1_OUT),
+    .p1_en(P1_EN),
+    .p1_func(P1_FUNC),
+
+    // SPI Peripheral Off chip interface
+    .SPI_SSn(SPI_SSn),
+    .SPI_SCLK(SPI_SCLK),
+    .SPI_MOSI(SPI_MOSI),
+    .SPI_MISO(SPI_MISO),
+
+    // Peripheral Interrupts to GIC
+    .PERI_IRQS(PERI_IRQS)
+);
+
+megasoc_power_control u_megasoc_power_control(
+    // Clock and Reset
+    .PCLK(SYS_CLK),
+    .PRESETn(SYS_RESETn),
+
+    // APB Bus interface to PPUs
+    .PCK_APB(PCK_APB),
+
+    // ROM Power management interfaces
+    .ROM_qchan_q(ROM_qchan_q),
+    .ROM_qchan_p(ROM_qchan_p),
+    .ROM_RESETn(ROM_RESETn),
+
+    // SRAM Power management interfaces
+    .SRAM_qchan_q(SRAM_qchan_q),
+    .SRAM_qchan_p(SRAM_qchan_p),
+    .SRAM_RESETn(SRAM_RESETn),
+
+    // CPU Core Power management interfaces
+    .CPU_CORE_q(CPU_CORE_q),
+    .CPU_CORE_PORESETn(CPU_CORE_PORESETn),
+    .CPU_CORE_WRMRSTn(CPU_CORE_WRMRSTn),
+
+    // CPU Advanced SIMD Power management interfaces
+    .CPU_NEON_q(CPU_NEON_q),
+
+    // CPU L2 Power management interfaces
+    .CPU_L2_q(CPU_L2_q),
+    .CPU_L2_RESETn(CPU_L2_RESETn)
 );
 
 
@@ -631,148 +519,148 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .RVALID_DRAM(),
     .RREADY_DRAM(),
 
-    .HSELx_FLASH(HSELx_FLASH),
-    .HADDR_FLASH(HADDR_FLASH),
-    .HTRANS_FLASH(HTRANS_FLASH),
-    .HWRITE_FLASH(HWRITE_FLASH),
-    .HSIZE_FLASH(HSIZE_FLASH),
-    .HBURST_FLASH(HBURST_FLASH),
-    .HPROT_FLASH(HPROT_FLASH),
-    .HWDATA_FLASH(HWDATA_FLASH),
-    .HRDATA_FLASH(HRDATA_FLASH),
-    .HREADYOUT_FLASH(HREADYOUT_FLASH),
-    .HREADY_FLASH(HREADY_FLASH),
-    .HRESP_FLASH(HRESP_FLASH),
+    .HSELx_FLASH(FLASH_AHB.HSEL),
+    .HADDR_FLASH(FLASH_AHB.HADDR),
+    .HTRANS_FLASH(FLASH_AHB.HTRANS),
+    .HWRITE_FLASH(FLASH_AHB.HWRITE),
+    .HSIZE_FLASH(FLASH_AHB.HSIZE),
+    .HBURST_FLASH(FLASH_AHB.HBURST),
+    .HPROT_FLASH(FLASH_AHB.HPROT),
+    .HWDATA_FLASH(FLASH_AHB.HWDATA),
+    .HRDATA_FLASH(FLASH_AHB.HRDATA),
+    .HREADYOUT_FLASH(FLASH_AHB.HREADYOUT),
+    .HREADY_FLASH(FLASH_AHB.HREADY),
+    .HRESP_FLASH(FLASH_AHB.HRESP),
 
-    .AWID_GIC(GIC_AWID),
-    .AWADDR_GIC(GIC_AWADDR),
-    .AWLEN_GIC(GIC_AWLEN),
-    .AWSIZE_GIC(GIC_AWSIZE),
-    .AWBURST_GIC(GIC_AWBURST),
+    .AWID_GIC(GIC_AXI.AWID),
+    .AWADDR_GIC(GIC_AXI.AWADDR),
+    .AWLEN_GIC(GIC_AXI.AWLEN),
+    .AWSIZE_GIC(GIC_AXI.AWSIZE),
+    .AWBURST_GIC(GIC_AXI.AWBURST),
     .AWLOCK_GIC(),
     .AWCACHE_GIC(),
-    .AWPROT_GIC(GIC_AWPROT),
-    .AWVALID_GIC(GIC_AWVALID),
-    .AWREADY_GIC(GIC_AWREADY),
-    .WDATA_GIC(GIC_WDATA),
-    .WSTRB_GIC(GIC_WSTRB),
+    .AWPROT_GIC(GIC_AXI.AWPROT),
+    .AWVALID_GIC(GIC_AXI.AWVALID),
+    .AWREADY_GIC(GIC_AXI.AWREADY),
+    .WDATA_GIC(GIC_AXI.WDATA),
+    .WSTRB_GIC(GIC_AXI.WSTRB),
     .WLAST_GIC(),
-    .WVALID_GIC(GIC_WVALID),
-    .WREADY_GIC(GIC_WREADY),
-    .BID_GIC(GIC_BID),
-    .BRESP_GIC(GIC_BRESP),
-    .BVALID_GIC(GIC_BVALID),
-    .BREADY_GIC(GIC_BREADY),
-    .ARID_GIC(GIC_ARID),
-    .ARADDR_GIC(GIC_ARADDR),
-    .ARLEN_GIC(GIC_ARLEN),
-    .ARSIZE_GIC(GIC_ARSIZE),
-    .ARBURST_GIC(GIC_ARBURST),
+    .WVALID_GIC(GIC_AXI.WVALID),
+    .WREADY_GIC(GIC_AXI.WREADY),
+    .BID_GIC(GIC_AXI.BID),
+    .BRESP_GIC(GIC_AXI.BRESP),
+    .BVALID_GIC(GIC_AXI.BVALID),
+    .BREADY_GIC(GIC_AXI.BREADY),
+    .ARID_GIC(GIC_AXI.ARID),
+    .ARADDR_GIC(GIC_AXI.ARADDR),
+    .ARLEN_GIC(GIC_AXI.ARLEN),
+    .ARSIZE_GIC(GIC_AXI.ARSIZE),
+    .ARBURST_GIC(GIC_AXI.ARBURST),
     .ARLOCK_GIC(),
     .ARCACHE_GIC(),
-    .ARPROT_GIC(GIC_ARPROT),
-    .ARVALID_GIC(GIC_ARVALID),
-    .ARREADY_GIC(GIC_ARREADY),
-    .RID_GIC(GIC_RID),
-    .RDATA_GIC(GIC_RDATA),
-    .RRESP_GIC(GIC_RRESP),
-    .RLAST_GIC(GIC_RLAST),
-    .RVALID_GIC(GIC_RVALID),
-    .RREADY_GIC(GIC_RREADY),
+    .ARPROT_GIC(GIC_AXI.ARPROT),
+    .ARVALID_GIC(GIC_AXI.ARVALID),
+    .ARREADY_GIC(GIC_AXI.ARREADY),
+    .RID_GIC(GIC_AXI.RID),
+    .RDATA_GIC(GIC_AXI.RDATA),
+    .RRESP_GIC(GIC_AXI.RRESP),
+    .RLAST_GIC(GIC_AXI.RLAST),
+    .RVALID_GIC(GIC_AXI.RVALID),
+    .RREADY_GIC(GIC_AXI.RREADY),
 
-    .HSELx_PERIPHERAL(HSELx_PERIPHERAL),
-    .HADDR_PERIPHERAL(HADDR_PERIPHERAL),
-    .HTRANS_PERIPHERAL(HTRANS_PERIPHERAL),
-    .HWRITE_PERIPHERAL(HWRITE_PERIPHERAL),
-    .HSIZE_PERIPHERAL(HSIZE_PERIPHERAL),
-    .HBURST_PERIPHERAL(HBURST_PERIPHERAL),
-    .HPROT_PERIPHERAL(HPROT_PERIPHERAL),
-    .HWDATA_PERIPHERAL(HWDATA_PERIPHERAL),
-    .HRDATA_PERIPHERAL(HRDATA_PERIPHERAL),
-    .HREADYOUT_PERIPHERAL(HREADYOUT_PERIPHERAL),
-    .HREADY_PERIPHERAL(HREADY_PERIPHERAL),
-    .HRESP_PERIPHERAL(HRESP_PERIPHERAL),
+    .HSELx_PERIPHERAL(PERIPH_AHB.HSEL),
+    .HADDR_PERIPHERAL(PERIPH_AHB.HADDR),
+    .HTRANS_PERIPHERAL(PERIPH_AHB.HTRANS),
+    .HWRITE_PERIPHERAL(PERIPH_AHB.HWRITE),
+    .HSIZE_PERIPHERAL(PERIPH_AHB.HSIZE),
+    .HBURST_PERIPHERAL(PERIPH_AHB.HBURST),
+    .HPROT_PERIPHERAL(PERIPH_AHB.HPROT),
+    .HWDATA_PERIPHERAL(PERIPH_AHB.HWDATA),
+    .HRDATA_PERIPHERAL(PERIPH_AHB.HRDATA),
+    .HREADYOUT_PERIPHERAL(PERIPH_AHB.HREADYOUT),
+    .HREADY_PERIPHERAL(PERIPH_AHB.HREADY),
+    .HRESP_PERIPHERAL(PERIPH_AHB.HRESP),
 
-    .AWID_RAM(AWID_RAM),
-    .AWADDR_RAM(AWADDR_RAM),
-    .AWLEN_RAM(AWLEN_RAM),
-    .AWSIZE_RAM(AWSIZE_RAM),
-    .AWBURST_RAM(AWBURST_RAM),
-    .AWLOCK_RAM(AWLOCK_RAM),
-    .AWCACHE_RAM(AWCACHE_RAM),
-    .AWPROT_RAM(AWPROT_RAM),
-    .AWVALID_RAM(AWVALID_RAM),
-    .AWREADY_RAM(AWREADY_RAM),
-    .WDATA_RAM(WDATA_RAM),
-    .WSTRB_RAM(WSTRB_RAM),
-    .WLAST_RAM(WLAST_RAM),
-    .WVALID_RAM(WVALID_RAM),
-    .WREADY_RAM(WREADY_RAM),
-    .BID_RAM(BID_RAM),
-    .BRESP_RAM(BRESP_RAM),
-    .BVALID_RAM(BVALID_RAM),
-    .BREADY_RAM(BREADY_RAM),
-    .ARID_RAM(ARID_RAM),
-    .ARADDR_RAM(ARADDR_RAM),
-    .ARLEN_RAM(ARLEN_RAM),
-    .ARSIZE_RAM(ARSIZE_RAM),
-    .ARBURST_RAM(ARBURST_RAM),
-    .ARLOCK_RAM(ARLOCK_RAM),
-    .ARCACHE_RAM(ARCACHE_RAM),
-    .ARPROT_RAM(ARPROT_RAM),
-    .ARVALID_RAM(ARVALID_RAM),
-    .ARREADY_RAM(ARREADY_RAM),
-    .RID_RAM(RID_RAM),
-    .RDATA_RAM(RDATA_RAM),
-    .RRESP_RAM(RRESP_RAM),
-    .RLAST_RAM(RLAST_RAM),
-    .RVALID_RAM(RVALID_RAM),
-    .RREADY_RAM(RREADY_RAM),
+    .AWID_RAM(SRAM_AXI.AWID),
+    .AWADDR_RAM(SRAM_AXI.AWADDR),
+    .AWLEN_RAM(SRAM_AXI.AWLEN),
+    .AWSIZE_RAM(SRAM_AXI.AWSIZE),
+    .AWBURST_RAM(SRAM_AXI.AWBURST),
+    .AWLOCK_RAM(SRAM_AXI.AWLOCK),
+    .AWCACHE_RAM(SRAM_AXI.AWCACHE),
+    .AWPROT_RAM(SRAM_AXI.AWPROT),
+    .AWVALID_RAM(SRAM_AXI.AWVALID),
+    .AWREADY_RAM(SRAM_AXI.AWREADY),
+    .WDATA_RAM(SRAM_AXI.WDATA),
+    .WSTRB_RAM(SRAM_AXI.WSTRB),
+    .WLAST_RAM(SRAM_AXI.WLAST),
+    .WVALID_RAM(SRAM_AXI.WVALID),
+    .WREADY_RAM(SRAM_AXI.WREADY),
+    .BID_RAM(SRAM_AXI.BID),
+    .BRESP_RAM(SRAM_AXI.BRESP),
+    .BVALID_RAM(SRAM_AXI.BVALID),
+    .BREADY_RAM(SRAM_AXI.BREADY),
+    .ARID_RAM(SRAM_AXI.ARID),
+    .ARADDR_RAM(SRAM_AXI.ARADDR),
+    .ARLEN_RAM(SRAM_AXI.ARLEN),
+    .ARSIZE_RAM(SRAM_AXI.ARSIZE),
+    .ARBURST_RAM(SRAM_AXI.ARBURST),
+    .ARLOCK_RAM(SRAM_AXI.ARLOCK),
+    .ARCACHE_RAM(SRAM_AXI.ARCACHE),
+    .ARPROT_RAM(SRAM_AXI.ARPROT),
+    .ARVALID_RAM(SRAM_AXI.ARVALID),
+    .ARREADY_RAM(SRAM_AXI.ARREADY),
+    .RID_RAM(SRAM_AXI.RID),
+    .RDATA_RAM(SRAM_AXI.RDATA),
+    .RRESP_RAM(SRAM_AXI.RRESP),
+    .RLAST_RAM(SRAM_AXI.RLAST),
+    .RVALID_RAM(SRAM_AXI.RVALID),
+    .RREADY_RAM(SRAM_AXI.RREADY),
 
-    .AWID_ROM(AWID_ROM),
-    .AWADDR_ROM(AWADDR_ROM),
-    .AWLEN_ROM(AWLEN_ROM),
-    .AWSIZE_ROM(AWSIZE_ROM),
-    .AWBURST_ROM(AWBURST_ROM),
-    .AWLOCK_ROM(AWLOCK_ROM),
-    .AWCACHE_ROM(AWCACHE_ROM),
-    .AWPROT_ROM(AWPROT_ROM),
-    .AWVALID_ROM(AWVALID_ROM),
-    .AWREADY_ROM(AWREADY_ROM),
-    .WDATA_ROM(WDATA_ROM),
-    .WSTRB_ROM(WSTRB_ROM),
-    .WLAST_ROM(WLAST_ROM),
-    .WVALID_ROM(WVALID_ROM),
-    .WREADY_ROM(WREADY_ROM),
-    .BID_ROM(BID_ROM),
-    .BRESP_ROM(BRESP_ROM),
-    .BVALID_ROM(BVALID_ROM),
-    .BREADY_ROM(BREADY_ROM),
-    .ARID_ROM(ARID_ROM),
-    .ARADDR_ROM(ARADDR_ROM),
-    .ARLEN_ROM(ARLEN_ROM),
-    .ARSIZE_ROM(ARSIZE_ROM),
-    .ARBURST_ROM(ARBURST_ROM),
-    .ARLOCK_ROM(ARLOCK_ROM),
-    .ARCACHE_ROM(ARCACHE_ROM),
-    .ARPROT_ROM(ARPROT_ROM),
-    .ARVALID_ROM(ARVALID_ROM),
-    .ARREADY_ROM(ARREADY_ROM),
-    .RID_ROM(RID_ROM),
-    .RDATA_ROM(RDATA_ROM),
-    .RRESP_ROM(RRESP_ROM),
-    .RLAST_ROM(RLAST_ROM),
-    .RVALID_ROM(RVALID_ROM),
-    .RREADY_ROM(RREADY_ROM),
+    .AWID_ROM(ROM_AXI.AWID),
+    .AWADDR_ROM(ROM_AXI.AWADDR),
+    .AWLEN_ROM(ROM_AXI.AWLEN),
+    .AWSIZE_ROM(ROM_AXI.AWSIZE),
+    .AWBURST_ROM(ROM_AXI.AWBURST),
+    .AWLOCK_ROM(ROM_AXI.AWLOCK),
+    .AWCACHE_ROM(ROM_AXI.AWCACHE),
+    .AWPROT_ROM(ROM_AXI.AWPROT),
+    .AWVALID_ROM(ROM_AXI.AWVALID),
+    .AWREADY_ROM(ROM_AXI.AWREADY),
+    .WDATA_ROM(ROM_AXI.WDATA),
+    .WSTRB_ROM(ROM_AXI.WSTRB),
+    .WLAST_ROM(ROM_AXI.WLAST),
+    .WVALID_ROM(ROM_AXI.WVALID),
+    .WREADY_ROM(ROM_AXI.WREADY),
+    .BID_ROM(ROM_AXI.BID),
+    .BRESP_ROM(ROM_AXI.BRESP),
+    .BVALID_ROM(ROM_AXI.BVALID),
+    .BREADY_ROM(ROM_AXI.BREADY),
+    .ARID_ROM(ROM_AXI.ARID),
+    .ARADDR_ROM(ROM_AXI.ARADDR),
+    .ARLEN_ROM(ROM_AXI.ARLEN),
+    .ARSIZE_ROM(ROM_AXI.ARSIZE),
+    .ARBURST_ROM(ROM_AXI.ARBURST),
+    .ARLOCK_ROM(ROM_AXI.ARLOCK),
+    .ARCACHE_ROM(ROM_AXI.ARCACHE),
+    .ARPROT_ROM(ROM_AXI.ARPROT),
+    .ARVALID_ROM(ROM_AXI.ARVALID),
+    .ARREADY_ROM(ROM_AXI.ARREADY),
+    .RID_ROM(ROM_AXI.RID),
+    .RDATA_ROM(ROM_AXI.RDATA),
+    .RRESP_ROM(ROM_AXI.RRESP),
+    .RLAST_ROM(ROM_AXI.RLAST),
+    .RVALID_ROM(ROM_AXI.RVALID),
+    .RREADY_ROM(ROM_AXI.RREADY),
 
-    .PADDR_DEBUG(CPU_PADDRDBG),
-    .PWDATA_DEBUG(CPU_PWDATADBG),
-    .PWRITE_DEBUG(CPU_PWRITEDBG),
-    .PENABLE_DEBUG(CPU_PENABLEDBG),
-    .PSELx_DEBUG(CPU_PSELDBG),
-    .PRDATA_DEBUG(CPU_PRDATADBG),
-    .PSLVERR_DEBUG(CPU_PSLVERRDBG),
-    .PREADY_DEBUG(CPU_PREADYDBG),
+    .PADDR_DEBUG(CPU_DBG_APB.paddr),
+    .PWDATA_DEBUG(CPU_DBG_APB.pwdata),
+    .PWRITE_DEBUG(CPU_DBG_APB.pwrite),
+    .PENABLE_DEBUG(CPU_DBG_APB.penable),
+    .PSELx_DEBUG(CPU_DBG_APB.psel),
+    .PRDATA_DEBUG(CPU_DBG_APB.prdata),
+    .PSLVERR_DEBUG(CPU_DBG_APB.pslverr),
+    .PREADY_DEBUG(CPU_DBG_APB.pready),
 
     .PADDR_DMA_CTRL(PADDR_DMA_CTRL),
     .PWDATA_DMA_CTRL(PWDATA_DMA_CTRL),
@@ -806,52 +694,52 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .PSLVERR_PCK_CTRL(PCK_APB.pslverr),
     .PREADY_PCK_CTRL(PCK_APB.pready),
 
-    .AWID_A53(CPU_AWIDM),
-    .AWADDR_A53(CPU_AWADDRM),
-    .AWLEN_A53(CPU_AWLENM),
-    .AWSIZE_A53(CPU_AWSIZEM),
-    .AWBURST_A53(CPU_AWBURSTM),
-    .AWLOCK_A53(CPU_AWLOCKM),
-    .AWCACHE_A53(CPU_AWCACHEM),
-    .AWPROT_A53(CPU_AWPROTM),
-    .AWVALID_A53(CPU_AWVALIDM),
-    .AWREADY_A53(CPU_AWREADYM),
-    .WDATA_A53(CPU_WDATAM),
-    .WSTRB_A53(CPU_WSTRBM),
-    .WLAST_A53(CPU_WLASTM),
-    .WVALID_A53(CPU_WVALIDM),
-    .WREADY_A53(CPU_WREADYM),
-    .BID_A53(CPU_BIDM),
-    .BRESP_A53(CPU_BRESPM),
-    .BVALID_A53(CPU_BVALIDM),
-    .BREADY_A53(CPU_BREADYM),
-    .ARID_A53(CPU_ARIDM),
-    .ARADDR_A53(CPU_ARADDRM),
-    .ARLEN_A53(CPU_ARLENM),
-    .ARSIZE_A53(CPU_ARSIZEM),
-    .ARBURST_A53(CPU_ARBURSTM),
-    .ARLOCK_A53(CPU_ARLOCKM),
-    .ARCACHE_A53(CPU_ARCACHEM),
-    .ARPROT_A53(CPU_ARPROTM),
-    .ARVALID_A53(CPU_ARVALIDM),
-    .ARREADY_A53(CPU_ARREADYM),
-    .RID_A53(CPU_RIDM),
-    .RDATA_A53(CPU_RDATAM),
-    .RRESP_A53(CPU_RRESPM),
-    .RLAST_A53(CPU_RLASTM),
-    .RVALID_A53(CPU_RVALIDM),
-    .RREADY_A53(CPU_RREADYM),
+    .AWID_A53(CPU_AXI.AWID),
+    .AWADDR_A53(CPU_AXI.AWADDR),
+    .AWLEN_A53(CPU_AXI.AWLEN),
+    .AWSIZE_A53(CPU_AXI.AWSIZE),
+    .AWBURST_A53(CPU_AXI.AWBURST),
+    .AWLOCK_A53(CPU_AXI.AWLOCK),
+    .AWCACHE_A53(CPU_AXI.AWCACHE),
+    .AWPROT_A53(CPU_AXI.AWPROT),
+    .AWVALID_A53(CPU_AXI.AWVALID),
+    .AWREADY_A53(CPU_AXI.AWREADY),
+    .WDATA_A53(CPU_AXI.WDATA),
+    .WSTRB_A53(CPU_AXI.WSTRB),
+    .WLAST_A53(CPU_AXI.WLAST),
+    .WVALID_A53(CPU_AXI.WVALID),
+    .WREADY_A53(CPU_AXI.WREADY),
+    .BID_A53(CPU_AXI.BID),
+    .BRESP_A53(CPU_AXI.BRESP),
+    .BVALID_A53(CPU_AXI.BVALID),
+    .BREADY_A53(CPU_AXI.BREADY),
+    .ARID_A53(CPU_AXI.ARID),
+    .ARADDR_A53(CPU_AXI.ARADDR),
+    .ARLEN_A53(CPU_AXI.ARLEN),
+    .ARSIZE_A53(CPU_AXI.ARSIZE),
+    .ARBURST_A53(CPU_AXI.ARBURST),
+    .ARLOCK_A53(CPU_AXI.ARLOCK),
+    .ARCACHE_A53(CPU_AXI.ARCACHE),
+    .ARPROT_A53(CPU_AXI.ARPROT),
+    .ARVALID_A53(CPU_AXI.ARVALID),
+    .ARREADY_A53(CPU_AXI.ARREADY),
+    .RID_A53(CPU_AXI.RID),
+    .RDATA_A53(CPU_AXI.RDATA),
+    .RRESP_A53(CPU_AXI.RRESP),
+    .RLAST_A53(CPU_AXI.RLAST),
+    .RVALID_A53(CPU_AXI.RVALID),
+    .RREADY_A53(CPU_AXI.RREADY),
 
-    .HADDR_ADP(HADDR_ADP),
-    .HTRANS_ADP(HTRANS_ADP),
-    .HWRITE_ADP(HWRITE_ADP),
-    .HSIZE_ADP(HSIZE_ADP),
-    .HBURST_ADP(HBURST_ADP),
-    .HPROT_ADP(HPROT_ADP),
-    .HWDATA_ADP(HWDATA_ADP),
-    .HRDATA_ADP(HRDATA_ADP),
-    .HREADY_ADP(HREADY_ADP),
-    .HRESP_ADP(HRESP_ADP),
+    .HADDR_ADP(ADP_AHB.HADDR),
+    .HTRANS_ADP(ADP_AHB.HTRANS),
+    .HWRITE_ADP(ADP_AHB.HWRITE),
+    .HSIZE_ADP(ADP_AHB.HSIZE),
+    .HBURST_ADP(ADP_AHB.HBURST),
+    .HPROT_ADP(ADP_AHB.HPROT),
+    .HWDATA_ADP(ADP_AHB.HWDATA),
+    .HRDATA_ADP(ADP_AHB.HRDATA),
+    .HREADY_ADP(ADP_AHB.HREADY),
+    .HRESP_ADP(ADP_AHB.HRESP),
 
     .AWID_DMA350(AWID_DMA350),
     .AWADDR_DMA350(AWADDR_DMA350),
@@ -892,219 +780,7 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .clk0clk(SYS_CLK),
     .clk0clken(SYS_CLKEN),
     .clk0resetn(SYS_RESETn)
-
 );
 
-ROM_wrapper u_ROM_wrapper(
-    .ACLK(SYS_CLK),
-    .ARESETn(SYS_RESETn),
-    .AWVALID(AWVALID_ROM),
-    .AWREADY(AWREADY_ROM),
-    .AWID(AWID_ROM),
-    .AWADDR(AWADDR_ROM),
-    .AWLEN(AWLEN_ROM),
-    .AWSIZE(AWSIZE_ROM),
-    .AWBURST(AWBURST_ROM),
-    .AWLOCK(AWLOCK_ROM),
-    .AWPROT(AWPROT_ROM),
-    .AWQOS(4'h0),
-    .WVALID(WVALID_ROM),
-    .WREADY(WREADY_ROM),
-    .WDATA(WDATA_ROM),
-    .WSTRB(WSTRB_ROM),
-    .WLAST(WLAST_ROM),
-    .WPOISON(1'b0),
-    .BVALID(BVALID_ROM),
-    .BREADY(BREADY_ROM),
-    .BID(BID_ROM),
-    .BRESP(BRESP_ROM),
-    .ARVALID(ARVALID_ROM),
-    .ARREADY(ARREADY_ROM),
-    .ARID(ARID_ROM),
-    .ARADDR(ARADDR_ROM),
-    .ARLEN(ARLEN_ROM),
-    .ARSIZE(ARSIZE_ROM),
-    .ARBURST(ARBURST_ROM),
-    .ARLOCK(ARLOCK_ROM),
-    .ARPROT(ARPROT_ROM),
-    .ARQOS(4'h0),
-    .RVALID(RVALID_ROM),
-    .RREADY(RREADY_ROM),
-    .RID(RID_ROM),
-    .RDATA(RDATA_ROM),
-    .RRESP(RRESP_ROM),
-    .RLAST(RLAST_ROM),
-    .RPOISON(),
-    .AWAKEUP(1'b1),
-    .clk_qreqn(ROM_qchan_q.qreqn),
-    .clk_qacceptn(ROM_qchan_q.qacceptn),
-    .clk_qdeny(ROM_qchan_q.qdeny),
-    .clk_qactive(ROM_qchan_q.qactive),
-    .pwr_qreqn(ROM_qchan_p.qreqn),
-    .pwr_qacceptn(ROM_qchan_p.qacceptn),
-    .pwr_qdeny(ROM_qchan_p.qdeny),
-    .pwr_qactive(ROM_qchan_p.qactive),
-    .ext_gt_qreqn(1'b1),
-    .ext_gt_qacceptn(),
-    .cfg_gate_resp(1'b0)
-);
-
-top_ahb_qspi #(.DATA_W(32)) u_sl_ahb_qspi(
-    .HCLK(SYS_CLK),
-    .HRESETn(SYS_RESETn),
-    .PCLK(SYS_CLK),
-    .PRESETn(SYS_RESETn),
-    .HADDR(HADDR_FLASH),
-    .HTRANS(HTRANS_FLASH),
-    .HWRITE(HWRITE_FLASH),
-    .HSIZE(HSIZE_FLASH),
-    .HBURST(HBURST_FLASH),
-    .HPROT(HPROT_FLASH),
-    .HWDATA(HWDATA_FLASH),
-    .HSELx(HSELx_FLASH),
-    .HRDATA(HRDATA_FLASH),
-    .HREADY(HREADY_FLASH),
-    .HREADYOUT(HREADYOUT_FLASH),
-    .HRESP(HRESP_FLASH),
-
-    .PADDR(FLASH_CTRL_APB.paddr[15:0]),
-    .PPROT(FLASH_CTRL_APB.pprot),
-    .PSEL(FLASH_CTRL_APB.psel),
-    .PENABLE(FLASH_CTRL_APB.penable),
-    .PWRITE(FLASH_CTRL_APB.pwrite),
-    .PWDATA(FLASH_CTRL_APB.pwdata),
-    .PSTRB(FLASH_CTRL_APB.pstrb),
-    .PRDATA(FLASH_CTRL_APB.prdata),
-    .PREADY(FLASH_CTRL_APB.pready),
-    .PSLVERR(FLASH_CTRL_APB.pslverr),   
-
-    .QSPI_SCLK(QSPI_SCLK),
-    .QSPI_nCS(QSPI_nCS),
-    .QSPI_IO_o(QSPI_IO_o),
-    .QSPI_IO_i(QSPI_IO_i),
-    .QSPI_IO_e(QSPI_IO_e)
-);
-
-SRAM_wrapper u_SRAM_wrapper(
-    .ACLK(SYS_CLK),
-    .ARESETn(SYS_RESETn),
-    .AWVALID(AWVALID_RAM),
-    .AWREADY(AWREADY_RAM),
-    .AWID(AWID_RAM),
-    .AWADDR(AWADDR_RAM),
-    .AWLEN(AWLEN_RAM),
-    .AWSIZE(AWSIZE_RAM),
-    .AWBURST(AWBURST_RAM),
-    .AWLOCK(AWLOCK_RAM),
-    .AWPROT(AWPROT_RAM),
-    .AWQOS(4'h0),
-    .WVALID(WVALID_RAM),
-    .WREADY(WREADY_RAM),
-    .WDATA(WDATA_RAM),
-    .WSTRB(WSTRB_RAM),
-    .WLAST(WLAST_RAM),
-    .WPOISON(1'b0),
-    .BVALID(BVALID_RAM),
-    .BREADY(BREADY_RAM),
-    .BID(BID_RAM),
-    .BRESP(BRESP_RAM),
-    .ARVALID(ARVALID_RAM),
-    .ARREADY(ARREADY_RAM),
-    .ARID(ARID_RAM),
-    .ARADDR(ARADDR_RAM),
-    .ARLEN(ARLEN_RAM),
-    .ARSIZE(ARSIZE_RAM),
-    .ARBURST(ARBURST_RAM),
-    .ARLOCK(ARLOCK_RAM),
-    .ARPROT(ARPROT_RAM),
-    .ARQOS(4'h0),
-    .RVALID(RVALID_RAM),
-    .RREADY(RREADY_RAM),
-    .RID(RID_RAM),
-    .RDATA(RDATA_RAM),
-    .RRESP(RRESP_RAM),
-    .RLAST(RLAST_RAM),
-    .RPOISON(),
-    .AWAKEUP(1'b1),
-    .clk_qreqn(SYS_CLKEN),
-    .clk_qacceptn(),
-    .clk_qdeny(),
-    .clk_qactive(),
-    .pwr_qreqn(SYS_CLKEN),
-    .pwr_qacceptn(),
-    .pwr_qdeny(),
-    .pwr_qactive(),
-    .ext_gt_qreqn(1'b1),
-    .ext_gt_qacceptn(),
-    .cfg_gate_resp(1'b0)
-);
-
-megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
-    .PCLK(SYS_CLK),
-    .PRESETn(SYS_RESETn),
-    .HCLK(SYS_CLK),
-    .HRESETn(SYS_RESETn),
-    .RT_CLK(RT_CLK),
-
-    .HADDR_ADP(HADDR_ADP),
-    .HTRANS_ADP(HTRANS_ADP),
-    .HWRITE_ADP(HWRITE_ADP),
-    .HSIZE_ADP(HSIZE_ADP),
-    .HBURST_ADP(HBURST_ADP),
-    .HPROT_ADP(HPROT_ADP),
-    .HWDATA_ADP(HWDATA_ADP),
-    .HRDATA_ADP(HRDATA_ADP),
-    .HREADY_ADP(HREADY_ADP),
-    .HRESP_ADP(HRESP_ADP),
-
-    .HSEL(HSELx_PERIPHERAL),
-    .HADDR(HADDR_PERIPHERAL),
-    .HTRANS(HTRANS_PERIPHERAL),
-    .HWRITE(HWRITE_PERIPHERAL),
-    .HSIZE(HSIZE_PERIPHERAL),
-    .HBURST(HBURST_PERIPHERAL),
-    .HPROT(HPROT_PERIPHERAL),
-    .HWDATA(HWDATA_PERIPHERAL),
-    .HREADY(HREADY_PERIPHERAL),
-    .HRDATA(HRDATA_PERIPHERAL),
-    .HREADYOUT(HREADYOUT_PERIPHERAL),
-    .HRESP(HRESP_PERIPHERAL),
-
-    .UARTRXD(UARTRXD),
-    .UARTTXD(UARTTXD),
-    .UARTTXEN(UARTTXEN),
-
-    .iodata4_i(iodata4_i),
-    .iodata4_o(iodata4_o),
-    .iodata4_e(iodata4_e),
-    .iodata4_t(iodata4_t),
-    .ioreq1_o(ioreq1_o),
-    .ioreq2_o(ioreq2_o),
-    .ioack_i(ioack_i),
-
-    .p0_in(P0_IN),
-    .p0_out(P0_OUT),
-    .p0_en(P0_EN),
-    .p0_func(P0_FUNC),
-    .p1_in(P1_IN),
-    .p1_out(P1_OUT),
-    .p1_en(P1_EN),
-    .p1_func(P1_FUNC),
-
-    .SPI_SSn(SPI_SSn),
-    .SPI_SCLK(SPI_SCLK),
-    .SPI_MOSI(SPI_MOSI),
-    .SPI_MISO(SPI_MISO),
-
-    .PERI_IRQS(PERI_IRQS)
-);
-
-megasoc_power_control u_megasoc_power_control(
-    .PCLK(SYS_CLK),
-    .PRESETn(SYS_RESETn),
-    .PCK_APB(PCK_APB),
-    .ROM_qchan_q(ROM_qchan_q),
-    .ROM_qchan_p(ROM_qchan_p)
-);
 
 endmodule

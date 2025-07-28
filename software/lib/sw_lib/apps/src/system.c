@@ -25,11 +25,6 @@
 #include "intrinsics.h"
 
 
-// void irq_handler(){
-//   int source, interrupt, raw_interrupt;
-
-// }
-
 /** @file system.c
  *  @brief System Print, TEST_PASS/TEST_FAIL and placeholder for other helper functions 
  */

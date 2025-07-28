@@ -13,11 +13,14 @@ interface axi3 #(
     wire [2:0]              AWPROT;
     wire                    AWVALID;
     wire                    AWREADY;
+
     wire [DATA_W-1:0]       WDATA;
     wire [(DATA_W/8)-1:0]   WSTRB;
     wire                    WLAST;
     wire                    WVALID;
     wire                    WREADY;
+    wire [ID_W-1:0]         WID;
+
     wire [ID_W-1:0]         BID;
     wire [1:0]              BRESP;
     wire                    BVALID;
@@ -40,12 +43,19 @@ interface axi3 #(
     wire                    RREADY;
 
     modport subordinate (
-        input paddr, pwdata, penable, pwrite, psel,
-        output prdata, pready, pslverr
+        input AWID, AWADDR, AWLEN, AWSIZE, AWBURST, AWLOCK, AWCACHE, AWPROT, AWVALID,
+        WDATA, WSTRB, WLAST, WVALID, WID, BREADY,
+        ARID, ARADDR, ARLEN, ARSIZE, ARBURST, ARLOCK, ARCACHE, ARPROT, ARVALID, RREADY,
+        output AWREADY, WREADY, BID, BRESP, BVALID, ARREADY,
+        RID, RDATA, RRESP, RLAST, RVALID
     );
     modport master (
-        input prdata, pready, pslverr,
-        output paddr, pwdata, penable, pwrite, psel
+        input AWREADY, WREADY, BID, BRESP, BVALID, ARREADY,
+        RID, RDATA, RRESP, RLAST, RVALID,
+        output AWID, AWADDR, AWLEN, AWSIZE, AWBURST, AWLOCK, AWCACHE, AWPROT, AWVALID,
+        WDATA, WSTRB, WLAST, WVALID, WID, BREADY,
+        ARID, ARADDR, ARLEN, ARSIZE, ARBURST, ARLOCK, ARCACHE, ARPROT, ARVALID, RREADY
+
     );
 
 endinterface

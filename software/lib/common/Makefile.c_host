@@ -85,6 +85,7 @@ ifeq ($(BOOT_CODE), 1)
     APP_SRC += $(SW_LIB_PATH)/apps/src/irq.s               
     APP_SRC += $(SW_LIB_PATH)/apps/src/vect_64.s  
     APP_SRC += $(SW_LIB_PATH)/apps/src/page_table.s  
+    APP_SRC += $(SW_LIB_PATH)/apps/src/stack_multi_cpu_init.s  
 endif
 APP_SRC += $(SW_LIB_PATH)/apps/src/system.c
 APP_SRC += $(SW_LIB_PATH)/apps/src/boot.s                 
@@ -94,6 +95,7 @@ APP_SRC += $(SW_LIB_PATH)/apps/src/ipc.s
 APP_SRC += $(SW_LIB_PATH)/apps/src/irq.s               
 APP_SRC += $(SW_LIB_PATH)/apps/src/vect_64.s  
 APP_SRC += $(SW_LIB_PATH)/apps/src/page_table.s  
+APP_SRC += $(SW_LIB_PATH)/apps/src/stack_multi_cpu_init.s  
 
 # APP_SRC += $(SW_LIB_PATH)/devices/src/pl011_uart.c
 # APP_SRC += $(SW_LIB_PATH)/devices/src/intr_rtr_1.c

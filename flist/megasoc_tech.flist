@@ -16,16 +16,19 @@
 // Interfaces
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/apb3_if.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/apb4_if.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/axi4_if.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/axi3_if.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/ahb_if.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/qchannel_if.sv
 
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_wrapper.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_system_wrapper.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_cpu_ss.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_cpu_ss.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_irq_sync.v
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_addr_decode.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_subsystem.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_subsystem.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_debug.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/extio8x4_axis_initiator.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/extio8x4_ifsm.v
@@ -33,6 +36,8 @@ $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/exti
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_power_control/megasoc_power_control.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/megasoc_ROM_power_control.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/megasoc_SRAM_power_control.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/megasoc_CPU_power_control.sv
 
 // ARM IP
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/ARM_Cortex_A53.flist

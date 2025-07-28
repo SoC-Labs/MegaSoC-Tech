@@ -28,63 +28,28 @@ module megasoc_cpu_ss #(
   input  wire                       CPU_CLK,
   input  wire                       RESETn,
 
+  input  wire                       CPU_CORE_PORESETn,
+  input  wire                       CPU_CORE_WRMRSTn,
+  input  wire                       CPU_L2_RESETn,
+
+  qchannel.subordinate              CPU_CORE_q,
+  qchannel.subordinate              CPU_NEON_q,
+  qchannel.subordinate              CPU_L2_q,
+
   // ACE Interface; Clock and Configuration Signals
   input   wire                      ACLKENM,
   input   wire                      ACINACTM,
   output  wire [  7: 0]             RDMEMATTR,
   output  wire [  7: 0]             WRMEMATTR,
-  // ACE Interface; Write Address Channel Signals
-  input   wire                      AWREADYM,
-  output  wire                      AWVALIDM,
-  output  wire  [  5: 0]            AWIDM,
-  output  wire  [ 43: 0]            AWADDRM,
-  output  wire  [  7: 0]            AWLENM,
-  output  wire  [  2: 0]            AWSIZEM,
-  output  wire  [  1: 0]            AWBURSTM,
-  output  wire                      AWLOCKM,
-  output  wire  [  3: 0]            AWCACHEM,
-  output  wire  [  2: 0]            AWPROTM,
-  // ACE Interface; Write Data Channel Signals
-  input   wire                      WREADYM,
-  output  wire                      WVALIDM,
-  output  wire  [  5: 0]            WIDM,
-  output  wire  [127: 0]            WDATAM,
-  output  wire  [ 15: 0]            WSTRBM,
-  output  wire                      WLASTM,
-  // ACE Interface; Write Response Channel Signals
-  output  wire                      BREADYM,
-  input   wire                      BVALIDM,
-  input   wire  [  5: 0]            BIDM,
-  input   wire  [  1: 0]            BRESPM,
-  // ACE Interface; Read Address Channel Signals
-  input   wire                      ARREADYM,
-  output  wire                      ARVALIDM,
-  output  wire  [  5: 0]            ARIDM,
-  output  wire  [ 43: 0]            ARADDRM,
-  output  wire  [  7: 0]            ARLENM,
-  output  wire  [  2: 0]            ARSIZEM,
-  output  wire  [  1: 0]            ARBURSTM,
-  output  wire                      ARLOCKM,
-  output  wire  [  3: 0]            ARCACHEM,
-  output  wire  [  2: 0]            ARPROTM,
-  // ACE Interface; Read Data Channel Signals
-  output  wire                      RREADYM,
-  input   wire                      RVALIDM,
-  input   wire  [  5: 0]            RIDM,
-  input   wire  [127: 0]            RDATAM,
-  input   wire  [  1: 0]            RRESPM,
-  input   wire                      RLASTM,
+
+  // AXI Interface
+  axi4.master                       CPU_AXI,
+
   // APB Interface Signals
   input   wire                      nPRESETDBG,
   input   wire                      PCLKENDBG,
-  input   wire                      PSELDBG,
-  input   wire  [ 30: 2]            PADDRDBG,
-  input   wire                      PENABLEDBG,
-  input   wire                      PWRITEDBG,
-  input   wire  [ 31: 0]            PWDATADBG,
-  output  wire  [ 31: 0]            PRDATADBG,
-  output  wire                      PREADYDBG,
-  output  wire                      PSLVERRDBG,
+
+  apb3.subordinate                  CPU_DBG_APB,
 
   // DAP-LITE external signals
   input  wire                       nTRST,
@@ -97,47 +62,7 @@ module megasoc_cpu_ss #(
   output wire                       SWDOEN,
 
   // GIC AXI interface signals
-  // AXI read address channel
-  input  wire [NUM_GICRID_BITS-1:0] GIC_ARID,
-  input  wire                [14:0] GIC_ARADDR,
-  input  wire                 [7:0] GIC_ARLEN,
-  input  wire                 [2:0] GIC_ARSIZE,
-  input  wire                 [1:0] GIC_ARBURST,
-  input  wire                 [2:0] GIC_ARPROT,
-  input  wire                 [2:0] GIC_ARUSER,
-  input  wire                       GIC_ARVALID,
-  output wire                       GIC_ARREADY,
-
-  // AXI read data channel
-  output wire [NUM_GICRID_BITS-1:0] GIC_RID,
-  output wire                [31:0] GIC_RDATA,
-  output wire                       GIC_RLAST,
-  output wire                 [1:0] GIC_RRESP,
-  output wire                       GIC_RVALID,
-  input  wire                       GIC_RREADY,
-
-  // AXI write address channel
-  input  wire [NUM_GICWID_BITS-1:0] GIC_AWID,
-  input  wire                [14:0] GIC_AWADDR,
-  input  wire                 [7:0] GIC_AWLEN,
-  input  wire                 [2:0] GIC_AWSIZE,
-  input  wire                 [1:0] GIC_AWBURST,
-  input  wire                 [2:0] GIC_AWPROT,
-  input  wire                 [2:0] GIC_AWUSER,
-  input  wire                       GIC_AWVALID,
-  output wire                       GIC_AWREADY,
-
-  // AXI write data channel
-  input  wire                [31:0] GIC_WDATA,
-  input  wire                 [3:0] GIC_WSTRB,
-  input  wire                       GIC_WVALID,
-  output wire                       GIC_WREADY,
-
-  // AXI write response channel
-  output wire [NUM_GICWID_BITS-1:0] GIC_BID,
-  output wire                 [1:0] GIC_BRESP,
-  output wire                       GIC_BVALID,
-  input  wire                       GIC_BREADY,
+  axi4.subordinate                  GIC_AXI,
 
   input  wire [NUM_SPIS-1:0]        IRQs
 
@@ -183,17 +108,26 @@ module megasoc_cpu_ss #(
   wire                  PENABLEDBG_CPU;
   wire [31:0]           PWDATADBG_CPU;
 
-  assign AWIDM[5] = 1'b0;
-  assign WIDM[5] = 1'b0;
-  assign BIDM[5] = 1'b0;
+  reg [63:0]            CNTVALUEB;
+
+  always @(posedge CPU_CLK or negedge CPU_CORE_PORESETn) begin
+    if(~CPU_CORE_PORESETn)
+      CNTVALUEB <= 64'd0;
+    else
+      CNTVALUEB <= CNTVALUEB + 1;
+  end
+
+  assign CPU_AXI.AWID[5] = 1'b0;
+  //assign CPU_AXI.WID[5] = 1'b0;
+  //assign CPU_AXI.BID[5] = 1'b0;
   CORTEXA53
     u_cortexa53
       (// Clocks and resets
        .CLKIN                       (CPU_CLK),
-       .nCPUPORESET                 ({NUM_CPUS{RESETn}}),
-       .nCORERESET                  ({NUM_CPUS{RESETn}}),
-       .nPRESETDBG                  (RESETn),
-       .nL2RESET                    (RESETn),
+       .nCPUPORESET                 (CPU_CORE_PORESETn),
+       .nCORERESET                  (CPU_CORE_WRMRSTn),
+       .nPRESETDBG                  (CPU_CORE_PORESETn),
+       .nL2RESET                    (CPU_L2_RESETn),
        .nMBISTRESET                 (1'b1),       // No MBIST
        .L2RSTDISABLE                (1'b0),
        .WARMRSTREQ                  (),
@@ -231,7 +165,7 @@ module megasoc_cpu_ss #(
        .ICCTID                      (),
 
        // Generic timer signals
-       .CNTVALUEB                   (64'd0),
+       .CNTVALUEB                   (CNTVALUEB),
        .CNTCLKEN                    (1'b1),
        .nCNTPNSIRQ                  (nCNTPNSIRQ),
        .nCNTPSIRQ                   (nCNTPSIRQ),
@@ -249,18 +183,19 @@ module megasoc_cpu_ss #(
        .L2FLUSHREQ                  (1'b0),
        .L2FLUSHDONE                 (),
        .SMPEN                       (),
-       .CPUQACTIVE                  (),
-       .CPUQREQn                    ({NUM_CPUS{1'b1}}),
-       .CPUQDENY                    (),
-       .CPUQACCEPTn                 (),
-       .NEONQACTIVE                 (),
-       .NEONQREQn                   ({NUM_CPUS{1'b1}}),
-       .NEONQDENY                   (),
-       .NEONQACCEPTn                (),
-       .L2QACTIVE                   (),
-       .L2QREQn                     (1'b1),
-       .L2QDENY                     (),
-       .L2QACCEPTn                  (),
+
+       .CPUQACTIVE                  (CPU_CORE_q.qactive),
+       .CPUQREQn                    (CPU_CORE_q.qreqn),
+       .CPUQDENY                    (CPU_CORE_q.qdeny),
+       .CPUQACCEPTn                 (CPU_CORE_q.qacceptn),
+       .NEONQACTIVE                 (CPU_NEON_q.qactive),
+       .NEONQREQn                   (CPU_NEON_q.qreqn),
+       .NEONQDENY                   (CPU_NEON_q.qdeny),
+       .NEONQACCEPTn                (CPU_NEON_q.qacceptn),
+       .L2QACTIVE                   (CPU_L2_q.qactive),
+       .L2QREQn                     (CPU_L2_q.qreqn),
+       .L2QDENY                     (CPU_L2_q.qdeny),
+       .L2QACCEPTn                  (CPU_L2_q.qacceptn),
 
 
        // ACE/Skyros interface signals
@@ -283,55 +218,55 @@ module megasoc_cpu_ss #(
        .RDMEMATTR                   (),
        .WRMEMATTR                   (),
        //  - Write address channel signals
-       .AWREADYM                    (AWREADYM),
-       .AWVALIDM                    (AWVALIDM),
-       .AWIDM                       (AWIDM[4:0]),
-       .AWADDRM                     (AWADDRM),
-       .AWLENM                      (AWLENM),
-       .AWSIZEM                     (AWSIZEM),
-       .AWBURSTM                    (AWBURSTM),
+       .AWREADYM                    (CPU_AXI.AWREADY),
+       .AWVALIDM                    (CPU_AXI.AWVALID),
+       .AWIDM                       (CPU_AXI.AWID[4:0]),
+       .AWADDRM                     (CPU_AXI.AWADDR),
+       .AWLENM                      (CPU_AXI.AWLEN),
+       .AWSIZEM                     (CPU_AXI.AWSIZE),
+       .AWBURSTM                    (CPU_AXI.AWBURST),
        .AWBARM                      (),
        .AWDOMAINM                   (),
 
-       .AWLOCKM                     (AWLOCKM),
-       .AWCACHEM                    (AWCACHEM),
-       .AWPROTM                     (AWPROTM),
+       .AWLOCKM                     (CPU_AXI.AWLOCK),
+       .AWCACHEM                    (CPU_AXI.AWCACHE),
+       .AWPROTM                     (CPU_AXI.AWPROT),
        .AWSNOOPM                    (),
        .AWUNIQUEM                   (),
        //  - Write data channel signals
-       .WREADYM                     (WREADYM),
-       .WVALIDM                     (WVALIDM),
-       .WIDM                        (WIDM[4:0]),
-       .WDATAM                      (WDATAM),
-       .WSTRBM                      (WSTRBM),
-       .WLASTM                      (WLASTM),
+       .WREADYM                     (CPU_AXI.WREADY),
+       .WVALIDM                     (CPU_AXI.WVALID),
+       .WIDM                        (),
+       .WDATAM                      (CPU_AXI.WDATA),
+       .WSTRBM                      (CPU_AXI.WSTRB),
+       .WLASTM                      (CPU_AXI.WLAST),
        //  - Write response channel signals
-       .BREADYM                     (BREADYM),
-       .BVALIDM                     (BVALIDM),
-       .BIDM                        (BIDM[4:0]),
-       .BRESPM                      (BRESPM),
+       .BREADYM                     (CPU_AXI.BREADY),
+       .BVALIDM                     (CPU_AXI.BVALID),
+       .BIDM                        (CPU_AXI.BID[4:0]),
+       .BRESPM                      (CPU_AXI.BRESP),
        //  - Read address channel signals
-       .ARREADYM                    (ARREADYM),
-       .ARVALIDM                    (ARVALIDM),
-       .ARIDM                       (ARIDM),
-       .ARADDRM                     (ARADDRM),
-       .ARLENM                      (ARLENM),
-       .ARSIZEM                     (ARSIZEM),
-       .ARBURSTM                    (ARBURSTM),
+       .ARREADYM                    (CPU_AXI.ARREADY),
+       .ARVALIDM                    (CPU_AXI.ARVALID),
+       .ARIDM                       (CPU_AXI.ARID),
+       .ARADDRM                     (CPU_AXI.ARADDR),
+       .ARLENM                      (CPU_AXI.ARLEN),
+       .ARSIZEM                     (CPU_AXI.ARSIZE),
+       .ARBURSTM                    (CPU_AXI.ARBURST),
        .ARBARM                      (),
        .ARDOMAINM                   (),
 
-       .ARLOCKM                     (ARLOCKM),
-       .ARCACHEM                    (ARCACHEM),
-       .ARPROTM                     (ARPROTM),
+       .ARLOCKM                     (CPU_AXI.ARLOCK),
+       .ARCACHEM                    (CPU_AXI.ARCACHE),
+       .ARPROTM                     (CPU_AXI.ARPROT),
        .ARSNOOPM                    (),
        //  - Read data channel signals
-       .RREADYM                     (RREADYM),
-       .RVALIDM                     (RVALIDM),
-       .RIDM                        (RIDM),
-       .RDATAM                      (RDATAM),
-       .RRESPM                      ({2'b00, RRESPM}),
-       .RLASTM                      (RLASTM),
+       .RREADYM                     (CPU_AXI.RREADY),
+       .RVALIDM                     (CPU_AXI.RVALID),
+       .RIDM                        (CPU_AXI.RID),
+       .RDATAM                      (CPU_AXI.RDATA),
+       .RRESPM                      ({2'b00, CPU_AXI.RRESP}),
+       .RLASTM                      (CPU_AXI.RLAST),
        //  - Coherency address channel signals
        .ACREADYM                    (),
        .ACVALIDM                    (1'b0),
@@ -474,15 +409,15 @@ DAPLITE u_daplite(
                                  // the system bus
    
   // System Slave port (driven by system APB)
-  .PADDRSYS(PADDRDBG),         // System APB address bus
-  .PSELSYS(PSELDBG),          // System APB select
-  .PWRITESYS(PWRITEDBG),        // System APB write access
-  .PENABLESYS(PENABLEDBG),       // System APB enable signal - indicates second
+  .PADDRSYS(CPU_DBG_APB.paddr[30:2]),         // System APB address bus
+  .PSELSYS(CPU_DBG_APB.psel),          // System APB select
+  .PWRITESYS(pwrite),        // System APB write access
+  .PENABLESYS(CPU_DBG_APB.penable),       // System APB enable signal - indicates second
                   // and subsequent cycles of an APB transfer
-  .PWDATASYS(PWDATADBG),        // System APB Write data bus
-  .PRDATASYS(PRDATADBG),        // System APB write data bus
-  .PREADYSYS(PREADYDBG),        // System APB Ready signal
-  .PSLVERRSYS(PSLVERRDBG),       // System APB transfer error signal
+  .PWDATASYS(CPU_DBG_APB.pwdata),        // System APB Write data bus
+  .PRDATASYS(CPU_DBG_APB.prdata),        // System APB write data bus
+  .PREADYSYS(CPU_DBG_APB.pready),        // System APB Ready signal
+  .PSLVERRSYS(CPU_DBG_APB.pslverr),       // System APB transfer error signal
   
   //Debug APB port
   
@@ -528,58 +463,58 @@ GIC400 #(
   .DFTSE(1'b0),
 
   .CFGSDISABLE(1'b0),
-  
-  .ARID(GIC_ARID),
-  .ARADDR(GIC_ARADDR),
-  .ARLEN(GIC_ARLEN),
-  .ARSIZE(GIC_ARSIZE),
-  .ARBURST(GIC_ARBURST),
-  .ARPROT(GIC_ARPROT),
-  .ARUSER(GIC_ARUSER),
-  .ARVALID(GIC_ARVALID),
-  .ARREADY(GIC_ARREADY),
-  
-  .RID(GIC_RID),
-  .RDATA(GIC_RDATA),
-  .RLAST(GIC_RLAST),
-  .RRESP(GIC_RRESP),
-  .RVALID(GIC_RVALID),
-  .RREADY(GIC_RREADY),
-  
-  .AWID(GIC_AWID),
-  .AWADDR(GIC_AWADDR),
-  .AWLEN(GIC_AWLEN),
-  .AWSIZE(GIC_AWSIZE),
-  .AWBURST(GIC_AWBURST),
-  .AWPROT(GIC_AWPROT),
-  .AWUSER(GIC_AWUSER),
-  .AWVALID(GIC_AWVALID),
-  .AWREADY(GIC_AWREADY),
-  
-  .WDATA(GIC_WDATA),
-  .WSTRB(GIC_WSTRB),
-  .WVALID(GIC_WVALID),
-  .WREADY(GIC_WREADY),
-  
-  .BID(GIC_BID),
-  .BRESP(GIC_BRESP),
-  .BVALID(GIC_BVALID),
-  .BREADY(GIC_BREADY),
-  
+
+  .ARID(GIC_AXI.ARID),
+  .ARADDR(GIC_AXI.ARADDR),
+  .ARLEN(GIC_AXI.ARLEN),
+  .ARSIZE(GIC_AXI.ARSIZE),
+  .ARBURST(GIC_AXI.ARBURST),
+  .ARPROT(GIC_AXI.ARPROT),
+  .ARUSER(3'h0),
+  .ARVALID(GIC_AXI.ARVALID),
+  .ARREADY(GIC_AXI.ARREADY),
+
+  .RID(GIC_AXI.RID),
+  .RDATA(GIC_AXI.RDATA),
+  .RLAST(GIC_AXI.RLAST),
+  .RRESP(GIC_AXI.RRESP),
+  .RVALID(GIC_AXI.RVALID),
+  .RREADY(GIC_AXI.RREADY),
+
+  .AWID(GIC_AXI.AWID),
+  .AWADDR(GIC_AXI.AWADDR),
+  .AWLEN(GIC_AXI.AWLEN),
+  .AWSIZE(GIC_AXI.AWSIZE),
+  .AWBURST(GIC_AXI.AWBURST),
+  .AWPROT(GIC_AXI.AWPROT),
+  .AWUSER(3'h0),
+  .AWVALID(GIC_AXI.AWVALID),
+  .AWREADY(GIC_AXI.AWREADY),
+
+  .WDATA(GIC_AXI.WDATA),
+  .WSTRB(GIC_AXI.WSTRB),
+  .WVALID(GIC_AXI.WVALID),
+  .WREADY(GIC_AXI.WREADY),
+
+  .BID(GIC_AXI.BID),
+  .BRESP(GIC_AXI.BRESP),
+  .BVALID(GIC_AXI.BVALID),
+  .BREADY(GIC_AXI.BREADY),
+
   .IRQS(IRQs_ss),
-  
+
   .nLEGACYFIQ(1'b1),
   .nLEGACYIRQ(1'b1),
   .nCNTPSIRQ(nCNTPSIRQ),
   .nCNTPNSIRQ(nCNTPNSIRQ),
   .nCNTVIRQ(nCNTVIRQ),
   .nCNTHPIRQ(nCNTHPIRQ),
-  
+
   .nIRQCPU(nIRQCPU),
   .nFIQCPU(nFIQCPU),
   .nVIRQCPU(nVIRQCPU),
   .nVFIQCPU(nVFIQCPU),
-  
+
   .nIRQOUT(nIRQOUT),
   .nFIQOUT(nFIQOUT)
 );

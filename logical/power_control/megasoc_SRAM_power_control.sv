@@ -1,14 +1,14 @@
 
 
-module megasoc_ROM_power_control(
+module megasoc_SRAM_power_control(
     input  wire         PCLK,
     input  wire         PRESETn,
 
-    apb3.subordinate    ROM_PPU_APB,
-    qchannel.master     ROM_qchan_q,
-    qchannel.master     ROM_qchan_p,
+    apb3.subordinate    SRAM_PPU_APB,
+    qchannel.master     SRAM_qchan_q,
+    qchannel.master     SRAM_qchan_p,
 
-    output wire         ROM_RESETn
+    output wire         SRAM_RESETn
 );
 
 wire        pcsm_preq;
@@ -27,18 +27,17 @@ wire        lpd_qactive;
 
 wire        devwarmresetn_o;
 wire        devporesetn_o;
+wire        devretresetn_o;
 
-assign ROM_RESETn = devwarmresetn_o & devporesetn_o;
+assign SRAM_RESETn = devwarmresetn_o & devporesetn_o & devretresetn_o;
 
-assign ROM_qchan_p.qreqn = dev_qreqn[0];
-assign ROM_qchan_q.qreqn = dev_qreqn[1];
-assign dev_qacceptn  = {ROM_qchan_q.qacceptn, ROM_qchan_p.qacceptn};
-assign dev_qdeny    = {ROM_qchan_q.qdeny,   ROM_qchan_p.qdeny};
-assign dev_qactive  = {ROM_qchan_q.qactive, ROM_qchan_p.qactive};
+assign SRAM_qchan_p.qreqn = dev_qreqn[0];
+assign SRAM_qchan_q.qreqn = dev_qreqn[1];
+assign dev_qacceptn  = {SRAM_qchan_q.qacceptn, SRAM_qchan_p.qacceptn};
+assign dev_qdeny    = {SRAM_qchan_q.qdeny,   SRAM_qchan_p.qdeny};
+assign dev_qactive  = {SRAM_qchan_q.qactive, SRAM_qchan_p.qactive};
 
-
-
-pck600_ppu_smc_q u_pck_ppu_rom_q(
+pck600_ppu_smc_q u_pck_ppu_sram_q(
     .clk(PCLK),
     .reset_n(PRESETn),
 
@@ -46,14 +45,14 @@ pck600_ppu_smc_q u_pck_ppu_rom_q(
     .dftisodisable(1'b0),
     .dftrstdisable(1'b0),
 
-    .psel_i(ROM_PPU_APB.psel),
-    .penable_i(ROM_PPU_APB.penable),
-    .paddr_i(ROM_PPU_APB.paddr),
-    .pwrite_i(ROM_PPU_APB.pwrite),
-    .pwdata_i(ROM_PPU_APB.pwdata),
-    .prdata_o(ROM_PPU_APB.prdata),
-    .pready_o(ROM_PPU_APB.pready),
-    .pslverr_o(ROM_PPU_APB.pslverr),
+    .psel_i(SRAM_PPU_APB.psel),
+    .penable_i(SRAM_PPU_APB.penable),
+    .paddr_i(SRAM_PPU_APB.paddr),
+    .pwrite_i(SRAM_PPU_APB.pwrite),
+    .pwdata_i(SRAM_PPU_APB.pwdata),
+    .prdata_o(SRAM_PPU_APB.prdata),
+    .pready_o(SRAM_PPU_APB.pready),
+    .pslverr_o(SRAM_PPU_APB.pslverr),
     .pwakeup_i(PRESETn),
 
     .irq_o(),
@@ -69,7 +68,7 @@ pck600_ppu_smc_q u_pck_ppu_rom_q(
     .devisolaten_o(),
     .devemuisolaten_o(),
     .devwarmresetn_o(devwarmresetn_o),
-    .devretresetn_o(),
+    .devretresetn_o(devretresetn_o),
     .devporesetn_o(devporesetn_o),
 
     .pcsm_preq_o(pcsm_preq),
@@ -107,7 +106,7 @@ pck600_lpd_q #(
     .dftcgen(1'b0)
 );
 
-pck600_ppu_pcsm_smc_q u_pck_ppu_rom_pcsm(
+pck600_ppu_pcsm_smc_q u_pck_ppu_sram_pcsm(
     .clk(PCLK),
     .reset_n(PRESETn),
 

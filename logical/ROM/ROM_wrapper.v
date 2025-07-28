@@ -12,14 +12,13 @@
 //  sie300_axi5_sram_ctrl_expansion_subsystem
 //  SRAM
 
-module ROM_wrapper #(
-    parameter ID_W=8)(
+module ROM_wrapper 
     input  wire             ACLK,
     input  wire             ARESETn,
 
     input  wire             AWVALID,
     output wire             AWREADY,
-    input  wire [ID_W-1:0]       AWID,
+    input  wire [ID_W-1:0]  AWID,
     input  wire [31:0]      AWADDR,
     input  wire [7:0]       AWLEN,
     input  wire [2:0]       AWSIZE,
@@ -37,12 +36,12 @@ module ROM_wrapper #(
 
     output wire             BVALID,
     input  wire             BREADY,
-    output wire [ID_W-1:0]       BID,
+    output wire [ID_W-1:0]  BID,
     output wire [1:0]       BRESP,
     
     input  wire             ARVALID,
     output wire             ARREADY,
-    input  wire [ID_W-1:0]       ARID,
+    input  wire [ID_W-1:0]  ARID,
     input  wire [31:0]      ARADDR,
     input  wire [7:0]       ARLEN,
     input  wire [2:0]       ARSIZE,
@@ -123,17 +122,21 @@ sie300_axi5_sram_ctrl_1 u_SMC(
     .rlast_s(RLAST),
     .rpoison_s(RPOISON),
     .awakeup_s(AWAKEUP),
+
     .clk_qreqn(clk_qreqn),
     .clk_qacceptn(clk_qacceptn),
     .clk_qdeny(clk_qdeny),
     .clk_qactive(clk_qactive),
+
     .pwr_qreqn(pwr_qreqn),
     .pwr_qacceptn(pwr_qacceptn),
     .pwr_qdeny(pwr_qdeny),
     .pwr_qactive(pwr_qactive),
+
     .ext_gt_qreqn(ext_gt_qreqn),
     .ext_gt_qacceptn(ext_gt_qacceptn),
     .cfg_gate_resp(cfg_gate_resp),
+
     .memaddr(memaddr),
     .memd(memd),
     .memq(memq),

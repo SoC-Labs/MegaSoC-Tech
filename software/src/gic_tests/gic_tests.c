@@ -105,12 +105,13 @@ int timer_interrupt_test_1(CMSDK_TIMER_TypeDef *CMSDK_TIMER){
   int err_code=0;
 
   puts ("Timer interrupt test");
-  puts ("- Test interrupt generation enabled.");
   CMSDK_TIMER->VALUE = 0; /* Disable timer */
+  cpu_ret_control(1);
 
   gic_initialise_intr(TIMER0_INTR,0,1,0);
   gic_install_handler(TIMER0_INTR, &timer_interrupt);
   gic_enable_interrupt(TIMER0_INTR);
+  puts ("- Test interrupt generation enabled.");
   timer0_irq_expected = 1;
   timer1_irq_expected = 0;
   timer0_irq_occurred = 0;
@@ -118,13 +119,13 @@ int timer_interrupt_test_1(CMSDK_TIMER_TypeDef *CMSDK_TIMER){
 
 
   enable_irq();
-
-  CMSDK_TIMER->RELOAD = 0x01FF;
-  CMSDK_TIMER->VALUE  = 0x01FF;
+  
+  CMSDK_TIMER->RELOAD = 0xFFFF;
+  CMSDK_TIMER->VALUE  = 0xFFFF;
   CMSDK_TIMER->CTRL   = 0x0009;  /* Timer enabled */
   counter = 0;
   while (( timer0_irq_occurred < 2) && (counter < 0x300)){
-    counter ++;
+    call_wfi();
   };
   CMSDK_TIMER->CTRL   = 0x0000;  /* Stop Timer */
   /* Check timeout has not occurred */

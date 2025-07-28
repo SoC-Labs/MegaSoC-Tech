@@ -135,46 +135,46 @@ uint32_t get_socket_id(void)
     return socket_id;
 }
 
-// /** @brief  enable_mmu, function to enable_mmu in el3 <br>
-//  * @return void
-//  */
+/** @brief  enable_mmu, function to enable_mmu in el3 <br>
+ * @return void
+ */
 
-// void enable_mmu(void)
-// {
-//   __ASM volatile ( "ldr     x0, =pgtbl1      \n\t"
-//                  "msr     TTBR0_EL3, x0    \n\t"
-//                  "mov     x1, #0x00FF      \n\t"            // Normal & Device memory attributes
-//                  "msr     mair_el3, x1     \n\t"
-//                  "ldr     x1, =0x00102F20  \n\t"
-//                  "msr     tcr_el3, x1      \n\t"
-//                  "ic      iallu            \n\t"
-//                  "tlbi    alle3            \n\t"
-//                  "mrs     x0, sctlr_el3    \n\t"
-//                  "mov     x1, #0x0001      \n\t"            // Turn on MMU
-//                  "orr     x0, x0, x1       \n\t"
-//                  "msr     SCTLR_EL3, x0    \n\t"
-//                  "isb                      \n\t" :::"x0", "x1");   
-// }
+void enable_mmu(void)
+{
+  __ASM volatile ( "ldr     x0, =pgtbl1      \n\t"
+                 "msr     TTBR0_EL3, x0    \n\t"
+                 "mov     x1, #0x00FF      \n\t"            // Normal & Device memory attributes
+                 "msr     mair_el3, x1     \n\t"
+                 "ldr     x1, =0x00102F20  \n\t"
+                 "msr     tcr_el3, x1      \n\t"
+                 "ic      iallu            \n\t"
+                 "tlbi    alle3            \n\t"
+                 "mrs     x0, sctlr_el3    \n\t"
+                 "mov     x1, #0x0001      \n\t"            // Turn on MMU
+                 "orr     x0, x0, x1       \n\t"
+                 "msr     SCTLR_EL3, x0    \n\t"
+                 "isb                      \n\t" :::"x0", "x1");   
+}
 
-// /** @brief  enable_mmu in el1, function to enable_mmu in el1 <br>
-//  * @return void
-//  */
+/** @brief  enable_mmu in el1, function to enable_mmu in el1 <br>
+ * @return void
+ */
 
-// void enable_mmu_el1(void)
-// {
-//   __ASM volatile ( "ldr     x0, =pgtbl1      \n\t"
-//                  "msr     TTBR0_EL1, x0    \n\t"
-//                  "mov     x1, #0x00FF      \n\t"            // Normal & Device memory attributes
-//                  "msr     mair_el1, x1     \n\t"
-//                  "ldr     x1, =0x00102F20  \n\t"
-//                  "msr     tcr_el1, x1      \n\t"
-//                  "ic      iallu            \n\t"
-//                  "mrs     x0, sctlr_el1    \n\t"
-//                  "mov     x1, #0x0001      \n\t"            // Turn on MMU
-//                  "orr     x0, x0, x1       \n\t"
-//                  "msr     SCTLR_EL1, x0    \n\t"
-//                  "isb                      \n\t" :::"x0", "x1");   
-// }
+void enable_mmu_el1(void)
+{
+  __ASM volatile ( "ldr     x0, =pgtbl1      \n\t"
+                 "msr     TTBR0_EL1, x0    \n\t"
+                 "mov     x1, #0x00FF      \n\t"            // Normal & Device memory attributes
+                 "msr     mair_el1, x1     \n\t"
+                 "ldr     x1, =0x00102F20  \n\t"
+                 "msr     tcr_el1, x1      \n\t"
+                 "ic      iallu            \n\t"
+                 "mrs     x0, sctlr_el1    \n\t"
+                 "mov     x1, #0x0001      \n\t"            // Turn on MMU
+                 "orr     x0, x0, x1       \n\t"
+                 "msr     SCTLR_EL1, x0    \n\t"
+                 "isb                      \n\t" :::"x0", "x1");   
+}
 
 /** @brief  enable_caches, function to enable caches <br>
  * @return void

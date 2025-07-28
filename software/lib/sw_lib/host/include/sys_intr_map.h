@@ -102,4 +102,6 @@
 #define SPI_RX_INTR                     99
 #define SPI_TX_INTR                     100
 #define SPI_RX_OVERR_INTR               101
-#define SPI_TX_TO_INTR                  102       
+#define SPI_TX_TO_INTR                  102  
+
+#define QSPI_INTR                       103

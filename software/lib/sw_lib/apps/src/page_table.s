@@ -55,7 +55,7 @@
 
 pgtbl1 :
     .quad (0x0000000000000003 + pgtbl2) //0- 1GB (next table address)
-    .quad (0x0000000040000401) //1- 2GB (output address) Host Master Expansion    - Normal, Inner/Outer WB/WA/RA
+    .quad (0x0060000040000409) //1- 2GB (output address) Host Master Expansion    - Normal, Inner/Outer WB/WA/RA
     .quad (0x0000000080000401) //2- 3GB (output address) Off-chip Volatile Memory - Normal, Inner/Outer WB/WA/RA
     .quad (0x00000000c0000401) //3- 4GB (output address) Off-chip Volatile Memory - Normal, Inner/Outer WB/WA/RA
     .quad (0x0060000100000409) //4- 5GB (output address) Reserved - MAIR: Device-nGnRnE - XN - AF
@@ -577,14 +577,14 @@ pgtbl1 :
 
 pgtbl2:
     .quad (0x0000000000000401) // 0-2MB boot register only occupaies 4k!
-    .quad (0x0040000000200409) // 2-4MB  Reseved  -Execute never  - MAIR: Device-nGnRnE
-    .quad (0x0040000000400409) // 4-6MB
+    .quad (0x0000000000200401) // 2-4MB  Reseved  -Execute never  - MAIR: Device-nGnRnE
+    .quad (0x0000000000400401) // 4-6MB
     .quad (0x0040000000600409) // 6-8MB
     .quad (0x0040000000800409) // 8-10MB
     .quad (0x0040000000a00409) // 10-12MB
     .quad (0x0040000000c00409) // 12-14MB
     .quad (0x0040000000e00409) // 14-16MB
-    .quad (0x0040000001000409) // 16-18MB
+    .quad (0x0060000001000409) // 16-18MB
     .quad (0x0040000001200409) // 18-20MB
     .quad (0x0040000001400409) // 20-22MB
     .quad (0x0040000001600409) // 22-24MB

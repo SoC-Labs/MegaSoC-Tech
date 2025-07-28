@@ -5,13 +5,14 @@
 
 
 typedef struct{
-    volatile    uint32_t    CTRL;
-    volatile    uint32_t    STATUS;
-    volatile    uint32_t    SPI_CMD;
-    volatile    uint32_t    SPI_ADDR;
-    volatile    uint32_t    READ_DATA[4];
-    volatile    uint32_t    WRITE_DATA[4];
-    volatile    uint32_t    AHB_CMD;
+    volatile    uint32_t    CTRL;           // Offset: 0x00
+    volatile    uint32_t    STATUS;         // Offset: 0x04
+    volatile    uint32_t    SPI_CMD;        // Offset: 0x08
+    volatile    uint32_t    SPI_ADDR;       // Offset: 0x0C
+    volatile    uint32_t    READ_DATA[4];   // Offset: 0x10-1C
+    volatile    uint32_t    WRITE_DATA[4];  // Offset: 0x20-2C
+    volatile    uint32_t    AHB_CMD;        // Offset: 0x30
+    volatile    uint32_t    CLK_DIV;        // Offset: 0x34
 } SL_AHB_QSPI_TypeDef;
 
 #define SL_AHB_QSPI_CTRL_QIO_Pos        0

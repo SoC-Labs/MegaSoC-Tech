@@ -28,34 +28,17 @@ module megasoc_peripheral_subsystem #(
 
 
     // ADP AHB bus interface
-    output wire  [31:0] HADDR_ADP,
-    output wire  [1:0]  HTRANS_ADP,
-    output wire         HWRITE_ADP,
-    output wire  [2:0]  HSIZE_ADP,
-    output wire  [2:0]  HBURST_ADP,
-    output wire  [3:0]  HPROT_ADP,
-    output wire  [31:0] HWDATA_ADP,
-    input  wire [31:0]  HRDATA_ADP,
-    input  wire         HREADY_ADP,
-    input  wire         HRESP_ADP,
-
+    ahb.master          ADP_AHB,
     // Peripheral AHB bus interface
-    input  wire         HSEL,
-    input  wire  [31:0] HADDR,
-    input  wire  [1:0]  HTRANS,
-    input  wire         HWRITE,
-    input  wire  [2:0]  HSIZE,
-    input  wire  [2:0]  HBURST,
-    input  wire  [3:0]  HPROT,
-    input  wire  [31:0] HWDATA,
-    input  wire         HREADY,
-    output wire [31:0]  HRDATA,
-    output wire         HREADYOUT,
-    output wire         HRESP,
+    ahb.subordinate     PERIPH_AHB,
 
-    input  wire         UARTRXD,
-    output wire         UARTTXD,
-    output wire         UARTTXEN,   
+    input  wire         UARTRXD0,
+    output wire         UARTTXD0,
+    output wire         UARTTXEN0,
+
+    input  wire         UARTRXD1,
+    output wire         UARTTXD1,
+    output wire         UARTTXEN1,
 
     input  wire [3:0]   iodata4_i,
     output wire [3:0]   iodata4_o,
@@ -86,13 +69,13 @@ module megasoc_peripheral_subsystem #(
 
 // APB bus interface
 wire [15:0] PADDR;
-wire        PENABLE;  
-wire        PWRITE;   
-wire [31:0] PWDATA;   
-wire        PSEL;     
-wire [31:0] PRDATA;   
-wire        PREADY;   
-wire        PSLVERR;  
+wire        PENABLE;
+wire        PWRITE;
+wire [31:0] PWDATA;
+wire        PSEL;
+wire [31:0] PRDATA;
+wire        PREADY;
+wire        PSLVERR;
 wire [3:0]  PSTRB;
 wire [2:0]  PPROT;
 
@@ -263,8 +246,8 @@ megasoc_peripheral_addr_decode #(
     .BASEADDR_GPIO0(32'h4001_0000),
     .BASEADDR_GPIO1(32'h4002_0000)
 ) u_peripheral_addr_decode (
-    .hsel(HSEL),
-    .haddr(HADDR),
+    .hsel(PERIPH_AHB.HSEL),
+    .haddr(PERIPH_AHB.HADDR),
     .apbsys_hsel(apbsys_hsel),
     .gpio0_hsel(gpio0_hsel),
     .gpio1_hsel(gpio1_hsel),
@@ -286,27 +269,33 @@ cmsdk_ahb_slave_mux #(
 ) u_ahb_slave_mux_sys_bus (
     .HCLK         (HCLK),
     .HRESETn      (HRESETn),
-    .HREADY       (HREADY),
+    .HREADY       (PERIPH_AHB.HREADY),
+
     .HSEL0        (apbsys_hsel),     // Input Port 0
     .HREADYOUT0   (apbsys_hreadyout),
     .HRESP0       (apbsys_hresp),
     .HRDATA0      (apbsys_hrdata),
+
     .HSEL1        (gpio0_hsel),      // Input Port 1
     .HREADYOUT1   (gpio0_hreadyout),
     .HRESP1       (gpio0_hresp),
     .HRDATA1      (gpio0_hrdata),
+
     .HSEL2        (gpio1_hsel),      // Input Port 2
     .HREADYOUT2   (gpio1_hreadyout),
     .HRESP2       (gpio1_hresp),
     .HRDATA2      (gpio1_hrdata),
+
     .HSEL3        (1'b0),    // Input Port 3
     .HREADYOUT3   (defslv_hreadyout),
     .HRESP3       (defslv_hresp),
     .HRDATA3      (defslv_hrdata),
+
     .HSEL4        (defslv_hsel),     // Input Port 4
     .HREADYOUT4   (defslv_hreadyout),
     .HRESP4       (defslv_hresp),
     .HRDATA4      (defslv_hrdata),
+
     .HSEL5        (1'b0),     // Input Port 5
     .HREADYOUT5   (defslv_hreadyout),
     .HRESP5       (defslv_hresp),
@@ -328,9 +317,9 @@ cmsdk_ahb_slave_mux #(
     .HRESP9       (defslv_hresp),
     .HRDATA9      (defslv_hrdata),
 
-    .HREADYOUT    (HREADYOUT),   // Outputs
-    .HRESP        (HRESP),
-    .HRDATA       (HRDATA)
+    .HREADYOUT    (PERIPH_AHB.HREADYOUT),   // Outputs
+    .HRESP        (PERIPH_AHB.HRESP),
+    .HRDATA       (PERIPH_AHB.HRDATA)
 );
 
 // Default slave
@@ -338,8 +327,8 @@ cmsdk_ahb_default_slave u_ahb_default_slave_1 (
 .HCLK         (HCLK),
 .HRESETn      (HRESETn),
 .HSEL         (defslv_hsel),
-.HTRANS       (HTRANS),
-.HREADY       (HREADY),
+.HTRANS       (PERIPH_AHB.HTRANS),
+.HREADY       (PERIPH_AHB.HREADY),
 .HREADYOUT    (defslv_hreadyout),
 .HRESP        (defslv_hresp)
 );
@@ -356,15 +345,15 @@ cmsdk_ahb_gpio #(
     .HRESETn(HRESETn),     
     .FCLK(HCLK),        
     .HSEL(gpio0_hsel),        
-    .HREADY(HREADY),      
-    .HTRANS(HTRANS),      
-    .HSIZE(HSIZE),       
-    .HWRITE(HWRITE),      
-    .HADDR(HADDR[11:0]),       
-    .HWDATA(HWDATA),     
-    .HREADYOUT(gpio0_hreadyout),       
-    .HRESP(gpio0_hresp),       
-    .HRDATA(gpio0_hrdata),   
+    .HREADY(PERIPH_AHB.HREADY),
+    .HTRANS(PERIPH_AHB.HTRANS),
+    .HSIZE(PERIPH_AHB.HSIZE),
+    .HWRITE(PERIPH_AHB.HWRITE),
+    .HADDR(PERIPH_AHB.HADDR[11:0]),
+    .HWDATA(PERIPH_AHB.HWDATA),
+    .HREADYOUT(gpio0_hreadyout),
+    .HRESP(gpio0_hresp),
+    .HRDATA(gpio0_hrdata),
 
     .ECOREVNUM(4'h0),   
 
@@ -379,19 +368,19 @@ cmsdk_ahb_gpio #(
 
 cmsdk_ahb_gpio #(
     .ALTERNATE_FUNC_MASK(16'hFFFF),
-    .ALTERNATE_FUNC_DEFAULT(16'h0000),
+    .ALTERNATE_FUNC_DEFAULT(16'hFFFF),
     .BE(0)
 ) u_cmsdk_ahb_gpio_1 (
     .HCLK(HCLK),        
     .HRESETn(HRESETn),     
     .FCLK(HCLK),        
     .HSEL(gpio1_hsel),        
-    .HREADY(HREADY),      
-    .HTRANS(HTRANS),      
-    .HSIZE(HSIZE),       
-    .HWRITE(HWRITE),      
-    .HADDR(HADDR[11:0]),       
-    .HWDATA(HWDATA),     
+    .HREADY(PERIPH_AHB.HREADY),      
+    .HTRANS(PERIPH_AHB.HTRANS),      
+    .HSIZE(PERIPH_AHB.HSIZE),       
+    .HWRITE(PERIPH_AHB.HWRITE),      
+    .HADDR(PERIPH_AHB.HADDR[11:0]),       
+    .HWDATA(PERIPH_AHB.HWDATA),     
     .HREADYOUT(gpio1_hreadyout),       
     .HRESP(gpio1_hresp),       
     .HRDATA(gpio1_hrdata),   
@@ -412,12 +401,12 @@ cmsdk_ahb_gpio #(
 
   wire   [31:0]    hwdata_le; // Little endian write data
   wire   [31:0]    hrdata_le; // Little endian read data
-  wire             reg_be_swap_ctrl_en = HSEL & HTRANS[1] & HREADY & bigendian;
+  wire             reg_be_swap_ctrl_en = PERIPH_AHB.HSEL & PERIPH_AHB.HTRANS[1] & PERIPH_AHB.HREADY & bigendian;
   reg     [1:0]    reg_be_swap_ctrl; // registered byte swap control
   wire    [1:0]    nxt_be_swap_ctrl; // next state of byte swap control
 
-  assign nxt_be_swap_ctrl[1] = bigendian & (HSIZE[1:0]==2'b10); // Swap upper and lower half word
-  assign nxt_be_swap_ctrl[0] = bigendian & (HSIZE[1:0]!=2'b00); // Swap byte within hafword
+  assign nxt_be_swap_ctrl[1] = bigendian & (PERIPH_AHB.HSIZE[1:0]==2'b10); // Swap upper and lower half word
+  assign nxt_be_swap_ctrl[0] = bigendian & (PERIPH_AHB.HSIZE[1:0]!=2'b00); // Swap byte within hafword
 
   // Register byte swap control for data phase
   always @(posedge HCLK or negedge HRESETn)
@@ -430,8 +419,8 @@ cmsdk_ahb_gpio #(
 
   // swap byte within half word
   wire  [31:0] hwdata_mux_1 = (reg_be_swap_ctrl[0] & bigendian) ?
-     {HWDATA[23:16],HWDATA[31:24],HWDATA[7:0],HWDATA[15:8]}:
-     {HWDATA[31:24],HWDATA[23:16],HWDATA[15:8],HWDATA[7:0]};
+     {PERIPH_AHB.HWDATA[23:16],PERIPH_AHB.HWDATA[31:24],PERIPH_AHB.HWDATA[7:0],PERIPH_AHB.HWDATA[15:8]}:
+     {PERIPH_AHB.HWDATA[31:24],PERIPH_AHB.HWDATA[23:16],PERIPH_AHB.HWDATA[15:8],PERIPH_AHB.HWDATA[7:0]};
   // swap lower and upper half word
   assign       hwdata_le    = (reg_be_swap_ctrl[1] & bigendian) ?
      {hwdata_mux_1[15: 0],hwdata_mux_1[31:16]}:
@@ -455,17 +444,17 @@ cmsdk_ahb_to_apb #(
     .HCLK     (HCLK),
     .HRESETn  (HRESETn),
     .HSEL     (apbsys_hsel),
-    .HADDR    (HADDR[15:0]),
-    .HTRANS   (HTRANS),
-    .HSIZE    (HSIZE),
-    .HPROT    (HPROT),
-    .HWRITE   (HWRITE),
-    .HREADY   (HREADY),
+    .HADDR    (PERIPH_AHB.HADDR[15:0]),
+    .HTRANS   (PERIPH_AHB.HTRANS),
+    .HSIZE    (PERIPH_AHB.HSIZE),
+    .HPROT    (PERIPH_AHB.HPROT),
+    .HWRITE   (PERIPH_AHB.HWRITE),
+    .HREADY   (PERIPH_AHB.HREADY),
     .HWDATA   (hwdata_le),
 
     .HREADYOUT(apbsys_hreadyout), // AHB Outputs
     .HRDATA   (hrdata_le),
-    .HRESP    (apb_hres),
+    .HRESP    (apbsys_hresp),
 
     .PADDR    (PADDR[15:0]),
     .PSEL     (PSEL),
@@ -514,7 +503,7 @@ cmsdk_apb_slave_mux #(
     .PSEL1(PSEL_TIMER1),
     .PREADY1(PREADY_TIMER1),
     .PRDATA1(PRDATA_TIMER1),
-    .PSLVERR1(PSLVERR_TIMER1),  
+    .PSLVERR1(PSLVERR_TIMER1),
 
     .PSEL2(PSEL_DUALTIMER),
     .PREADY2(PREADY_DUALTIMER),
@@ -680,10 +669,10 @@ cmsdk_apb_uart u_apb_uart_0(
 
     .ECOREVNUM         (4'h0),// Engineering-change-order revision bits
 
-    .RXD               (UARTRXD),      // Receive data
+    .RXD               (UARTRXD0),      // Receive data
 
-    .TXD               (UARTTXD),      // Transmit data
-    .TXEN              (UARTTXEN),     // Transmit Enabled
+    .TXD               (UARTTXD0),      // Transmit data
+    .TXEN              (UARTTXEN0),     // Transmit Enabled
 
     .BAUDTICK          (),   // Baud rate x16 tick output (for testing)
 
@@ -835,16 +824,16 @@ megasoc_peripheral_debug #(
 ) u_megasoc_peripheral_debug(
     .HCLK(HCLK),
     .HRESETn(HRESETn),
-    .HADDR_ADP(HADDR_ADP),
-    .HTRANS_ADP(HTRANS_ADP),
-    .HWRITE_ADP(HWRITE_ADP),
-    .HSIZE_ADP(HSIZE_ADP),
-    .HBURST_ADP(HBURST_ADP),
-    .HPROT_ADP(HPROT_ADP),
-    .HWDATA_ADP(HWDATA_ADP),
-    .HRDATA_ADP(HRDATA_ADP),
-    .HREADY_ADP(HREADY_ADP),
-    .HRESP_ADP(HRESP_ADP),
+    .HADDR_ADP(ADP_AHB.HADDR),
+    .HTRANS_ADP(ADP_AHB.HTRANS),
+    .HWRITE_ADP(ADP_AHB.HWRITE),
+    .HSIZE_ADP(ADP_AHB.HSIZE),
+    .HBURST_ADP(ADP_AHB.HBURST),
+    .HPROT_ADP(ADP_AHB.HPROT),
+    .HWDATA_ADP(ADP_AHB.HWDATA),
+    .HRDATA_ADP(ADP_AHB.HRDATA),
+    .HREADY_ADP(ADP_AHB.HREADY),
+    .HRESP_ADP(ADP_AHB.HRESP),
 
     .PCLK(PCLK),
     .PRESETn(PRESETn),

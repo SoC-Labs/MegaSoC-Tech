@@ -1,7 +1,7 @@
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/verilog/ca53_caches_tlb_rams.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/verilog/ca53_l2_datarams.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/verilog/ca53_l2_tagrams.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/verilog/ca53scu_l1d_tagrams.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/mem_integrations/CortexA53/ca53_caches_tlb_rams.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/mem_integrations/CortexA53/ca53_l2_datarams.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/mem_integrations/CortexA53/ca53_l2_tagrams.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/mem_integrations/CortexA53/ca53scu_l1d_tagrams.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_clkgate.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_inter_clkgate.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_sync.v

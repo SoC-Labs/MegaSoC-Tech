@@ -104,7 +104,7 @@ def output_construct(input_hex, address_width):
             temp_verilog = f"""       {address_width:d}'h{i:03x} : RDATA <= 64'h{word:08x}; // 0x{i*8:04x}\n"""
         else:
             temp_verilog = f"""       {address_width:d}'h{i:02x} : RDATA <= 64'h{word:08x}; // 0x{i*8:04x}\n"""
-        temp_binary = f"""{word:032b}\n"""
+        temp_binary = f"""{word:064b}\n"""
         bootrom_verilog += temp_verilog
         bootrom_binary  += temp_binary
 

@@ -95,11 +95,11 @@ app_bl1_entry:
             MRS     x0, scr_el3
             ORR     x0, x0, #0xe
             MSR     scr_el3, x0
-// 
+ 
             MRS     x1, CPACR_EL1
             ORR     x1, x1, #0xf00000         //// co-pro access for VFP/Neon
             MSR     CPACR_EL1, x1
-// 
+ 
             MRS     x1, CPTR_EL3
             AND     x1, x1, # ~ ( 1 << 10 )   //// clear TFP bit
             MSR     CPTR_EL3, x1
@@ -159,4 +159,30 @@ app_bl1_entry:
             FMOV    d30, xzr
             FMOV    d31, xzr
 #endif            
-            B   __main
+mmu_cache_setup:
+            
+            bl enable_mmu
+            B __stack_multi_cpu_init
+
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+            NOP
+

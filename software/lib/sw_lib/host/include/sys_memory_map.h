@@ -16,7 +16,6 @@
 // -----------------------------------------------------------------------------
 
 
-
 #define GIC_BASE                            0x01100000UL
 #define GIC_DISTRIBUTOR_BASE                0x01101000UL
 #define GIC_CPU_INTERFACE_BASE              0x01102000UL

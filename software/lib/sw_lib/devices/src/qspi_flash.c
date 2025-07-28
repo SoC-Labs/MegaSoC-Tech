@@ -85,6 +85,7 @@ void QPI_SET_AHB_MODE(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
 }
 
 void SPI_WAIT_BUSY(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
+    while(((SL_AHB_QSPI->STATUS)&SL_AHB_QSPI_STATUS_Busy_Msk)!=1){;}
     while(((SL_AHB_QSPI->STATUS)&SL_AHB_QSPI_STATUS_Busy_Msk)!=0){;}
 }
 

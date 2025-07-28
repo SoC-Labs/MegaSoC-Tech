@@ -15,7 +15,7 @@ int main(void) {
   enable_caches();
   enable_caches_el1();
 
-
+  SL_QSPI->CLK_DIV = 0x4;
   SPI_STARTUP(SL_QSPI);
 
   printf("***Flash Enabled...Booting***\n\n\n");

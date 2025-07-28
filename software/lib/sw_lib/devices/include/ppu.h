@@ -413,3 +413,15 @@ void ppu_check_power_policy (SCP_PPU_1_1_TypeDef*, uint32_t);
 void ppu_clear_irq_mask(SCP_PPU_1_1_TypeDef*);
 void ppu_set_irq_mask(SCP_PPU_1_1_TypeDef *ppu);
 void ppu_clear_intr(SCP_PPU_1_1_TypeDef*);
+
+#define ROM_PPU_BASE      0x01200000
+#define SRAM_PPU_BASE     0x01201000
+#define A53_CORE_PPU_BASE 0x01202000
+#define A53_NEON_PPU_BASE 0x01203000
+#define A53_L2_PPU_BASE   0x01204000
+
+#define ROM_PPU       ((SCP_PPU_1_1_TypeDef *) ROM_PPU_BASE)
+#define SRAM_PPU      ((SCP_PPU_1_1_TypeDef *) SRAM_PPU_BASE)
+#define A53_CORE_PPU  ((SCP_PPU_1_1_TypeDef *) A53_CORE_PPU_BASE)
+#define A53_NEON_PPU  ((SCP_PPU_1_1_TypeDef *) A53_NEON_PPU_BASE)
+#define A53_L2_PPU    ((SCP_PPU_1_1_TypeDef *) A53_L2_PPU_BASE)
