@@ -27,7 +27,7 @@ build_dma350:
 build_pck:
 	cd $(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control;  $(PCK_600_IP_DIR)/generate --render-clean --config=$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/config/pck600_config.yaml --output=$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical
 
-build_ip: build_nic400 build_cortex_a53 build_sie300_sram_ctrl build_dma350
+build_ip: build_nic400 build_cortex_a53 build_sie300_sram_ctrl build_dma350 build_pck
 
 make_project:
 	socrates_cli --project megasoc_tech -data ../ --flow AddNewProject
