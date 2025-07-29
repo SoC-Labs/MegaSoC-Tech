@@ -17,10 +17,10 @@ int main(void) {
     if(dap_id_check()!=0){
         printf("DAP not present\n");
         printf ("\n** TEST SKIPPED **\n");
-        UartEndSimulation();
+        TEST_FAIL();
     }
 
-    UartEndSimulation();
+    TEST_PASS();
 }
 
 /* --------------------------------------------------------------- */

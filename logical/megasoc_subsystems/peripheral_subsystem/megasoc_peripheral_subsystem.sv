@@ -770,15 +770,15 @@ Ssp u_apb_spi(
     .PCLK(PCLK), 
     .SSPCLK(PCLK), 
 
-    .PRESETn(PRESETn), 
-    .nSSPRST(PRESETn), 
+    .PRESETn(PRESETn),
+    .nSSPRST(PRESETn),
 // APB Bus
-    .PSEL(PSEL_SPI), 
-    .PENABLE(PENABLE), 
-    .PWRITE(PWRITE), 
-    .PADDR(PADDR[11:2]), 
-    .PWDATA(PWDATA), 
-    .PRDATA(PRDATA_SPI),
+    .PSEL(PSEL_SPI),
+    .PENABLE(PENABLE),
+    .PWRITE(PWRITE),
+    .PADDR(PADDR[11:2]),
+    .PWDATA(PWDATA[15:0]),
+    .PRDATA(PRDATA_SPI[15:0]),
 
 // Scan
     .SCANENABLE(1'b0),

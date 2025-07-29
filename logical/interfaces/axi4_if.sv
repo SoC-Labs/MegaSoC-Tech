@@ -34,7 +34,7 @@ interface axi4 #(
     wire                    ARVALID;
     wire                    ARREADY;
     wire [ID_W-1:0]         RID;
-    wire [DATA_W:0]         RDATA;
+    wire [DATA_W-1:0]       RDATA;
     wire [1:0]              RRESP;
     wire                    RLAST;
     wire                    RVALID;

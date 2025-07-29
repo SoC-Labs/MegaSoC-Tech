@@ -35,7 +35,7 @@
 #define SYS_SPI_BASE        (PERIPHERAL_BASE + 0x9000UL)
 
 
-#define DAP_DBG_BASE                        0x60000000UL
+#define DAP_DBG_BASE                        0x01300000UL
 
 #define PASS_CODE 0xBEEF1AC0
 #define FAIL_CODE 0xDEADBEEF
