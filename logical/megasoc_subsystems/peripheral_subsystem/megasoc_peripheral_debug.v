@@ -99,6 +99,7 @@ socdebug_ahb u_socdebug_ahb(
     .ADP_RXD_TVALID_o(ADP_RXD_TVALID),
     .ADP_RXD_TDATA_o(ADP_RXD_TDATA),
     .ADP_RXD_TREADY_i(ADP_RXD_TREADY),
+
     .ADP_TXD_TVALID_i(ADP_TXD_TVALID),
     .ADP_TXD_TDATA_i(ADP_TXD_TDATA),
     .ADP_TXD_TREADY_o(ADP_TXD_TREADY),
@@ -106,6 +107,7 @@ socdebug_ahb u_socdebug_ahb(
     .STD_RXD_TVALID_o(STD_RXD_TVALID),
     .STD_RXD_TDATA_o(STD_RXD_TDATA),
     .STD_RXD_TREADY_i(STD_RXD_TREADY),
+
     .STD_TXD_TVALID_i(STD_TXD_TVALID),
     .STD_TXD_TDATA_i(STD_TXD_TDATA),
     .STD_TXD_TREADY_o(STD_TXD_TREADY),
@@ -200,17 +202,17 @@ extio8x4_axis_initiator u_extio8x4_axis_initiator(
   .axis_rx0_tdata8 ( ADP_RXD_TDATA  ),
   .axis_rx0_tready ( ADP_RXD_TREADY ),
 
-  .axis_rx1_tvalid ( DAT_RXD_TVALID ),
-  .axis_rx1_tdata8 ( DAT_RXD_TDATA  ),
-  .axis_rx1_tready ( DAT_RXD_TREADY ),
+  .axis_rx1_tvalid ( DAT_TXD_TVALID ),
+  .axis_rx1_tdata8 ( DAT_TXD_TDATA  ),
+  .axis_rx1_tready ( DAT_TXD_TREADY ),
 
   .axis_tx0_tvalid ( ADP_TXD_TVALID ),
   .axis_tx0_tdata8 ( ADP_TXD_TDATA  ),
   .axis_tx0_tready ( ADP_TXD_TREADY ),
 
-  .axis_tx1_tvalid ( DAT_TXD_TVALID ),
-  .axis_tx1_tdata8 ( DAT_TXD_TDATA  ),
-  .axis_tx1_tready ( DAT_TXD_TREADY ),
+  .axis_tx1_tvalid ( DAT_RXD_TVALID ),
+  .axis_tx1_tdata8 ( DAT_RXD_TDATA  ),
+  .axis_tx1_tready ( DAT_RXD_TREADY ),
 // external io interface
   .iodata4_a       ( iodata4_i       ),
   .iodata4_o       ( iodata4_o       ),

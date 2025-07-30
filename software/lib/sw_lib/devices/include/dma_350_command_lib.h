@@ -342,8 +342,8 @@
 
 // External variables
 // Channel pointers
-extern DMACH_TypeDef *sec_dma_channels[3];
-extern DMACH_TypeDef *nsec_dma_channels[3];
+extern DMACH_TypeDef *sec_dma_channels[8];
+extern DMACH_TypeDef *nsec_dma_channels[8];
 
 //Functions
 DMACH_TypeDef* GetChannelPtr(uint32_t ch_num, uint8_t security);
@@ -482,7 +482,7 @@ void AdaNSecAllChPausedIrqEn(uint8_t irq_en);
 void AdaSecIrqCombine(uint8_t en);
 void AdaNSecIrqCombine(uint8_t en);
 
-void AdaSecAllChStopReq(void);
+void AdaSecAllChStopReq(DMASECCTRL_TypeDef* DMASECCTRL);
 void AdaNSecAllChStopReq(void);
 
 void AdaSecAllChPauseReq(void);
@@ -520,9 +520,9 @@ void AdaClrSecViolationIrq(void);
 uint8_t AdaNSecAllPausedState(void);
 uint8_t AdaSecAllPausedState(void);
 
-uint32_t AdaGetChNum(uint8_t security);
-uint32_t AdaGetTrigInNum(uint8_t security);
-uint32_t AdaGetTrigOutNum(uint8_t security);
+uint32_t AdaGetChNum(DMAINFO_TypeDef* DMAINFO);
+uint32_t AdaGetTrigInNum(DMAINFO_TypeDef* DMAINFO);
+uint32_t AdaGetTrigOutNum(DMAINFO_TypeDef* DMAINFO);
 
 uint32_t AdaSecurityViolationTestRead(void);
 

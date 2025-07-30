@@ -411,7 +411,7 @@ DAPLITE u_daplite(
   // System Slave port (driven by system APB)
   .PADDRSYS(CPU_DBG_APB.paddr[30:2]),         // System APB address bus
   .PSELSYS(CPU_DBG_APB.psel),          // System APB select
-  .PWRITESYS(pwrite),        // System APB write access
+  .PWRITESYS(CPU_DBG_APB.pwrite),        // System APB write access
   .PENABLESYS(CPU_DBG_APB.penable),       // System APB enable signal - indicates second
                   // and subsequent cycles of an APB transfer
   .PWDATASYS(CPU_DBG_APB.pwdata),        // System APB Write data bus

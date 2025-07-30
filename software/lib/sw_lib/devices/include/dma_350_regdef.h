@@ -158,6 +158,10 @@ typedef struct
 #define ADA_DMA_S_BASE                              0x01010000UL
 #endif /* ADA_DMA_S_BASE */
 
+#ifndef ADA_EXP_DMA_S_BASE
+#define ADA_EXP_DMA_S_BASE                          0x600C0000UL
+#endif /* ADA_EXP_DMA_S_BASE */
+
 #define DMASECCFG_S_BASE                            (ADA_DMA_S_BASE + 0x0000UL)
 #define DMASECCTRL_S_BASE                           (ADA_DMA_S_BASE + 0x0100UL)
 #define DMANSECCTRL_S_BASE                          (ADA_DMA_S_BASE + 0x0200UL)
@@ -166,14 +170,24 @@ typedef struct
 #define DMACH1_S_BASE                               (ADA_DMA_S_BASE + 0x1100UL)
 #define DMACH2_S_BASE                               (ADA_DMA_S_BASE + 0x1200UL)
 #define DMACH3_S_BASE                               (ADA_DMA_S_BASE + 0x1300UL)
-// #define DMACH4_S_BASE                               (ADA_DMA_S_BASE + 0x1400UL)
-// #define DMACH5_S_BASE                               (ADA_DMA_S_BASE + 0x1500UL)
-// #define DMACH6_S_BASE                               (ADA_DMA_S_BASE + 0x1600UL)
-// #define DMACH7_S_BASE                               (ADA_DMA_S_BASE + 0x1700UL)
+
+#define DMA_EXP_SECCFG_S_BASE                       (ADA_EXP_DMA_S_BASE + 0x0000UL)
+#define DMA_EXP_SECCTRL_S_BASE                      (ADA_EXP_DMA_S_BASE + 0x0100UL)
+#define DMA_EXP_NSECCTRL_S_BASE                     (ADA_EXP_DMA_S_BASE + 0x0200UL)
+#define DMA_EXP_INFO_S_BASE                         (ADA_EXP_DMA_S_BASE + 0x0F00UL)
+#define DMA_EXP_CH0_S_BASE                          (ADA_EXP_DMA_S_BASE + 0x1000UL)
+#define DMA_EXP_CH1_S_BASE                          (ADA_EXP_DMA_S_BASE + 0x1100UL)
+#define DMA_EXP_CH2_S_BASE                          (ADA_EXP_DMA_S_BASE + 0x1200UL)
+#define DMA_EXP_CH3_S_BASE                          (ADA_EXP_DMA_S_BASE + 0x1300UL)
 
 #ifndef ADA_DMA_NS_BASE
 #define ADA_DMA_NS_BASE                             0x01010000UL
 #endif /* ADA_DMA_NS_BASE */
+
+#ifndef ADA_EXP_DMA_NS_BASE
+#define ADA_EXP_DMA_NS_BASE                          0x600C0000UL
+#endif /* ADA_EXP_DMA_NS_BASE */
+
 
 #define DMASECCFG_NS_BASE                           (ADA_DMA_NS_BASE + 0x0000UL)
 #define DMASECCTRL_NS_BASE                          (ADA_DMA_NS_BASE + 0x0100UL)
@@ -183,10 +197,15 @@ typedef struct
 #define DMACH1_NS_BASE                              (ADA_DMA_NS_BASE + 0x1100UL)
 #define DMACH2_NS_BASE                              (ADA_DMA_NS_BASE + 0x1200UL)
 #define DMACH3_NS_BASE                              (ADA_DMA_NS_BASE + 0x1300UL)
-// #define DMACH4_NS_BASE                              (ADA_DMA_NS_BASE + 0x1400UL)
-// #define DMACH5_NS_BASE                              (ADA_DMA_NS_BASE + 0x1500UL)
-// #define DMACH6_NS_BASE                              (ADA_DMA_NS_BASE + 0x1600UL)
-// #define DMACH7_NS_BASE                              (ADA_DMA_NS_BASE + 0x1700UL)
+
+#define DMA_EXP_SECCFG_NS_BASE                           (ADA_EXP_DMA_NS_BASE + 0x0000UL)
+#define DMA_EXP_SECCTRL_NS_BASE                          (ADA_EXP_DMA_NS_BASE + 0x0100UL)
+#define DMA_EXP_NSECCTRL_NS_BASE                         (ADA_EXP_DMA_NS_BASE + 0x0200UL)
+#define DMA_EXP_INFO_NS_BASE                             (ADA_EXP_DMA_NS_BASE + 0x0F00UL)
+#define DMA_EXP_CH0_NS_BASE                              (ADA_EXP_DMA_NS_BASE + 0x1000UL)
+#define DMA_EXP_CH1_NS_BASE                              (ADA_EXP_DMA_NS_BASE + 0x1100UL)
+#define DMA_EXP_CH2_NS_BASE                              (ADA_EXP_DMA_NS_BASE + 0x1200UL)
+#define DMA_EXP_CH3_NS_BASE                              (ADA_EXP_DMA_NS_BASE + 0x1300UL)
 
 /******************************************************************************/
 /*                     ADA_DMA register block declaration                     */
@@ -199,10 +218,15 @@ typedef struct
 #define DMACH1_S                                    ((DMACH_TypeDef *) DMACH1_S_BASE)
 #define DMACH2_S                                    ((DMACH_TypeDef *) DMACH2_S_BASE)
 #define DMACH3_S                                    ((DMACH_TypeDef *) DMACH3_S_BASE)
-// #define DMACH4_S                                    ((DMACH_TypeDef *) DMACH4_S_BASE)
-// #define DMACH5_S                                    ((DMACH_TypeDef *) DMACH5_S_BASE)
-// #define DMACH6_S                                    ((DMACH_TypeDef *) DMACH6_S_BASE)
-// #define DMACH7_S                                    ((DMACH_TypeDef *) DMACH7_S_BASE)
+
+#define DMA_EXP_SECCFG_S                                 ((DMASECCFG_TypeDef *) DMA_EXP_SECCFG_S_BASE)
+#define DMA_EXP_SECCTRL_S                                ((DMASECCTRL_TypeDef *) DMA_EXP_SECCTRL_S_BASE)
+#define DMA_EXP_NSECCTRL_S                               ((DMANSECCTRL_TypeDef *) DMA_EXP_NSECCTRL_S_BASE)
+#define DMA_EXP_INFO_S                                   ((DMAINFO_TypeDef *) DMA_EXP_INFO_S_BASE)
+#define DMA_EXP_CH0_S                                    ((DMACH_TypeDef *) DMA_EXP_CH0_S_BASE)
+#define DMA_EXP_CH1_S                                    ((DMACH_TypeDef *) DMA_EXP_CH1_S_BASE)
+#define DMA_EXP_CH2_S                                    ((DMACH_TypeDef *) DMA_EXP_CH2_S_BASE)
+#define DMA_EXP_CH3_S                                    ((DMACH_TypeDef *) DMA_EXP_CH3_S_BASE)
 
 #define DMASECCFG_NS                                ((DMASECCFG_TypeDef *) DMASECCFG_NS_BASE)
 #define DMASECCTRL_NS                               ((DMASECCTRL_TypeDef *) DMASECCTRL_NS_BASE)
@@ -212,10 +236,15 @@ typedef struct
 #define DMACH1_NS                                   ((DMACH_TypeDef *) DMACH1_NS_BASE)
 #define DMACH2_NS                                   ((DMACH_TypeDef *) DMACH2_NS_BASE)
 #define DMACH3_NS                                   ((DMACH_TypeDef *) DMACH3_NS_BASE)
-// #define DMACH4_NS                                   ((DMACH_TypeDef *) DMACH4_NS_BASE)
-// #define DMACH5_NS                                   ((DMACH_TypeDef *) DMACH5_NS_BASE)
-// #define DMACH6_NS                                   ((DMACH_TypeDef *) DMACH6_NS_BASE)
-// #define DMACH7_NS                                   ((DMACH_TypeDef *) DMACH7_NS_BASE)
+
+#define DMA_EXP_SECCFG_NS                                ((DMASECCFG_TypeDef *) DMA_EXP_SECCFG_NS_BASE)
+#define DMA_EXP_SECCTRL_NS                               ((DMASECCTRL_TypeDef *) DMA_EXP_SECCTRL_NS_BASE)
+#define DMA_EXP_NSECCTRL_NS                              ((DMANSECCTRL_TypeDef *) DMA_EXP_NSECCTRL_NS_BASE)
+#define DMA_EXP_INFO_NS                                  ((DMAINFO_TypeDef *) DMA_EXP_INFO_NS_BASE)
+#define DMA_EXP_CH0_NS                                   ((DMACH_TypeDef *) DMA_EXP_CH0_NS_BASE)
+#define DMA_EXP_CH1_NS                                   ((DMACH_TypeDef *) DMA_EXP_CH1_NS_BASE)
+#define DMA_EXP_CH2_NS                                   ((DMACH_TypeDef *) DMA_EXP_CH2_NS_BASE)
+#define DMA_EXP_CH3_NS                                   ((DMACH_TypeDef *) DMA_EXP_CH3_NS_BASE)
 
 /******************************************************************************/
 /*                       Field Definitions of Registers                       */

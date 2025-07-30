@@ -15,7 +15,7 @@
 //
 // -----------------------------------------------------------------------------
 
-#define NUM_SHD_INTR                    64
+#define NUM_SHD_INTR                    128
 #define CNTH_INTR                       26
 #define CNTV_INTR                       27
 #define CNTPS_INTR                      29
@@ -105,3 +105,10 @@
 #define SPI_TX_TO_INTR                  102  
 
 #define QSPI_INTR                       103
+
+#define EXP_DMA350_CH0_INTR             104
+#define EXP_DMA350_CH1_INTR             105
+#define EXP_DMA350_CH2_INTR             106
+#define EXP_DMA350_CH3_INTR             107
+#define EXP_DMA350_CMB_INTR             108
+

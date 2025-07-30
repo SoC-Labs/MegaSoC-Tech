@@ -22,9 +22,9 @@
 #include "dma_350_command_lib.h"
 
 // Channel pointers
-DMACH_TypeDef *sec_dma_channels[3] =  { DMACH0_S,  DMACH1_S, DMACH2_S};
+DMACH_TypeDef *sec_dma_channels[8] =  { DMACH0_S,  DMACH1_S, DMACH2_S, DMACH3_S, DMA_EXP_CH0_S, DMA_EXP_CH1_S, DMA_EXP_CH2_S, DMA_EXP_CH3_S};
 
-DMACH_TypeDef *nsec_dma_channels[3] =  { DMACH0_NS,  DMACH1_NS, DMACH2_NS};
+DMACH_TypeDef *nsec_dma_channels[8] =  { DMACH0_NS,  DMACH1_NS, DMACH2_NS, DMACH3_NS, DMA_EXP_CH0_NS, DMA_EXP_CH1_NS, DMA_EXP_CH2_NS, DMA_EXP_CH3_NS};
 
 //
 // Get DMA channel register frame based on security and channel number
@@ -2056,18 +2056,18 @@ void AdaNSecIrqCombine(uint8_t en)
   DMANSECCTRL_NS->NSEC_CTRL = CTRL.w;
 }
 
-void AdaSecAllChStopReq(void)
+void AdaSecAllChStopReq(DMASECCTRL_TypeDef* DMASECCTRL)
 {
   //Temporary unions for register read-write
   volatile DMASECCTRL_SEC_CTRL_Type CTRL;
 
   //Read registers
-  CTRL.w = DMASECCTRL_S->SEC_CTRL;
+  CTRL.w = DMASECCTRL->SEC_CTRL;
 
   // Set the Actual status to the struct
   CTRL.b.ALLCHSTOP =   1;
 
-  DMASECCTRL_S->SEC_CTRL = CTRL.w;
+  DMASECCTRL->SEC_CTRL = CTRL.w;
 }
 
 void AdaNSecAllChStopReq(void)
@@ -2401,42 +2401,31 @@ uint8_t AdaSecAllPausedState(void)
 }
 
 
-uint32_t AdaGetChNum(uint8_t security) {
+uint32_t AdaGetChNum(DMAINFO_TypeDef* DMAINFO) {
   //Temporary unions for register read-write
   volatile DMAINFO_DMA_BUILDCFG0_Type info_bcfg;
+
   //Read registers
-  if(security==0){
-    info_bcfg.w = DMAINFO_S->DMA_BUILDCFG0;
-  }
-  else {
-    info_bcfg.w = DMAINFO_NS->DMA_BUILDCFG0;
-  }
+  info_bcfg.w = DMAINFO->DMA_BUILDCFG0;
+
   //Return number of channels
   return (info_bcfg.b.NUM_CHANNELS + 1);
 }
-uint32_t AdaGetTrigInNum(uint8_t security) {
+uint32_t AdaGetTrigInNum(DMAINFO_TypeDef* DMAINFO ) {
   //Temporary unions for register read-write
   volatile DMAINFO_DMA_BUILDCFG1_Type info_bcfg;
+
   //Read registers
-  if(security==0){
-    info_bcfg.w = DMAINFO_S->DMA_BUILDCFG1;
-  }
-  else {
-    info_bcfg.w = DMAINFO_NS->DMA_BUILDCFG1;
-  }
+  info_bcfg.w = DMAINFO->DMA_BUILDCFG1;
+
   //Return number of trigger outputs
   return info_bcfg.b.NUM_TRIGGER_IN;
 }
-uint32_t AdaGetTrigOutNum(uint8_t security) {
+uint32_t AdaGetTrigOutNum(DMAINFO_TypeDef* DMAINFO) {
   //Temporary unions for register read-write
   volatile DMAINFO_DMA_BUILDCFG1_Type info_bcfg;
   //Read registers
-  if(security==0){
-    info_bcfg.w = DMAINFO_S->DMA_BUILDCFG1;
-  }
-  else {
-    info_bcfg.w = DMAINFO_NS->DMA_BUILDCFG1;
-  }
+  info_bcfg.w = DMAINFO->DMA_BUILDCFG1;
   //Return number of trigger inputs
   return info_bcfg.b.NUM_TRIGGER_OUT;
 }

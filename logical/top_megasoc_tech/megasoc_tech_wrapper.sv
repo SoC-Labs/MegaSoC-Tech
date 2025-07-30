@@ -39,6 +39,7 @@ module megasoc_tech_wrapper(
     // MegaSoC system AXI Subordinate
     axi4.subordinate        EXP_S_AXI,
 
+    input  wire [7:0]       EXP_IRQs,
     // DMA 350 APB Interface Wires
     output wire [31:0]      PADDR_DMA_CTRL,
     output wire [31:0]      PWDATA_DMA_CTRL,
@@ -203,7 +204,7 @@ wire [(NUM_SPIS-1):0]   CPU_IRQS;
 wire                    QSPI_IRQ;
 wire [65:0]             PERI_IRQS;
 
-assign CPU_IRQS={{(NUM_SPIS-63){1'b0}}, QSPI_IRQ, PERI_IRQS, DMA350_irq_comb_nonsec, DMA350_irq_channel};
+assign CPU_IRQS={{(NUM_SPIS-80){1'b0}},EXP_IRQs, QSPI_IRQ, PERI_IRQS, DMA350_irq_comb_nonsec, DMA350_irq_channel};
 
 // Subordinate AWAKEUP signal generation
 assign AWAKEUP_ROM = (ROM_AXI.AWVALID | ROM_AXI.ARVALID | ROM_AXI.WVALID);
