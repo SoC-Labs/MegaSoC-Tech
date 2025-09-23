@@ -35,7 +35,7 @@ endif
 ############# Variables necessary for compiling image for Cortex A53 ########
 #############################################################################
 
-APP_TESTDEFINES     := -DITERATIONS=0 
+APP_TESTDEFINES     :=
 
 APP_SCAT := default
 APP_LD_FLAGS :=
@@ -43,12 +43,7 @@ APP_AS_FLAGS := -DMASTER_CPU_REF=0x0 -DMASTER_CLUS_REF=0x0 -DTTBR0_BASE=0x021000
 APP_AS_INC_DIR :=
 APP_C_FLAGS := $(APP_TESTDEFINES) $(GLOBAL_TESTDEFINES) -DTTBR0_BASE=0x02100000
 APP_C_INC_DIR := $(TEST_PATH)
-APP_SRC := coremark.c
-APP_SRC += core_matrix.c 
-APP_SRC += core_list_join.c 
-APP_SRC += core_state.c 
-APP_SRC += core_util.c 
-APP_SRC += core_portme.c 
+APP_SRC := adp_tests.c
 
 export APP_SRC
 export APP_C_FLAGS

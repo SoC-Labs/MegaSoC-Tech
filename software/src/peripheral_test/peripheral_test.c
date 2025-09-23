@@ -10,6 +10,7 @@ int uart_id_test(uint32_t base_addr);
 int watchdog_id_test(uint32_t base_addr);
 int rtc_id_test(uint32_t base_addr);
 int spi_id_test(uint32_t base_addr);
+int gpio_id_test(uint32_t base_addr);
 
 
 int main(void) {
@@ -38,7 +39,10 @@ int main(void) {
   if(rtc_id_test(SYS_RTC_BASE)!=0){errors+=256;}
   printf("Check ID of SPI\n");
   if(spi_id_test(SYS_SPI_BASE)!=0){errors+=512;}
-
+  printf("Check ID of GPIO 0\n");
+  if(gpio_id_test(GPIO_0_BASE)!=0){errors+=1024;}
+  printf("Check ID of GPIO 1\n");
+  if(gpio_id_test(GPIO_1_BASE)!=0){errors+=2048;}
 
   printf("Error = 0x%x\n", errors);
 
@@ -198,6 +202,36 @@ int spi_id_test(uint32_t base_addr){
   uint8_t CID2 = 0x05;
   uint8_t CID3 = 0xB1;
 
+  if(HW_REG_BYTE(base_addr,0xFE0) != PID0){return 1;}
+  if(HW_REG_BYTE(base_addr,0xFE4) != PID1){return 1;}
+  if(HW_REG_BYTE(base_addr,0xFE8) != PID2){return 1;}
+  if(HW_REG_BYTE(base_addr,0xFEC) != PID3){return 1;}
+  if(HW_REG_BYTE(base_addr,0xFF0) != CID0){return 1;}
+  if(HW_REG_BYTE(base_addr,0xFF4) != CID1){return 1;}
+  if(HW_REG_BYTE(base_addr,0xFF8) != CID2){return 1;}
+  if(HW_REG_BYTE(base_addr,0xFFC) != CID3){return 1;}
+  return 0;
+}
+
+int gpio_id_test(uint32_t base_addr){
+  uint8_t PID4 = 0x04;
+  uint8_t PID5 = 0x00;
+  uint8_t PID6 = 0x00;
+  uint8_t PID7 = 0x00;
+  uint8_t PID0 = 0x20;
+  uint8_t PID1 = 0xB8;
+  uint8_t PID2 = 0x1B;
+  uint8_t PID3 = 0x00;
+
+  uint8_t CID0 = 0x0D;
+  uint8_t CID1 = 0xF0;
+  uint8_t CID2 = 0x05;
+  uint8_t CID3 = 0xB1;
+
+  if(HW_REG_BYTE(base_addr,0xFD0) != PID4){return 1;}
+  if(HW_REG_BYTE(base_addr,0xFD4) != PID5){return 1;}
+  if(HW_REG_BYTE(base_addr,0xFD8) != PID6){return 1;}
+  if(HW_REG_BYTE(base_addr,0xFDC) != PID7){return 1;}
   if(HW_REG_BYTE(base_addr,0xFE0) != PID0){return 1;}
   if(HW_REG_BYTE(base_addr,0xFE4) != PID1){return 1;}
   if(HW_REG_BYTE(base_addr,0xFE8) != PID2){return 1;}

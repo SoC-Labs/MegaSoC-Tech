@@ -13,10 +13,22 @@
 //  muxes to several peripherals including UART and timers
 //-----------------------------------------------------------------------------
 // Modules instantiated:
-//  cmsdk_apb_slave_mux (u_apb_slave_mux)
-//  cmsdk_apb_uart      (u_apb_uart_0)
-//  cmsdk_apb_timer     (u_apb_timer0)
-//  megasoc_peripheral_debug (u_megasoc_peripheral_debug)
+//  megasoc_peripheral_addr_decode  (u_peripheral_addr_decode)
+//  cmsdk_ahb_slave_mux             (u_ahb_slave_mux_sys_bus)
+//  cmsdk_ahb_default_slave         (u_ahb_default_slave_1)
+//  cmsdk_ahb_gpio                  (u_cmsdk_gpio_0)
+//  cmsdk_ahb_gpio                  (u_cmsdk_gpio_1)
+//  cmsdk_ahb_to_apb                (u_ahb_to_apb)
+//  cmsdk_apb_slave_mux             (u_apb_slave_mux)
+//  cmsdk_apb_timer                 (u_apb_timer0)
+//  cmsdk_apb_timer                 (u_apb_timer1)
+//  cmsdk_apb_dualtimers            (u_apb_dualtimers_2)
+//  cmsdk_apb_uart                  (u_apb_uart_0)
+//  cmsdk_apb_uart                  (u_apb_uart_1)
+//  cmsdk_apb_watchdog              (u_apb_watchdog)
+//  Rtc                             (u_apb_rtc)
+//  Ssp                             (u_apb_spi)
+//  megasoc_peripheral_debug        (u_megasoc_peripheral_debug)
 
 module megasoc_peripheral_subsystem #(
     parameter BE = 0 )(
@@ -78,10 +90,6 @@ wire        PREADY;
 wire        PSLVERR;
 wire [3:0]  PSTRB;
 wire [2:0]  PPROT;
-
-
-wire        UARTCLK;
-assign      UARTCLK=PCLK; // TODO generate UARTCLK from elsewhere
 
 // AHB internal wires 
 wire        defslv_hsel;   // AHB default slave signals

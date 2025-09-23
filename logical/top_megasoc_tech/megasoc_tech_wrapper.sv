@@ -145,7 +145,32 @@ module megasoc_tech_wrapper(
     input  wire [15:0]      P1_IN,
     output wire [15:0]      P1_OUT,
     output wire [15:0]      P1_EN,
-    output wire [15:0]      P1_FUNC
+    output wire [15:0]      P1_FUNC,
+
+    // DDR4 signals
+    output wire             DDR4_CK_T,
+    output wire             DDR4_CK_C,
+
+    output wire [16:0]      DDR4_ADR,
+    output wire [1:0]       DDR4_BA,
+    output wire [1:0]       DDR4_BG,
+
+    output wire             DDR4_ACT_n,
+    output wire [1:0]       DDR4_CKE,
+    output wire [1:0]       DDR4_CS_N,
+    output wire [1:0]       DDR4_ODT,
+    output wire             DDR_PARITY,
+
+    inout  wire [63:0]      DDR4_DQ,
+    inout  wire [7:0]       DDR4_DM_DBI_N,
+    inout  wire [7:0]       DDR4_DQS_T,
+    inout  wire [7:0]       DDR4_DQS_C,
+
+    output wire             DDR4_RESET_N,
+
+    input  wire             DDR_nALERT,
+    input  wire             DDR_nEVENT
+
 
 );
 
@@ -256,6 +281,31 @@ megasoc_cpu_ss #(
     .IRQs(CPU_IRQS)
 );
 
+
+megasoc_dram_wrapper #(.ID_W(8)) u_megasoc_dram_wrapper(
+    .ACLK(SYS_CLK),
+    .ARESETn(SYS_RESETn),
+
+    .DRAM_AXI(DRAM_AXI),
+
+    .DDR4_CK_T(DDR4_CK_T),
+    .DDR4_CK_C(DDR4_CK_C),
+    .DDR4_ADR(DDR4_ADR),
+    .DDR4_BA(DDR4_BA),
+    .DDR4_BG(DDR4_BG),
+    .DDR4_ACT_n(DDR4_ACT_n),
+    .DDR4_CKE(DDR4_CKE),
+    .DDR4_CS_N(DDR4_CS_N),
+    .DDR4_ODT(DDR4_ODT),
+    .DDR_PARITY(DDR_PARITY),
+    .DDR4_DQ(DDR4_DQ),
+    .DDR4_DM_DBI_N(DDR4_DM_DBI_N),
+    .DDR4_DQS_T(DDR4_DQS_T),
+    .DDR4_DQS_C(DDR4_DQS_C),
+    .DDR4_RESET_N(DDR4_RESET_N),
+    .DDR_nALERT(DDR_nALERT),
+    .DDR_nEVENT(DDR_nEVENT)
+);
 
 ROM_wrapper u_ROM_wrapper(
     .ACLK(SYS_CLK),
@@ -415,41 +465,41 @@ megasoc_power_control u_megasoc_power_control(
 
 
 nic400_megasoc_main u_nic400_megasoc_main(
-    .AWID_DRAM(),
-    .AWADDR_DRAM(),
-    .AWLEN_DRAM(),
-    .AWSIZE_DRAM(),
-    .AWBURST_DRAM(),
-    .AWLOCK_DRAM(),
-    .AWCACHE_DRAM(),
-    .AWPROT_DRAM(),
-    .AWVALID_DRAM(),
-    .AWREADY_DRAM(),
-    .WDATA_DRAM(),
-    .WSTRB_DRAM(),
-    .WLAST_DRAM(),
-    .WVALID_DRAM(),
-    .WREADY_DRAM(),
-    .BID_DRAM(),
-    .BRESP_DRAM(),
-    .BVALID_DRAM(),
-    .BREADY_DRAM(),
-    .ARID_DRAM(),
-    .ARADDR_DRAM(),
-    .ARLEN_DRAM(),
-    .ARSIZE_DRAM(),
-    .ARBURST_DRAM(),
-    .ARLOCK_DRAM(),
-    .ARCACHE_DRAM(),
-    .ARPROT_DRAM(),
-    .ARVALID_DRAM(),
-    .ARREADY_DRAM(),
-    .RID_DRAM(),
-    .RDATA_DRAM(),
-    .RRESP_DRAM(),
-    .RLAST_DRAM(),
-    .RVALID_DRAM(),
-    .RREADY_DRAM(),
+    .AWID_DRAM(DRAM_AXI.AWID),
+    .AWADDR_DRAM(DRAM_AXI.AWADDR),
+    .AWLEN_DRAM(DRAM_AXI.AWLEN),
+    .AWSIZE_DRAM(DRAM_AXI.AWSIZE),
+    .AWBURST_DRAM(DRAM_AXI.AWBURST),
+    .AWLOCK_DRAM(DRAM_AXI.AWLOCK),
+    .AWCACHE_DRAM(DRAM_AXI.AWCACHE),
+    .AWPROT_DRAM(DRAM_AXI.AWPROT),
+    .AWVALID_DRAM(DRAM_AXI.AWVALID),
+    .AWREADY_DRAM(DRAM_AXI.AWREADY),
+    .WDATA_DRAM(DRAM_AXI.WDATA),
+    .WSTRB_DRAM(DRAM_AXI.WSTRB),
+    .WLAST_DRAM(DRAM_AXI.WLAST),
+    .WVALID_DRAM(DRAM_AXI.WVALID),
+    .WREADY_DRAM(DRAM_AXI.WREADY),
+    .BID_DRAM(DRAM_AXI.BID),
+    .BRESP_DRAM(DRAM_AXI.BRESP),
+    .BVALID_DRAM(DRAM_AXI.BVALID),
+    .BREADY_DRAM(DRAM_AXI.BREADY),
+    .ARID_DRAM(DRAM_AXI.ARID),
+    .ARADDR_DRAM(DRAM_AXI.ARADDR),
+    .ARLEN_DRAM(DRAM_AXI.ARLEN),
+    .ARSIZE_DRAM(DRAM_AXI.ARSIZE),
+    .ARBURST_DRAM(DRAM_AXI.ARBURST),
+    .ARLOCK_DRAM(DRAM_AXI.ARLOCK),
+    .ARCACHE_DRAM(DRAM_AXI.ARCACHE),
+    .ARPROT_DRAM(DRAM_AXI.ARPROT),
+    .ARVALID_DRAM(DRAM_AXI.ARVALID),
+    .ARREADY_DRAM(DRAM_AXI.ARREADY),
+    .RID_DRAM(DRAM_AXI.RID),
+    .RDATA_DRAM(DRAM_AXI.RDATA),
+    .RRESP_DRAM(DRAM_AXI.RRESP),
+    .RLAST_DRAM(DRAM_AXI.RLAST),
+    .RVALID_DRAM(DRAM_AXI.RVALID),
+    .RREADY_DRAM(DRAM_AXI.RREADY),
 
     .AWID_EXP_M(EXP_M_AXI.AWID),
     .AWADDR_EXP_M(EXP_M_AXI.AWADDR),

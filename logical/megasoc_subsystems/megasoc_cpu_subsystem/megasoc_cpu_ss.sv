@@ -299,7 +299,7 @@ module megasoc_cpu_ss #(
        .PSLVERRDBG                  (PSLVERRDBG_CPU),
 
        // Miscellaneous debug signals
-       .DBGROMADDR                  (28'h0060000), //0x60000000
+       .DBGROMADDR                  (28'h0013000), //0x13000000
        .DBGROMADDRV                 (1'b1),
        .DBGACK                      (),
        .nCOMMIRQ                    (),

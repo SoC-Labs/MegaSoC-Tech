@@ -12,7 +12,7 @@
 //  sie300_axi5_sram_ctrl_expansion_subsystem
 //  SRAM
 
-module ROM_wrapper 
+module ROM_wrapper (
     input  wire             ACLK,
     input  wire             ARESETn,
 
@@ -81,7 +81,7 @@ wire [64:0]    memq;
 wire           memcen;
 wire [7:0]     memwen;
 
-sie300_axi5_sram_ctrl_1 u_SMC(
+sie300_axi5_sram_ctrl_1 u_SMC (
     .aclk(ACLK),
     .aresetn(ARESETn),
     .awvalid_s(AWVALID),

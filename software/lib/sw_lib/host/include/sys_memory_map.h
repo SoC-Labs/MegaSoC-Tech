@@ -34,6 +34,8 @@
 #define SYS_RTC_BASE        (PERIPHERAL_BASE + 0x8000UL)
 #define SYS_SPI_BASE        (PERIPHERAL_BASE + 0x9000UL)
 
+#define GPIO_0_BASE         0x40010000UL
+#define GPIO_1_BASE         0x40020000UL
 
 #define DAP_DBG_BASE                        0x01300000UL
 

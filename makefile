@@ -23,6 +23,9 @@ build_cortex_a53:
 	mkdir -p $(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/verilog
 	@$(CORTEX_A53_IP_LOGICAL_DIR)/shared/tools/bin/RenderCORTEXA53.pl -config $(SOCLABS_MEGASOC_TECH_DIR)/socrates/CortexA53_1/CORTEXA53.cfg -input $(CORTEX_A53_IP_LOGICAL_DIR)/cortexa53/verilog/CORTEXA53_unconfigured.v -output $(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/verilog/CORTEXA53.v
 build_dma350:
+	if [ ! -e $(DMA350_IP_LOGICAL_DIR)/models/modules/generic/address_map_m1_megasoc.sv ] ; then \
+		cp ./socrates/DMA350/config/address_map_m1_megasoc.sv $(DMA350_IP_LOGICAL_DIR)/models/modules/generic/address_map_m1_megasoc.sv ; \
+	fi
 	@$(DMA350_IP_LOGICAL_DIR)/generate --config ./socrates/DMA350/config/cfg_dma_megasoc.yaml --output ./logical/dma350/
 build_pck:
 	cd $(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control;  $(PCK_600_IP_DIR)/generate --render-clean --config=$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/config/pck600_config.yaml --output=$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical

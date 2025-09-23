@@ -27,12 +27,19 @@ module SRAM_wrapper#(
     input  wire             cfg_gate_resp
 );
 
-
-wire [19:0]     memaddr;
+wire [16:0]     memaddr;
 wire [63:0]     memd;
 wire [63:0]     memq;
 wire            memcen;
 wire [7:0]      memwen;
+
+localparam N_MEMS = 4;
+localparam SEL_W = 2;
+
+reg [N_MEMS:0]  CEN_i;
+wire [63:0]     q_i[0:N_MEMS];
+wire [63:0]     wena_i;
+wire            gwen_i;
 
 sie300_axi5_sram_ctrl_1 u_SMC(
     .aclk(ACLK),
@@ -99,22 +106,45 @@ sie300_axi5_sram_ctrl_1 u_SMC(
     .memwen(memwen)
 );
 
-cmsdk_fpga_sram #(.AW(16)) u_fpga_sram_0(
-    .CLK(ACLK),
-    .ADDR(memaddr[15:2]),
-    .WDATA(memd[31:0]),
-    .WREN(memwen[3:0]),
-    .CS(memcen),
-    .RDATA(memq[31:0])
-);
+assign wena_i= {{8{memwen[7]}},
+                {8{memwen[6]}},
+                {8{memwen[5]}},
+                {8{memwen[4]}},
+                {8{memwen[3]}},
+                {8{memwen[2]}},
+                {8{memwen[1]}},
+                {8{memwen[0]}}};
+assign gwen_i= &memwen;
 
-cmsdk_fpga_sram #(.AW(16)) u_fpga_sram_1(
-    .CLK(ACLK),
-    .ADDR(memaddr[15:2]),
-    .WDATA(memd[63:32]),
-    .WREN(memwen[7:4]),
-    .CS(memcen),
-    .RDATA(memq[63:32])
-);
+genvar i;
+generate for(i=0; i<N_MEMS-1; i=i+1) begin: g_srams
+    sram_64b_16k u_sram_64b_16k (
+        .Q(q_i[N_MEMS-1]),
+        .CLK(clk),
+        .CEN(CEN_i[N_MEMS-1]),
+        .GWEN(gwen_i),
+        .A(memaddr[16:3]),
+        .D(memd),
+        .WEN(wena_i),
+        .STOV(1'b0),
+        .EMA(3'b011),
+        .EMAW(2'b01),
+        .EMAS(1'b0),
+        .RET1N(1'b1)
+    );
+end endgenerate
+
+generate
+integer j;
+always @(*) begin 
+    for(j=0; j<N_MEMS; j=j+1) begin
+        if(j==memaddr[(SEL_W+17-1):17])
+            CEN_i[j] = memcen;
+        else
+            CEN_i[j] = 1'b1;
+    end
+    memq = q_i[memaddr[(SEL_W+17-1):17]];
+end endgenerate
+
 
 endmodule
