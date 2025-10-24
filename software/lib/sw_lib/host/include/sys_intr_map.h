@@ -104,11 +104,18 @@
 #define SPI_RX_OVERR_INTR               101
 #define SPI_TX_TO_INTR                  102  
 
-#define QSPI_INTR                       103
+#define PL011_UARTMSINTR                103
+#define PL011_UARTRXINTR                104
+#define PL011_UARTTXINTR                105
+#define PL011_UARTRTINTR                106
+#define PL011_UARTEINTR                 107
+#define PL011_UARTINTR                  108
 
-#define EXP_DMA350_CH0_INTR             104
-#define EXP_DMA350_CH1_INTR             105
-#define EXP_DMA350_CH2_INTR             106
-#define EXP_DMA350_CH3_INTR             107
-#define EXP_DMA350_CMB_INTR             108
+#define QSPI_INTR                       109
+
+#define EXP_DMA350_CH0_INTR             110
+#define EXP_DMA350_CH1_INTR             111
+#define EXP_DMA350_CH2_INTR             112
+#define EXP_DMA350_CH3_INTR             113
+#define EXP_DMA350_CMB_INTR             114
 

@@ -47,7 +47,7 @@ __attribute__((weak)) void abort_handler (void) {
 
 #ifndef SEMIHOST
 __ASM(".global __use_no_semihosting");
-__ASM(".global __use_no_heap");
+//__ASM(".global __use_no_heap");
 
 /*
 * These must be defined to avoid linking in stdio.o from the
@@ -170,7 +170,7 @@ int c_print(const char * fmt, ...) {
   do{
     UartPutc((unsigned int)buffer[count]);
     count++;
-  } while(count<79 && buffer[count]!='\0');
+  } while(count<160 && buffer[count]!='\0');
 
   return tmp;
 }  

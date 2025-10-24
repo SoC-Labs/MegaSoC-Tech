@@ -5,7 +5,7 @@
 // Contributors
 //
 // Daniel Newbrook (d.newbrook@soton.ac.uk)
-// 
+//
 // Copyright � 2021-4, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
 // Purpose:
@@ -40,61 +40,63 @@ module megasoc_tech_wrapper(
     axi4.subordinate        EXP_S_AXI,
 
     input  wire [7:0]       EXP_IRQs,
-    // DMA 350 APB Interface Wires
-    output wire [31:0]      PADDR_DMA_CTRL,
-    output wire [31:0]      PWDATA_DMA_CTRL,
-    output wire             PWRITE_DMA_CTRL,
-    output wire [2:0]       PPROT_DMA_CTRL,
-    output wire [3:0]       PSTRB_DMA_CTRL,
-    output wire             PENABLE_DMA_CTRL,
-    output wire             PSELx_DMA_CTRL,
-    input  wire [31:0]      PRDATA_DMA_CTRL,
-    input  wire             PSLVERR_DMA_CTRL,
-    input  wire             PREADY_DMA_CTRL,
+
+    // Update 24/09/2025 No "system" DMA needed as not yet getting ethernet or PCIe added
+    // // DMA 350 APB Interface Wires
+    // output wire [31:0]      PADDR_DMA_CTRL,
+    // output wire [31:0]      PWDATA_DMA_CTRL,
+    // output wire             PWRITE_DMA_CTRL,
+    // output wire [2:0]       PPROT_DMA_CTRL,
+    // output wire [3:0]       PSTRB_DMA_CTRL,
+    // output wire             PENABLE_DMA_CTRL,
+    // output wire             PSELx_DMA_CTRL,
+    // input  wire [31:0]      PRDATA_DMA_CTRL,
+    // input  wire             PSLVERR_DMA_CTRL,
+    // input  wire             PREADY_DMA_CTRL,
 
     // DMA 350 AXI Interface Wires
-    input  wire [1:0]       AWID_DMA350,
-    input  wire [43:0]      AWADDR_DMA350,
-    input  wire [7:0]       AWLEN_DMA350,
-    input  wire [2:0]       AWSIZE_DMA350,
-    input  wire [1:0]       AWBURST_DMA350,
-    input  wire             AWLOCK_DMA350,
-    input  wire [3:0]       AWCACHE_DMA350,
-    input  wire [2:0]       AWPROT_DMA350,
-    input  wire             AWVALID_DMA350,
-    output wire             AWREADY_DMA350,
+    // input  wire [1:0]       AWID_DMA350,
+    // input  wire [43:0]      AWADDR_DMA350,
+    // input  wire [7:0]       AWLEN_DMA350,
+    // input  wire [2:0]       AWSIZE_DMA350,
+    // input  wire [1:0]       AWBURST_DMA350,
+    // input  wire             AWLOCK_DMA350,
+    // input  wire [3:0]       AWCACHE_DMA350,
+    // input  wire [2:0]       AWPROT_DMA350,
+    // input  wire             AWVALID_DMA350,
+    // output wire             AWREADY_DMA350,
 
-    input  wire [127:0]     WDATA_DMA350,
-    input  wire [15:0]      WSTRB_DMA350,
-    input  wire             WLAST_DMA350,
-    input  wire             WVALID_DMA350,
-    output wire             WREADY_DMA350,
+    // input  wire [127:0]     WDATA_DMA350,
+    // input  wire [15:0]      WSTRB_DMA350,
+    // input  wire             WLAST_DMA350,
+    // input  wire             WVALID_DMA350,
+    // output wire             WREADY_DMA350,
 
-    output wire [1:0]       BID_DMA350,
-    output wire [1:0]       BRESP_DMA350,
-    output wire             BVALID_DMA350,
-    input  wire             BREADY_DMA350,
+    // output wire [1:0]       BID_DMA350,
+    // output wire [1:0]       BRESP_DMA350,
+    // output wire             BVALID_DMA350,
+    // input  wire             BREADY_DMA350,
 
-    input  wire [1:0]       ARID_DMA350,
-    input  wire [43:0]      ARADDR_DMA350,
-    input  wire [7:0]       ARLEN_DMA350,
-    input  wire [2:0]       ARSIZE_DMA350,
-    input  wire [1:0]       ARBURST_DMA350,
-    input  wire             ARLOCK_DMA350,
-    input  wire [3:0]       ARCACHE_DMA350,
-    input  wire [2:0]       ARPROT_DMA350,
-    input  wire             ARVALID_DMA350,
-    output wire             ARREADY_DMA350,
+    // input  wire [1:0]       ARID_DMA350,
+    // input  wire [43:0]      ARADDR_DMA350,
+    // input  wire [7:0]       ARLEN_DMA350,
+    // input  wire [2:0]       ARSIZE_DMA350,
+    // input  wire [1:0]       ARBURST_DMA350,
+    // input  wire             ARLOCK_DMA350,
+    // input  wire [3:0]       ARCACHE_DMA350,
+    // input  wire [2:0]       ARPROT_DMA350,
+    // input  wire             ARVALID_DMA350,
+    // output wire             ARREADY_DMA350,
 
-    output wire [1:0]       RID_DMA350,
-    output wire [127:0]     RDATA_DMA350,
-    output wire [1:0]       RRESP_DMA350,
-    output wire             RLAST_DMA350,
-    output wire             RVALID_DMA350,
-    input  wire             RREADY_DMA350,
+    // output wire [1:0]       RID_DMA350,
+    // output wire [127:0]     RDATA_DMA350,
+    // output wire [1:0]       RRESP_DMA350,
+    // output wire             RLAST_DMA350,
+    // output wire             RVALID_DMA350,
+    // input  wire             RREADY_DMA350,
 
-    input  wire [3:0]       DMA350_irq_channel,
-    input  wire             DMA350_irq_comb_nonsec,
+    // input  wire [3:0]       DMA350_irq_channel,
+    // input  wire             DMA350_irq_comb_nonsec,
 
     // QSPI Signals
     output wire             QSPI_SCLK,
@@ -111,6 +113,20 @@ module megasoc_tech_wrapper(
     input  wire             UARTRXD1,
     output wire             UARTTXD1,
     output wire             UARTTXEN1,
+
+    // PL011 UART
+    input  wire             PL011_nUARTCTS,
+    input  wire             PL011_nUARTDCD,
+    input  wire             PL011_nUARTDSR,
+    input  wire             PL011_nUARTRI,
+    input  wire             PL011_UARTRXD,
+    input  wire             PL011_SIRIN,
+    output wire             PL011_UARTTXD,
+    output wire             PL011_nSIROUT,
+    output wire             PL011_nUARTOut2,
+    output wire             PL011_nUARTOut1,
+    output wire             PL011_nUARTRTS,
+    output wire             PL011_nUARTDTR,
 
     // EXTIO Signals
     input  wire [3:0]       iodata4_i,
@@ -169,13 +185,38 @@ module megasoc_tech_wrapper(
     output wire             DDR4_RESET_N,
 
     input  wire             DDR_nALERT,
-    input  wire             DDR_nEVENT
+    input  wire             DDR_nEVENT,
 
-
+    // SDIO PHY to MAC Signals
+    output wire             SDIO_o_cfg_ddr,
+    output wire             SDIO_o_cfg_ds,
+    output wire             SDIO_o_cfg_dscmd,
+    output wire [4:0]       SDIO_o_cfg_sample_shift,
+    output wire [7:0]       SDIO_o_sdclk,
+    output wire             SDIO_o_cmd_en,
+    output wire             SDIO_o_cmd_tristate,
+    output wire [1:0]       SDIO_o_cmd_data,
+    output wire             SDIO_o_data_en,
+    output wire             SDIO_o_data_tristate,
+    output wire             SDIO_o_rx_en,
+    output wire [31:0]      SDIO_o_tx_data,
+    input  wire [1:0]       SDIO_i_cmd_strb,
+    input  wire [1:0]       SDIO_i_cmd_data,
+    input  wire             SDIO_i_cmd_collision,
+    input  wire             SDIO_i_card_busy,
+    input  wire [1:0]       SDIO_i_rx_strb,
+    input  wire [15:0]      SDIO_i_rx_data,
+    input  wire             SDIO_i_crcack,
+    input  wire             SDIO_i_crcnak,
+    output wire             SD_O_1P8V,
+    input  wire             SDIO_AC_VALID,
+    input  wire [1:0]       SDIO_AC_DATA,
+    input  wire             SDIO_AD_VALID,
+    input  wire [31:0]      SDIO_AD_DATA
 );
 
 
-parameter ID_W=8;
+parameter ID_W=9;
 parameter NUM_SPIS=480;
 
 
@@ -204,10 +245,13 @@ wire     CPU_L2_RESETn;
 //--------------------------------------
 // AXI
 axi4 #(.DATA_W(128), .ID_W(6), .ADDR_W(44))     CPU_AXI();
-axi4 #(.DATA_W(32), .ID_W(ID_W-1), .ADDR_W(32))   GIC_AXI();
-axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(32))   DRAM_AXI();
+axi4 #(.DATA_W(32), .ID_W(7), .ADDR_W(32)) GIC_AXI();
+axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(33))   DRAM_AXI();
 axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(32))   SRAM_AXI();
 axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(32))   ROM_AXI();
+axi4 #(.DATA_W(32), .ID_W(7)   , .ADDR_W(32))   SDIO_S_AXI();
+axi4l #(.DATA_W(32), .ADDR_W(32))               SDIO_S_AXIL();
+axi4 #(.DATA_W(64), .ID_W(2)   , .ADDR_W(44))   SDIO_M_AXI();
 // AHB
 ahb #(.DATA_W(32), .ADDR_W(32))     FLASH_AHB();
 ahb #(.DATA_W(32), .ADDR_W(32))     PERIPH_AHB();
@@ -227,9 +271,10 @@ assign CPU_PCLKENDBG = 1'b1;
 
 wire [(NUM_SPIS-1):0]   CPU_IRQS;
 wire                    QSPI_IRQ;
-wire [65:0]             PERI_IRQS;
+wire [71:0]             PERI_IRQS;
+wire                    SDIO_IRQ;
 
-assign CPU_IRQS={{(NUM_SPIS-80){1'b0}},EXP_IRQs, QSPI_IRQ, PERI_IRQS, DMA350_irq_comb_nonsec, DMA350_irq_channel};
+assign CPU_IRQS={{(NUM_SPIS-87){1'b0}}, SDIO_IRQ ,EXP_IRQs, QSPI_IRQ, PERI_IRQS, 1'b0, 4'h0};
 
 // Subordinate AWAKEUP signal generation
 assign AWAKEUP_ROM = (ROM_AXI.AWVALID | ROM_AXI.ARVALID | ROM_AXI.WVALID);
@@ -237,8 +282,8 @@ assign AWAKEUP_SRAM = (SRAM_AXI.AWVALID | SRAM_AXI.ARVALID | SRAM_AXI.WVALID);
 
 
 megasoc_cpu_ss #(
-    .NUM_GICRID_BITS(ID_W-1),
-    .NUM_GICWID_BITS(ID_W-1),
+    .NUM_GICRID_BITS(ID_W-2),
+    .NUM_GICWID_BITS(ID_W-2),
     .NUM_SPIS(NUM_SPIS)
     ) u_megasoc_cpu_ss(
     // Clocks and Reset
@@ -393,6 +438,13 @@ megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
     // Peripheral AHB Subordinate
     .PERIPH_AHB(PERIPH_AHB),
 
+    // PL011 DMA request
+    .UARTTXDMACLR(1'b0),
+    .UARTRXDMACLR(1'b0),
+    .UARTTXDMASREQ(),
+    .UARTTXDMABREQ(),
+    .UARTRXDMASREQ(),
+    .UARTRXDMABREQ(),
     // UART 0 Off-chip interface
     .UARTRXD0(UARTRXD0),
     .UARTTXD0(UARTTXD0),
@@ -402,6 +454,20 @@ megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
     .UARTRXD1(UARTRXD1),
     .UARTTXD1(UARTTXD1),
     .UARTTXEN1(UARTTXEN1),
+
+    // PL011 UART off-chip interface
+    .PL011_nUARTCTS(PL011_nUARTCTS),
+    .PL011_nUARTDCD(PL011_nUARTDCD),
+    .PL011_nUARTDSR(PL011_nUARTDSR),
+    .PL011_nUARTRI(PL011_nUARTRI),
+    .PL011_UARTRXD(PL011_UARTRXD),
+    .PL011_SIRIN(PL011_SIRIN),
+    .PL011_UARTTXD(PL011_UARTTXD),
+    .PL011_nSIROUT(PL011_nSIROUT),
+    .PL011_nUARTOut2(PL011_nUARTOut2),
+    .PL011_nUARTOut1(PL011_nUARTOut1),
+    .PL011_nUARTRTS(PL011_nUARTRTS),
+    .PL011_nUARTDTR(PL011_nUARTDTR),
 
     // EXTIO Off-chip Debug interface
     .iodata4_i(iodata4_i),
@@ -462,6 +528,200 @@ megasoc_power_control u_megasoc_power_control(
     .CPU_L2_q(CPU_L2_q),
     .CPU_L2_RESETn(CPU_L2_RESETn)
 );
+
+mkaxi2axil_bridge u_axi2axil (
+    .CLK(SYS_CLK),
+    .RST_N(SYS_RESETn),
+
+    .AXI4_AWVALID(SDIO_S_AXI.AWVALID),
+    .AXI4_AWID(SDIO_S_AXI.AWID),
+    .AXI4_AWADDR(SDIO_S_AXI.AWADDR),
+    .AXI4_AWLEN(SDIO_S_AXI.AWLEN),
+    .AXI4_AWSIZE(SDIO_S_AXI.AWSIZE),
+    .AXI4_AWBURST(SDIO_S_AXI.AWBURST),
+    .AXI4_AWLOCK(SDIO_S_AXI.AWLOCK),
+    .AXI4_AWCACHE(SDIO_S_AXI.AWCACHE),
+    .AXI4_AWPROT(SDIO_S_AXI.AWPROT),
+    .AXI4_AWQOS(4'h0),
+    .AXI4_AWREGION(4'h0),
+    .AXI4_AWREADY(SDIO_S_AXI.AWREADY),
+    .AXI4_WVALID(SDIO_S_AXI.WVALID),
+    .AXI4_WDATA(SDIO_S_AXI.WDATA),
+    .AXI4_WSTRB(SDIO_S_AXI.WSTRB),
+    .AXI4_WLAST(SDIO_S_AXI.WLAST),
+    .AXI4_WREADY(SDIO_S_AXI.WREADY),
+    .AXI4_BVALID(SDIO_S_AXI.BVALID),
+    .AXI4_BID(SDIO_S_AXI.BID),
+    .AXI4_BRESP(SDIO_S_AXI.BRESP),
+    .AXI4_BREADY(SDIO_S_AXI.BREADY),
+    .AXI4_ARVALID(SDIO_S_AXI.ARVALID),
+    .AXI4_ARID(SDIO_S_AXI.ARID),
+    .AXI4_ARADDR(SDIO_S_AXI.ARADDR),
+    .AXI4_ARLEN(SDIO_S_AXI.ARLEN),
+    .AXI4_ARSIZE(SDIO_S_AXI.ARSIZE),
+    .AXI4_ARBURST(SDIO_S_AXI.ARBURST),
+    .AXI4_ARLOCK(SDIO_S_AXI.ARLOCK),
+    .AXI4_ARCACHE(SDIO_S_AXI.ARCACHE),
+    .AXI4_ARPROT(SDIO_S_AXI.ARPROT),
+    .AXI4_ARQOS(4'h0),
+    .AXI4_ARREGION(4'h0),
+    .AXI4_ARREADY(SDIO_S_AXI.ARREADY),
+    .AXI4_RVALID(SDIO_S_AXI.RVALID),
+    .AXI4_RID(SDIO_S_AXI.RID),
+    .AXI4_RDATA(SDIO_S_AXI.RDATA),
+    .AXI4_RRESP(SDIO_S_AXI.RRESP),
+    .AXI4_RLAST(SDIO_S_AXI.RLAST),
+    .AXI4_RREADY(SDIO_S_AXI.RREADY),
+
+    .AXI4L_AWVALID(SDIO_S_AXIL.AWVALID),
+    .AXI4L_AWADDR(SDIO_S_AXIL.AWADDR),
+    .AXI4L_AWPROT(SDIO_S_AXIL.AWPROT),
+    .AXI4L_AWREADY(SDIO_S_AXIL.AWREADY),
+    .AXI4L_WVALID(SDIO_S_AXIL.WVALID),
+    .AXI4L_WDATA(SDIO_S_AXIL.WDATA),
+    .AXI4L_WSTRB(SDIO_S_AXIL.WSTRB),
+    .AXI4L_WREADY(SDIO_S_AXIL.WREADY),
+    .AXI4L_BVALID(SDIO_S_AXIL.BVALID),
+    .AXI4L_BRESP(SDIO_S_AXIL.BRESP),
+    .AXI4L_BREADY(SDIO_S_AXIL.BREADY),
+    .AXI4L_ARVALID(SDIO_S_AXIL.ARVALID),
+    .AXI4L_ARADDR(SDIO_S_AXIL.ARADDR),
+    .AXI4L_ARPROT(SDIO_S_AXIL.ARPROT),
+    .AXI4L_ARREADY(SDIO_S_AXIL.ARREADY),
+    .AXI4L_RVALID(SDIO_S_AXIL.RVALID),
+    .AXI4L_RRESP(SDIO_S_AXIL.RRESP),
+    .AXI4L_RDATA(SDIO_S_AXIL.RDATA),
+    .AXI4L_RREADY(SDIO_S_AXIL.RREADY)
+);
+
+wire sd_1p8v;
+assign SD_O_1P8V = sd_1p8v;
+
+`define SDIO_AXI
+sdio #(
+    .OPT_DMA(1'b1),
+    .ADDRESS_WIDTH(44),
+    .DMA_DW(64),
+    .AXI_IW(2), // ID Widtth
+    .OPT_LITTLE_ENDIAN(1'b1),
+    .OPT_SERDES(1'b0),
+    .OPT_DDR(1'b0),
+    .OPT_EMMC(1'b0),
+    .OPT_1P8V(1'b1),
+    .OPT_CRCTOKEN(1'b1)
+    ) u_sdio_controller (
+        .i_clk(SYS_CLK),
+        .i_reset(~SYS_RESETn),
+        // Control Interface AXI lite
+        .S_AXIL_AWVALID(SDIO_S_AXIL.AWVALID),
+        .S_AXIL_AWREADY(SDIO_S_AXIL.AWREADY),
+        .S_AXIL_AWADDR(SDIO_S_AXIL.AWADDR[4:0]),
+        .S_AXIL_AWPROT(SDIO_S_AXIL.AWPROT),
+
+        .S_AXIL_WVALID(SDIO_S_AXIL.WVALID),
+        .S_AXIL_WREADY(SDIO_S_AXIL.WREADY),
+        .S_AXIL_WDATA(SDIO_S_AXIL.WDATA),
+        .S_AXIL_WSTRB(SDIO_S_AXIL.WSTRB),
+
+        .S_AXIL_BVALID(SDIO_S_AXIL.BVALID),
+        .S_AXIL_BREADY(SDIO_S_AXIL.BREADY),
+        .S_AXIL_BRESP(SDIO_S_AXIL.BRESP),
+
+        .S_AXIL_ARVALID(SDIO_S_AXIL.ARVALID),
+        .S_AXIL_ARREADY(SDIO_S_AXIL.ARREADY),
+        .S_AXIL_ARADDR(SDIO_S_AXIL.ARADDR[4:0]),
+        .S_AXIL_ARPROT(SDIO_S_AXIL.ARPROT),
+
+        .S_AXIL_RVALID(SDIO_S_AXIL.RVALID),
+        .S_AXIL_RREADY(SDIO_S_AXIL.RREADY),
+        .S_AXIL_RDATA(SDIO_S_AXIL.RDATA),
+        .S_AXIL_RRESP(SDIO_S_AXIL.RRESP),
+        // DMA AXI Manager
+        .M_AXI_AWVALID(SDIO_M_AXI.AWVALID),
+        .M_AXI_AWREADY(SDIO_M_AXI.AWREADY),
+        .M_AXI_AWID(SDIO_M_AXI.AWID),
+        .M_AXI_AWADDR(SDIO_M_AXI.AWADDR),
+        .M_AXI_AWLEN(SDIO_M_AXI.AWLEN),
+        .M_AXI_AWSIZE(SDIO_M_AXI.AWSIZE),
+        .M_AXI_AWBURST(SDIO_M_AXI.AWBURST),
+        .M_AXI_AWLOCK(SDIO_M_AXI.AWLOCK),
+        .M_AXI_AWCACHE(SDIO_M_AXI.AWCACHE),
+        .M_AXI_AWPROT(SDIO_M_AXI.AWPROT),
+        .M_AXI_AWQOS(),
+
+        .M_AXI_WVALID(SDIO_M_AXI.WVALID),
+        .M_AXI_WREADY(SDIO_M_AXI.WREADY),
+        .M_AXI_WDATA(SDIO_M_AXI.WDATA),
+        .M_AXI_WSTRB(SDIO_M_AXI.WSTRB),
+        .M_AXI_WLAST(SDIO_M_AXI.WLAST),
+
+        .M_AXI_BVALID(SDIO_M_AXI.BVALID),
+        .M_AXI_BID(SDIO_M_AXI.BID),
+        .M_AXI_BREADY(SDIO_M_AXI.BREADY),
+        .M_AXI_BRESP(SDIO_M_AXI.BRESP),
+
+        .M_AXI_ARVALID(SDIO_M_AXI.ARVALID),
+        .M_AXI_ARREADY(SDIO_M_AXI.ARREADY),
+        .M_AXI_ARID(SDIO_M_AXI.ARID),
+        .M_AXI_ARADDR(SDIO_M_AXI.ARADDR),
+        .M_AXI_ARLEN(SDIO_M_AXI.ARLEN),
+        .M_AXI_ARSIZE(SDIO_M_AXI.ARSIZE),
+        .M_AXI_ARBURST(SDIO_M_AXI.ARBURST),
+        .M_AXI_ARLOCK(SDIO_M_AXI.ARLOCK),
+        .M_AXI_ARCACHE(SDIO_M_AXI.ARCACHE),
+        .M_AXI_ARPROT(SDIO_M_AXI.ARPROT),
+        .M_AXI_ARQOS(),
+
+        .M_AXI_RVALID(SDIO_M_AXI.RVALID),
+        .M_AXI_RREADY(SDIO_M_AXI.RREADY),
+        .M_AXI_RID(SDIO_M_AXI.RID),
+        .M_AXI_RDATA(SDIO_M_AXI.RDATA),
+        .M_AXI_RLAST(SDIO_M_AXI.RLAST),
+        .M_AXI_RRESP(SDIO_M_AXI.RRESP),
+
+        // External Stream interface
+        .s_valid(),
+        .s_ready(),
+        .s_data(),
+        .m_valid(),
+        .m_ready(),
+        .m_data(),
+        .m_last(),
+
+        // ?
+        .i_card_detect(1'b1),
+        .o_hwreset_n(),
+        .o_1p8v(sd_1p8v),
+        .i_1p8v(sd_1p8v),
+        .o_int(SDIO_IRQ),
+
+        // Interface to PHY
+        .o_cfg_ddr(SDIO_o_cfg_ddr),
+        .o_cfg_ds(SDIO_o_cfg_ds),
+        .o_cfg_dscmd(SDIO_o_cfg_dscmd),
+        .o_cfg_sample_shift(SDIO_o_cfg_sample_shift),
+        .o_sdclk(SDIO_o_sdclk),
+        .o_cmd_en(SDIO_o_cmd_en),
+        .o_cmd_tristate(SDIO_o_cmd_tristate),
+        .o_cmd_data(SDIO_o_cmd_data),
+        .o_data_en(SDIO_o_data_en),
+        .o_data_tristate(SDIO_o_data_tristate),
+        .o_rx_en(SDIO_o_rx_en),
+        .o_tx_data(SDIO_o_tx_data),
+        .i_cmd_strb(SDIO_i_cmd_strb),
+        .i_cmd_data(SDIO_i_cmd_data),
+        .i_cmd_collision(SDIO_i_cmd_collision),
+        .i_card_busy(SDIO_i_card_busy),
+        .i_rx_strb(SDIO_i_rx_strb),
+        .i_rx_data(SDIO_i_rx_data),
+        .i_crcack(SDIO_i_crcack),
+        .i_crcnak(SDIO_i_crcnak),
+        .S_AC_VALID(SDIO_AC_VALID),
+        .S_AC_DATA(SDIO_AC_DATA),
+        .S_AD_VALID(SDIO_AD_VALID),
+        .S_AD_DATA(SDIO_AD_DATA)
+);
+
 
 
 nic400_megasoc_main u_nic400_megasoc_main(
@@ -672,6 +932,43 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .RVALID_ROM(ROM_AXI.RVALID),
     .RREADY_ROM(ROM_AXI.RREADY),
 
+    .AWID_SDIO_S(SDIO_S_AXI.AWID),
+    .AWADDR_SDIO_S(SDIO_S_AXI.AWADDR),
+    .AWLEN_SDIO_S(SDIO_S_AXI.AWLEN),
+    .AWSIZE_SDIO_S(SDIO_S_AXI.AWSIZE),
+    .AWBURST_SDIO_S(SDIO_S_AXI.AWBURST),
+    .AWLOCK_SDIO_S(SDIO_S_AXI.AWLOCK),
+    .AWCACHE_SDIO_S(SDIO_S_AXI.AWCACHE),
+    .AWPROT_SDIO_S(SDIO_S_AXI.AWPROT),
+    .AWVALID_SDIO_S(SDIO_S_AXI.AWVALID),
+    .AWREADY_SDIO_S(SDIO_S_AXI.AWREADY),
+    .WDATA_SDIO_S(SDIO_S_AXI.WDATA),
+    .WSTRB_SDIO_S(SDIO_S_AXI.WSTRB),
+    .WLAST_SDIO_S(SDIO_S_AXI.WLAST),
+    .WVALID_SDIO_S(SDIO_S_AXI.WVALID),
+    .WREADY_SDIO_S(SDIO_S_AXI.WREADY),
+    .BID_SDIO_S(SDIO_S_AXI.BID),
+    .BRESP_SDIO_S(SDIO_S_AXI.BRESP),
+    .BVALID_SDIO_S(SDIO_S_AXI.BVALID),
+    .BREADY_SDIO_S(SDIO_S_AXI.BREADY),
+    .ARID_SDIO_S(SDIO_S_AXI.ARID),
+    .ARADDR_SDIO_S(SDIO_S_AXI.ARADDR),
+    .ARLEN_SDIO_S(SDIO_S_AXI.ARLEN),
+    .ARSIZE_SDIO_S(SDIO_S_AXI.ARSIZE),
+    .ARBURST_SDIO_S(SDIO_S_AXI.ARBURST),
+    .ARLOCK_SDIO_S(SDIO_S_AXI.ARLOCK),
+    .ARCACHE_SDIO_S(SDIO_S_AXI.ARCACHE),
+    .ARPROT_SDIO_S(SDIO_S_AXI.ARPROT),
+    .ARVALID_SDIO_S(SDIO_S_AXI.ARVALID),
+    .ARREADY_SDIO_S(SDIO_S_AXI.ARREADY),
+    .RID_SDIO_S(SDIO_S_AXI.RID),
+    .RDATA_SDIO_S(SDIO_S_AXI.RDATA),
+    .RRESP_SDIO_S(SDIO_S_AXI.RRESP),
+    .RLAST_SDIO_S(SDIO_S_AXI.RLAST),
+    .RVALID_SDIO_S(SDIO_S_AXI.RVALID),
+    .RREADY_SDIO_S(SDIO_S_AXI.RREADY),
+
+
     .PADDR_DEBUG(CPU_DBG_APB.paddr),
     .PWDATA_DEBUG(CPU_DBG_APB.pwdata),
     .PWRITE_DEBUG(CPU_DBG_APB.pwrite),
@@ -681,16 +978,16 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .PSLVERR_DEBUG(CPU_DBG_APB.pslverr),
     .PREADY_DEBUG(CPU_DBG_APB.pready),
 
-    .PADDR_DMA_CTRL(PADDR_DMA_CTRL),
-    .PWDATA_DMA_CTRL(PWDATA_DMA_CTRL),
-    .PWRITE_DMA_CTRL(PWRITE_DMA_CTRL),
-    .PPROT_DMA_CTRL(PPROT_DMA_CTRL),
-    .PSTRB_DMA_CTRL(PSTRB_DMA_CTRL),
-    .PENABLE_DMA_CTRL(PENABLE_DMA_CTRL),
-    .PSELx_DMA_CTRL(PSELx_DMA_CTRL),
-    .PRDATA_DMA_CTRL(PRDATA_DMA_CTRL),
-    .PSLVERR_DMA_CTRL(PSLVERR_DMA_CTRL),
-    .PREADY_DMA_CTRL(PREADY_DMA_CTRL),
+    // .PADDR_DMA_CTRL(PADDR_DMA_CTRL),
+    // .PWDATA_DMA_CTRL(PWDATA_DMA_CTRL),
+    // .PWRITE_DMA_CTRL(PWRITE_DMA_CTRL),
+    // .PPROT_DMA_CTRL(PPROT_DMA_CTRL),
+    // .PSTRB_DMA_CTRL(PSTRB_DMA_CTRL),
+    // .PENABLE_DMA_CTRL(PENABLE_DMA_CTRL),
+    // .PSELx_DMA_CTRL(PSELx_DMA_CTRL),
+    // .PRDATA_DMA_CTRL(PRDATA_DMA_CTRL),
+    // .PSLVERR_DMA_CTRL(PSLVERR_DMA_CTRL),
+    // .PREADY_DMA_CTRL(PREADY_DMA_CTRL),
 
 
     .PADDR_FLASH_CTRL(FLASH_CTRL_APB.paddr),
@@ -760,41 +1057,77 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .HREADY_ADP(ADP_AHB.HREADY),
     .HRESP_ADP(ADP_AHB.HRESP),
 
-    .AWID_DMA350(AWID_DMA350),
-    .AWADDR_DMA350(AWADDR_DMA350),
-    .AWLEN_DMA350(AWLEN_DMA350),
-    .AWSIZE_DMA350(AWSIZE_DMA350),
-    .AWBURST_DMA350(AWBURST_DMA350),
-    .AWLOCK_DMA350(AWLOCK_DMA350),
-    .AWCACHE_DMA350(AWCACHE_DMA350),
-    .AWPROT_DMA350(AWPROT_DMA350),
-    .AWVALID_DMA350(AWVALID_DMA350),
-    .AWREADY_DMA350(AWREADY_DMA350),
-    .WDATA_DMA350(WDATA_DMA350),
-    .WSTRB_DMA350(WSTRB_DMA350),
-    .WLAST_DMA350(WLAST_DMA350),
-    .WVALID_DMA350(WVALID_DMA350),
-    .WREADY_DMA350(WREADY_DMA350),
-    .BID_DMA350(BID_DMA350),
-    .BRESP_DMA350(BRESP_DMA350),
-    .BVALID_DMA350(BVALID_DMA350),
-    .BREADY_DMA350(BREADY_DMA350),
-    .ARID_DMA350(ARID_DMA350),
-    .ARADDR_DMA350(ARADDR_DMA350),
-    .ARLEN_DMA350(ARLEN_DMA350),
-    .ARSIZE_DMA350(ARSIZE_DMA350),
-    .ARBURST_DMA350(ARBURST_DMA350),
-    .ARLOCK_DMA350(ARLOCK_DMA350),
-    .ARCACHE_DMA350(ARCACHE_DMA350),
-    .ARPROT_DMA350(ARPROT_DMA350),
-    .ARVALID_DMA350(ARVALID_DMA350),
-    .ARREADY_DMA350(ARREADY_DMA350),
-    .RID_DMA350(RID_DMA350),
-    .RDATA_DMA350(RDATA_DMA350),
-    .RRESP_DMA350(RRESP_DMA350),
-    .RLAST_DMA350(RLAST_DMA350),
-    .RVALID_DMA350(RVALID_DMA350),
-    .RREADY_DMA350(RREADY_DMA350),
+    // .AWID_DMA350(AWID_DMA350),
+    // .AWADDR_DMA350(AWADDR_DMA350),
+    // .AWLEN_DMA350(AWLEN_DMA350),
+    // .AWSIZE_DMA350(AWSIZE_DMA350),
+    // .AWBURST_DMA350(AWBURST_DMA350),
+    // .AWLOCK_DMA350(AWLOCK_DMA350),
+    // .AWCACHE_DMA350(AWCACHE_DMA350),
+    // .AWPROT_DMA350(AWPROT_DMA350),
+    // .AWVALID_DMA350(AWVALID_DMA350),
+    // .AWREADY_DMA350(AWREADY_DMA350),
+    // .WDATA_DMA350(WDATA_DMA350),
+    // .WSTRB_DMA350(WSTRB_DMA350),
+    // .WLAST_DMA350(WLAST_DMA350),
+    // .WVALID_DMA350(WVALID_DMA350),
+    // .WREADY_DMA350(WREADY_DMA350),
+    // .BID_DMA350(BID_DMA350),
+    // .BRESP_DMA350(BRESP_DMA350),
+    // .BVALID_DMA350(BVALID_DMA350),
+    // .BREADY_DMA350(BREADY_DMA350),
+    // .ARID_DMA350(ARID_DMA350),
+    // .ARADDR_DMA350(ARADDR_DMA350),
+    // .ARLEN_DMA350(ARLEN_DMA350),
+    // .ARSIZE_DMA350(ARSIZE_DMA350),
+    // .ARBURST_DMA350(ARBURST_DMA350),
+    // .ARLOCK_DMA350(ARLOCK_DMA350),
+    // .ARCACHE_DMA350(ARCACHE_DMA350),
+    // .ARPROT_DMA350(ARPROT_DMA350),
+    // .ARVALID_DMA350(ARVALID_DMA350),
+    // .ARREADY_DMA350(ARREADY_DMA350),
+    // .RID_DMA350(RID_DMA350),
+    // .RDATA_DMA350(RDATA_DMA350),
+    // .RRESP_DMA350(RRESP_DMA350),
+    // .RLAST_DMA350(RLAST_DMA350),
+    // .RVALID_DMA350(RVALID_DMA350),
+    // .RREADY_DMA350(RREADY_DMA350),
+
+    .AWID_SDIO_M(SDIO_M_AXI.AWID),
+    .AWADDR_SDIO_M(SDIO_M_AXI.AWADDR),
+    .AWLEN_SDIO_M(SDIO_M_AXI.AWLEN),
+    .AWSIZE_SDIO_M(SDIO_M_AXI.AWSIZE),
+    .AWBURST_SDIO_M(SDIO_M_AXI.AWBURST),
+    .AWLOCK_SDIO_M(SDIO_M_AXI.AWLOCK),
+    .AWCACHE_SDIO_M(SDIO_M_AXI.AWCACHE),
+    .AWPROT_SDIO_M(SDIO_M_AXI.AWPROT),
+    .AWVALID_SDIO_M(SDIO_M_AXI.AWVALID),
+    .AWREADY_SDIO_M(SDIO_M_AXI.AWREADY),
+    .WDATA_SDIO_M(SDIO_M_AXI.WDATA),
+    .WSTRB_SDIO_M(SDIO_M_AXI.WSTRB),
+    .WLAST_SDIO_M(SDIO_M_AXI.WLAST),
+    .WVALID_SDIO_M(SDIO_M_AXI.WVALID),
+    .WREADY_SDIO_M(SDIO_M_AXI.WREADY),
+    .BID_SDIO_M(SDIO_M_AXI.BID),
+    .BRESP_SDIO_M(SDIO_M_AXI.BRESP),
+    .BVALID_SDIO_M(SDIO_M_AXI.BVALID),
+    .BREADY_SDIO_M(SDIO_M_AXI.BREADY),
+    .ARID_SDIO_M(SDIO_M_AXI.ARID),
+    .ARADDR_SDIO_M(SDIO_M_AXI.ARADDR),
+    .ARLEN_SDIO_M(SDIO_M_AXI.ARLEN),
+    .ARSIZE_SDIO_M(SDIO_M_AXI.ARSIZE),
+    .ARBURST_SDIO_M(SDIO_M_AXI.ARBURST),
+    .ARLOCK_SDIO_M(SDIO_M_AXI.ARLOCK),
+    .ARCACHE_SDIO_M(SDIO_M_AXI.ARCACHE),
+    .ARPROT_SDIO_M(SDIO_M_AXI.ARPROT),
+    .ARVALID_SDIO_M(SDIO_M_AXI.ARVALID),
+    .ARREADY_SDIO_M(SDIO_M_AXI.ARREADY),
+    .RID_SDIO_M(SDIO_M_AXI.RID),
+    .RDATA_SDIO_M(SDIO_M_AXI.RDATA),
+    .RRESP_SDIO_M(SDIO_M_AXI.RRESP),
+    .RLAST_SDIO_M(SDIO_M_AXI.RLAST),
+    .RVALID_SDIO_M(SDIO_M_AXI.RVALID),
+    .RREADY_SDIO_M(SDIO_M_AXI.RREADY),
 
     .AWID_EXP_S(EXP_S_AXI.AWID),
     .AWADDR_EXP_S(EXP_S_AXI.AWADDR),

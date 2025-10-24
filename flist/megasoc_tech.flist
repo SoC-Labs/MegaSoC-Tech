@@ -17,15 +17,20 @@
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/apb3_if.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/apb4_if.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/axi4_if.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/axi4l_if.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/mkaxi2axil_bridge.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/FIFO2.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/axi3_if.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/ahb_if.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/qchannel_if.sv
 
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_wrapper.sv
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_system_wrapper.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_cpu_ss.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/megasoc_irq_sync.v
+
+// Update 24/09/2025 No "system" DMA needed as not yet getting ethernet or PCIe added
+//$(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_system_wrapper.v
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_addr_decode.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_subsystem.sv
@@ -44,13 +49,18 @@ $(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/megasoc_CPU_power_control.sv
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/CA53_tarmac.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/GIC400.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/nic400_megasoc_main.flist
--f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/nic400_megasoc_system.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SIE300_SRAM_controller.flist
--f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SIE300_SYS_SRAM_controller.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PCK600.flist
-// -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PL011.flist
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PL011.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/Corstone101.flist 
--f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/DMA350.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SoCDebug_tech.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PL031.flist
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/PL022.flist
+
+// Update 24/09/2025 No "system" DMA needed as not yet getting ethernet or PCIe added
+// -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/nic400_megasoc_system.flist
+// -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SIE300_SYS_SRAM_controller.flist
+// -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/DMA350.flist
+
+// Other IP
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/SDIO.flist

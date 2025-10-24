@@ -33,6 +33,11 @@ module megasoc_dram_wrapper #(
 );
 
 
+assign DRAM_AXI.AWREADY = 1'b0;
+assign DRAM_AXI.WREADY = 1'b0;
+assign DRAM_AXI.ARREADY = 1'b0;
+assign DRAM_AXI.RVALID = 1'b0;
+
 
 
 endmodule 

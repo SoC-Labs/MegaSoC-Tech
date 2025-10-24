@@ -1,5 +1,4 @@
-dap_tests
-dma350_tests
+adp_tests
 gic_tests
 hello_world
 low_power_tests
@@ -7,3 +6,4 @@ mem_tests
 neon_tests
 peripheral_test
 timer_tests
+uart_tests

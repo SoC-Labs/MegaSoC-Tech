@@ -86,29 +86,41 @@ ifeq ($(BOOT_CODE), 1)
     APP_SRC += $(SW_LIB_PATH)/apps/src/vect_64.s  
     APP_SRC += $(SW_LIB_PATH)/apps/src/page_table.s  
     APP_SRC += $(SW_LIB_PATH)/apps/src/stack_multi_cpu_init.s  
-endif
-APP_SRC += $(SW_LIB_PATH)/apps/src/system.c
-APP_SRC += $(SW_LIB_PATH)/apps/src/boot.s                 
-APP_SRC += $(SW_LIB_PATH)/apps/src/platform.c             
-APP_SRC += $(SW_LIB_PATH)/apps/src/cpu_asm_codes.c         
-APP_SRC += $(SW_LIB_PATH)/apps/src/ipc.s                
-APP_SRC += $(SW_LIB_PATH)/apps/src/irq.s               
-APP_SRC += $(SW_LIB_PATH)/apps/src/vect_64.s  
-APP_SRC += $(SW_LIB_PATH)/apps/src/page_table.s  
-APP_SRC += $(SW_LIB_PATH)/apps/src/stack_multi_cpu_init.s  
+    APP_SRC += $(SW_LIB_PATH)/host/src/sys_utils.c
+    
+    APP_SRC += $(SW_LIB_PATH)/devices/src/gic400.c
+    APP_SRC += $(SW_LIB_PATH)/devices/src/qspi_flash.c
+    APP_SRC += $(SW_LIB_PATH)/common/src/system_level_functions.c
+    APP_SRC += $(SW_LIB_PATH)/devices/src/uart_stdout.c
+    APP_SRC += $(SW_LIB_PATH)/devices/src/ppu.c
+    APP_SRC += $(SW_LIB_PATH)/devices/src/pl011_uart.c 
+else 
+    APP_SRC += $(SW_LIB_PATH)/apps/src/system.c
+    APP_SRC += $(SW_LIB_PATH)/apps/src/boot.s                 
+    APP_SRC += $(SW_LIB_PATH)/apps/src/platform.c             
+    APP_SRC += $(SW_LIB_PATH)/apps/src/cpu_asm_codes.c         
+    APP_SRC += $(SW_LIB_PATH)/apps/src/ipc.s                
+    APP_SRC += $(SW_LIB_PATH)/apps/src/irq.s               
+    APP_SRC += $(SW_LIB_PATH)/apps/src/vect_64.s  
+    APP_SRC += $(SW_LIB_PATH)/apps/src/page_table.s  
+    APP_SRC += $(SW_LIB_PATH)/apps/src/stack_multi_cpu_init.s  
+    APP_SRC += $(SW_LIB_PATH)/host/src/sys_utils.c
 
-# APP_SRC += $(SW_LIB_PATH)/devices/src/pl011_uart.c
+    APP_SRC += $(SW_LIB_PATH)/devices/src/gic400.c
+    APP_SRC += $(SW_LIB_PATH)/devices/src/qspi_flash.c
+    APP_SRC += $(SW_LIB_PATH)/common/src/system_level_functions.c
+    APP_SRC += $(SW_LIB_PATH)/devices/src/uart_stdout.c
+    APP_SRC += $(SW_LIB_PATH)/devices/src/ppu.c
+    APP_SRC += $(SW_LIB_PATH)/devices/src/pl011_uart.c 
+
+    APP_SRC += $(SW_LIB_PATH)/devices/src/dma_350_command_lib.c
+    APP_SRC += $(SW_LIB_PATH)/devices/src/sdiodrv.c 
+    APP_SRC += $(SW_LIB_PATH)/devices/src/diskio.c 
+endif
+
 # APP_SRC += $(SW_LIB_PATH)/devices/src/intr_rtr_1.c
 # APP_SRC += $(SW_LIB_PATH)/devices/src/watchdog_generic.c
 
-APP_SRC += $(SW_LIB_PATH)/devices/src/gic400.c
-APP_SRC += $(SW_LIB_PATH)/devices/src/dma_350_command_lib.c
-APP_SRC += $(SW_LIB_PATH)/devices/src/ppu.c
-
-APP_SRC += $(SW_LIB_PATH)/host/src/sys_utils.c
-APP_SRC += $(SW_LIB_PATH)/devices/src/qspi_flash.c
-APP_SRC += $(SW_LIB_PATH)/common/src/system_level_functions.c
-APP_SRC += $(SW_LIB_PATH)/devices/src/uart_stdout.c
 CPU := -mcpu=cortex-a53
 CPU := $(CPU)+nocrypto
 

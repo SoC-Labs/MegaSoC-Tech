@@ -28,6 +28,7 @@
 //  cmsdk_apb_watchdog              (u_apb_watchdog)
 //  Rtc                             (u_apb_rtc)
 //  Ssp                             (u_apb_spi)
+//  Uart                            (u_pl011_uart)
 //  megasoc_peripheral_debug        (u_megasoc_peripheral_debug)
 
 module megasoc_peripheral_subsystem #(
@@ -44,14 +45,37 @@ module megasoc_peripheral_subsystem #(
     // Peripheral AHB bus interface
     ahb.subordinate     PERIPH_AHB,
 
+    // PL011 DMA request
+    input  wire         UARTTXDMACLR,
+    input  wire         UARTRXDMACLR,
+    output wire         UARTTXDMASREQ,
+    output wire         UARTTXDMABREQ,
+    output wire         UARTRXDMASREQ,
+    output wire         UARTRXDMABREQ,
+
+    // UART0
     input  wire         UARTRXD0,
     output wire         UARTTXD0,
     output wire         UARTTXEN0,
-
+    // UART1
     input  wire         UARTRXD1,
     output wire         UARTTXD1,
     output wire         UARTTXEN1,
+    // PL011 UART
+    input  wire         PL011_nUARTCTS,
+    input  wire         PL011_nUARTDCD,
+    input  wire         PL011_nUARTDSR,
+    input  wire         PL011_nUARTRI,
+    input  wire         PL011_UARTRXD,
+    input  wire         PL011_SIRIN,
+    output wire         PL011_UARTTXD,
+    output wire         PL011_nSIROUT,
+    output wire         PL011_nUARTOut2,
+    output wire         PL011_nUARTOut1,
+    output wire         PL011_nUARTRTS,
+    output wire         PL011_nUARTDTR,
 
+    // EXTIO Interface
     input  wire [3:0]   iodata4_i,
     output wire [3:0]   iodata4_o,
     output wire [3:0]   iodata4_e,
@@ -60,11 +84,13 @@ module megasoc_peripheral_subsystem #(
     output wire         ioreq2_o,
     input  wire         ioack_i,
 
+    // GPIO P0
     input  wire [15:0]  p0_in,
     output wire [15:0]  p0_out,
     output wire [15:0]  p0_en,
     output wire [15:0]  p0_func,
 
+    // GPIO P1
     input  wire [15:0]  p1_in,
     output wire [15:0]  p1_out,
     output wire [15:0]  p1_en,
@@ -76,7 +102,8 @@ module megasoc_peripheral_subsystem #(
     output wire         SPI_MOSI,
     input  wire         SPI_MISO,
 
-    output wire [65:0]  PERI_IRQS   // Peripheral interrupts to GIC
+    // Interrupts
+    output wire [71:0]  PERI_IRQS   // Peripheral interrupts to GIC
 );
 
 // APB bus interface
@@ -90,6 +117,7 @@ wire        PREADY;
 wire        PSLVERR;
 wire [3:0]  PSTRB;
 wire [2:0]  PPROT;
+wire        APBACTIVE;
 
 // AHB internal wires 
 wire        defslv_hsel;   // AHB default slave signals
@@ -174,6 +202,12 @@ wire        PREADY_SPI;
 wire [31:0] PRDATA_SPI;
 wire        PSLVERR_SPI;
 
+// Internal APB signals for PL011 UART
+wire        PSEL_UART_PL011;
+wire        PREADY_UART_PL011;
+wire [31:0] PRDATA_UART_PL011;
+wire        PSLVERR_UART_PL011;
+
 // Interrupt Signals 
 wire [15:0] gpio0_int;
 wire        gpio0_comb_int;
@@ -211,6 +245,12 @@ wire        spi_rx_int;
 wire        spi_tx_int;
 wire        spi_rx_overr_int;
 wire        spi_tx_to_int;
+wire        pl011_uartmsintr;
+wire        pl011_uartrxintr;
+wire        pl011_uarttxintr;
+wire        pl011_uartrtintr;
+wire        pl011_uarteintr;
+wire        pl011_uartintr;
 
 assign PERI_IRQS[0] = gpio0_comb_int;
 assign PERI_IRQS[1] = gpio1_comb_int;
@@ -248,6 +288,12 @@ assign PERI_IRQS[62] = spi_rx_int;
 assign PERI_IRQS[63] = spi_tx_int;
 assign PERI_IRQS[64] = spi_rx_overr_int;
 assign PERI_IRQS[65] = spi_tx_to_int;
+assign PERI_IRQS[66] = pl011_uartmsintr;
+assign PERI_IRQS[67] = pl011_uartrxintr;
+assign PERI_IRQS[68] = pl011_uarttxintr;
+assign PERI_IRQS[69] = pl011_uartrtintr;
+assign PERI_IRQS[70] = pl011_uarteintr;
+assign PERI_IRQS[71] = pl011_uartintr;
 
 megasoc_peripheral_addr_decode #(
     .BASEADDR_APBSS(32'h4000_0000),
@@ -493,7 +539,7 @@ cmsdk_apb_slave_mux #(
     .PORT7_ENABLE(1),
     .PORT8_ENABLE(1),
     .PORT9_ENABLE(1),
-    .PORT10_ENABLE(0),
+    .PORT10_ENABLE(1),
     .PORT11_ENABLE(0),
     .PORT12_ENABLE(0),
     .PORT13_ENABLE(0),
@@ -536,27 +582,27 @@ cmsdk_apb_slave_mux #(
     .PSEL6(PSEL_UART1),
     .PREADY6(PREADY_UART1),
     .PRDATA6(PRDATA_UART1),
-    .PSLVERR6(PSLVERR_UART1),   
+    .PSLVERR6(PSLVERR_UART1),
 
     .PSEL7(PSEL_WATCHDOG),
     .PREADY7(PREADY_WATCHDOG),
     .PRDATA7(PRDATA_WATCHDOG),
-    .PSLVERR7(PSLVERR_WATCHDOG),   
+    .PSLVERR7(PSLVERR_WATCHDOG),
 
     .PSEL8(PSEL_RTC),
     .PREADY8(PREADY_RTC),
     .PRDATA8(PRDATA_RTC),
-    .PSLVERR8(PSLVERR_RTC),   
+    .PSLVERR8(PSLVERR_RTC),
 
     .PSEL9(PSEL_SPI),
     .PREADY9(PREADY_SPI),
     .PRDATA9(PRDATA_SPI),
-    .PSLVERR9(PSLVERR_SPI),   
+    .PSLVERR9(PSLVERR_SPI),
 
-    .PSEL10(),
-    .PREADY10(1'b1),
-    .PRDATA10(32'd0),
-    .PSLVERR10(1'b1),  
+    .PSEL10(PSEL_UART_PL011),
+    .PREADY10(PREADY_UART_PL011),
+    .PRDATA10(PRDATA_UART_PL011),
+    .PSLVERR10(PSLVERR_UART_PL011),
 
     .PSEL11(),
     .PREADY11(1'b1),
@@ -826,6 +872,60 @@ Ssp u_apb_spi(
 
 assign PREADY_SPI  = 1'b1;
 assign PSLVERR_SPI = 1'b0;
+
+Uart u_pl011_uart(
+    .PCLK(PCLK),
+    .UARTCLK(PCLK),
+    .PRESETn(PRESETn),
+    .nUARTRST(PRESETn),
+
+    .PSEL(PSEL_UART_PL011),
+    .PENABLE(PENABLE),
+    .PWRITE(PWRITE),
+    .PADDR(PADDR[11:2]),
+    .PWDATA(PWDATA),
+    .PRDATA(PRDATA_UART_PL011),
+
+    // Pad
+    .nUARTCTS(PL011_nUARTCTS),
+    .nUARTDCD(PL011_nUARTDCD),
+    .nUARTDSR(PL011_nUARTDSR),
+    .nUARTRI(PL011_nUARTRI),
+    .UARTRXD(PL011_UARTRXD),
+    .SIRIN(PL011_SIRIN),
+    .UARTTXD(PL011_UARTTXD),
+    .nSIROUT(PL011_nSIROUT),
+    .nUARTOut2(PL011_nUARTOut2),
+    .nUARTOut1(PL011_nUARTOut1),
+    .nUARTRTS(PL011_nUARTRTS),
+    .nUARTDTR(PL011_nUARTDTR),
+
+    // Interrupts
+    .UARTMSINTR(pl011_uartmsintr),
+    .UARTRXINTR(pl011_uartrxintr),
+    .UARTTXINTR(pl011_uarttxintr),
+    .UARTRTINTR(pl011_uartrtintr),
+    .UARTEINTR(pl011_uarteintr),
+    .UARTINTR(pl011_uartintr),
+
+    // DMA Interface
+    .UARTTXDMACLR(UARTTXDMACLR),
+    .UARTRXDMACLR(UARTRXDMACLR),
+    .UARTTXDMASREQ(UARTTXDMASREQ),
+    .UARTTXDMABREQ(UARTTXDMABREQ),
+    .UARTRXDMASREQ(UARTRXDMASREQ),
+    .UARTRXDMABREQ(UARTRXDMABREQ),
+
+    // Scan
+    .SCANENABLE(1'b0),
+    .SCANINPCLK(1'b0),
+    .SCANINUCLK(1'b0),
+    .SCANOUTPCLK(),
+    .SCANOUTUCLK()
+);
+
+assign PREADY_UART_PL011 = 1'b1;
+assign PSLVERR_UART_PL011 = 1'b0;
 
 megasoc_peripheral_debug #(
     .FT1248_WIDTH(1)

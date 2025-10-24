@@ -19,10 +19,12 @@ interface axi4 #(
     wire                    WLAST;
     wire                    WVALID;
     wire                    WREADY;
+
     wire [ID_W-1:0]         BID;
     wire [1:0]              BRESP;
     wire                    BVALID;
     wire                    BREADY;
+
     wire [ID_W-1:0]         ARID;
     wire [ADDR_W-1:0]       ARADDR;
     wire [7:0]              ARLEN;

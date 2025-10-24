@@ -17,7 +17,8 @@ build_sie300_sram_ctrl:
 	@$(SIE300_IP_LOGICAL_DIR)/generate --config ./socrates/BP301_SRAM/config/SYS_SRAM_ctrl.yaml --output ./logical/sie300/
 build_nic400:
 	socrates_cli --project megasoc_tech -data ../ --flow build.configured.component configuredComponentName=nic400_megasoc_main
-	socrates_cli --project megasoc_tech -data ../ --flow build.configured.component configuredComponentName=nic400_megasoc_system
+#	socrates_cli --project megasoc_tech -data ../ --flow build.configured.component configuredComponentName=nic400_megasoc_system
+
 build_cortex_a53:
 	mkdir -p $(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/
 	mkdir -p $(SOCLABS_MEGASOC_TECH_DIR)/logical/CortexA53_1/verilog
@@ -30,7 +31,7 @@ build_dma350:
 build_pck:
 	cd $(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control;  $(PCK_600_IP_DIR)/generate --render-clean --config=$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/config/pck600_config.yaml --output=$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/logical
 
-build_ip: build_nic400 build_cortex_a53 build_sie300_sram_ctrl build_dma350 build_pck
+build_ip: build_nic400 build_cortex_a53 build_sie300_sram_ctrl build_pck
 
 make_project:
 	socrates_cli --project megasoc_tech -data ../ --flow AddNewProject
