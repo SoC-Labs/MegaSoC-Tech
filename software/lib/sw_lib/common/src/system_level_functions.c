@@ -19,6 +19,7 @@
 #define __SYSTEM_LEVEL_FUNCTIONS_C__
 
 #include "system_level_functions.h"
+#include "megasoc_resetctrl.h"
 
 #if defined(SYNC_CPU_CM0)
   void CPUSync_Init() {
@@ -870,6 +871,16 @@ uint32_t UnalignedAccessP(uint32_t BaseAddr, uint32_t TopAddr, uint32_t BackupAd
 
     return(ErrCnt);
 }
+
+void system_sw_reset(void)
+{
+    // Write 1 to RESET_REQ[0] (SWRESET)
+    MEGASOC_RESETCTRL->RESET_REQ = (1u << 0);
+
+    // CPU should reset immediately after this; don’t continue normal execution
+    while (1) {;}
+}
+
 
 #endif //__SYSTEM_LEVEL_FUNCTIONS_C__
 
