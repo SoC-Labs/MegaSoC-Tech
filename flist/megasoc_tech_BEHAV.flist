@@ -15,8 +15,6 @@
 
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/megasoc_tech.flist
 
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/behavioural/SRAM.v 
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/behavioural/SRAM_wrapper.sv
 // $(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/behavioural/SYS_SRAM_wrapper.v
 
 -f $(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/flist/Top/ahb_QSPI_SIM.flist
