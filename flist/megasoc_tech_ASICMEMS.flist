@@ -6,6 +6,6 @@
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/ROM/ASIC/TSMC16nm/ROM_wrapper.sv 
 $(SOCLABS_PROJECT_DIR)/memories/megasoc/bootrom/bootrom_emulation.v
 
-$(SOCLABS_PROJECT_DIR)/memories/megasoc/sram/sram_emulation.v
+$(SOCLABS_PROJECT_DIR)/memories/megasoc/sram/sram_64b_16k_emulation.v
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/ASIC/TSMC16nm/SRAM_wrapper.sv
