@@ -163,29 +163,22 @@ module megasoc_tech_wrapper(
     output wire [15:0]      P1_EN,
     output wire [15:0]      P1_FUNC,
 
-    // DDR4 signals
+    // LPDDR4 Signals
+    output wire             DDR4_RESET_N,
     output wire             DDR4_CK_T,
     output wire             DDR4_CK_C,
-
-    output wire [16:0]      DDR4_ADR,
-    output wire [1:0]       DDR4_BA,
-    output wire [1:0]       DDR4_BG,
-
-    output wire             DDR4_ACT_n,
-    output wire [1:0]       DDR4_CKE,
-    output wire [1:0]       DDR4_CS_N,
-    output wire [1:0]       DDR4_ODT,
-    output wire             DDR_PARITY,
-
-    inout  wire [63:0]      DDR4_DQ,
-    inout  wire [7:0]       DDR4_DM_DBI_N,
-    inout  wire [7:0]       DDR4_DQS_T,
-    inout  wire [7:0]       DDR4_DQS_C,
-
-    output wire             DDR4_RESET_N,
-
-    input  wire             DDR_nALERT,
-    input  wire             DDR_nEVENT,
+    output wire             DDR4_CKE,
+    output wire             DDR4_CS_N,
+    output wire [5:0]       DDR4_ADR,
+    output wire             DDR4_ODT,
+    inout  wire [1:0]       DDR4_DQS_T,
+    inout  wire [1:0]       DDR4_DQS_C,
+    inout  wire [15:0]      DDR4_DQ,
+    inout  wire [1:0]       DDR4_DM_DBI_N,
+    inout  wire             DDR4_ALERT_N,
+    inout  wire             DDR4_VREF,
+    input  wire             DDR4_ZN_SENSE,
+    output wire             DDR4_ZN,
 
     // SDIO PHY to MAC Signals
     output wire             SDIO_o_cfg_ddr,
@@ -240,18 +233,26 @@ wire     CPU_CORE_PORESETn;
 wire     CPU_CORE_WRMRSTn;
 wire     CPU_L2_RESETn;
 
+qchannel DRAM_SYS_Qchannel();
+qchannel DRAM_DDRC_Qchannel();
+
+assign DRAM_SYS_Qchannel.qreqn = 1'b1;
+assign DRAM_DDRC_Qchannel.qreqn= 1'b1;
 //--------------------------------------
 //  Bus Interfaces
 //--------------------------------------
 // AXI
-axi4 #(.DATA_W(128), .ID_W(6), .ADDR_W(44))     CPU_AXI();
-axi4 #(.DATA_W(32), .ID_W(7), .ADDR_W(32)) GIC_AXI();
-axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(33))   DRAM_AXI();
-axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(32))   SRAM_AXI();
-axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(32))   ROM_AXI();
-axi4 #(.DATA_W(32), .ID_W(7)   , .ADDR_W(32))   SDIO_S_AXI();
+axi4 #(.DATA_W(128), .ID_W(6),    .ADDR_W(44))  CPU_AXI();
+axi4 #(.DATA_W(32),  .ID_W(7),    .ADDR_W(32))  GIC_AXI();
+axi4 #(.DATA_W(64),  .ID_W(ID_W), .ADDR_W(33))  DRAM_AXI();
+axi4 #(.DATA_W(64),  .ID_W(ID_W), .ADDR_W(32))  SRAM_AXI();
+axi4 #(.DATA_W(64),  .ID_W(ID_W), .ADDR_W(32))  ROM_AXI();
+axi4 #(.DATA_W(32),  .ID_W(7)   , .ADDR_W(32))  SDIO_S_AXI();
 axi4l #(.DATA_W(32), .ADDR_W(32))               SDIO_S_AXIL();
-axi4 #(.DATA_W(64), .ID_W(2)   , .ADDR_W(44))   SDIO_M_AXI();
+axi4 #(.DATA_W(64),  .ID_W(2)   , .ADDR_W(44))  SDIO_M_AXI();
+
+wire [3:0] DRAM_AXI_AWQOS;
+wire [3:0] DRAM_AXI_ARQOS;
 // AHB
 ahb #(.DATA_W(32), .ADDR_W(32))     FLASH_AHB();
 ahb #(.DATA_W(32), .ADDR_W(32))     PERIPH_AHB();
@@ -260,7 +261,8 @@ ahb #(.DATA_W(32), .ADDR_W(32))     ADP_AHB();
 apb3    CPU_DBG_APB();
 apb3    PCK_APB();
 apb4    FLASH_CTRL_APB();
-
+apb3    DRAM_CFG_APB();
+apb4    DRAM_PHY_CFG_APB();
 
 wire                CPU_nPRESETDBG;
 wire                CPU_PCLKENDBG;
@@ -331,25 +333,34 @@ megasoc_dram_wrapper #(.ID_W(8)) u_megasoc_dram_wrapper(
     .ACLK(SYS_CLK),
     .ARESETn(SYS_RESETn),
 
-    .DRAM_AXI(DRAM_AXI),
+    .PCLK(SYS_CLK),
+    .PRESETn(SYS_RESETn),
 
+    .DRAM_AXI(DRAM_AXI),
+    .DRAM_AXI_AWQOS(DRAM_AXI_AWQOS),
+    .DRAM_AXI_ARQOS(DRAM_AXI_ARQOS),
+    .DRAM_CFG_APB(DRAM_CFG_APB),
+    .DRAM_PHY_CFG_APB(DRAM_PHY_CFG_APB),
+
+    .DRAM_SYS_Qchannel(DRAM_SYS_Qchannel),
+    .DRAM_DDRC_Qchannel(DRAM_DDRC_Qchannel),
+
+    .DDR4_RESET_N(DDR4_RESET_N),
     .DDR4_CK_T(DDR4_CK_T),
     .DDR4_CK_C(DDR4_CK_C),
-    .DDR4_ADR(DDR4_ADR),
-    .DDR4_BA(DDR4_BA),
-    .DDR4_BG(DDR4_BG),
-    .DDR4_ACT_n(DDR4_ACT_n),
     .DDR4_CKE(DDR4_CKE),
     .DDR4_CS_N(DDR4_CS_N),
+    .DDR4_ADR(DDR4_ADR),
     .DDR4_ODT(DDR4_ODT),
-    .DDR_PARITY(DDR_PARITY),
-    .DDR4_DQ(DDR4_DQ),
-    .DDR4_DM_DBI_N(DDR4_DM_DBI_N),
     .DDR4_DQS_T(DDR4_DQS_T),
     .DDR4_DQS_C(DDR4_DQS_C),
-    .DDR4_RESET_N(DDR4_RESET_N),
-    .DDR_nALERT(DDR_nALERT),
-    .DDR_nEVENT(DDR_nEVENT)
+    .DDR4_DQ(DDR4_DQ),
+    .DDR4_DM_DBI_N(DDR4_DM_DBI_N),
+
+    .DDR4_ALERT_N(DDR4_ALERT_N),
+    .DDR4_VREF(DDR4_VREF),
+    .DDR4_ZN_SENSE(DDR4_ZN_SENSE),
+    .DDR4_ZN(DDR4_ZN)
 );
 
 ROM_wrapper u_ROM_wrapper(
@@ -760,6 +771,8 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .RLAST_DRAM(DRAM_AXI.RLAST),
     .RVALID_DRAM(DRAM_AXI.RVALID),
     .RREADY_DRAM(DRAM_AXI.RREADY),
+    .AWQOS_DRAM(DRAM_AXI_AWQOS),
+    .ARQOS_DRAM(DRAM_AXI_ARQOS),
 
     .AWID_EXP_M(EXP_M_AXI.AWID),
     .AWADDR_EXP_M(EXP_M_AXI.AWADDR),
@@ -977,6 +990,27 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .PRDATA_DEBUG(CPU_DBG_APB.prdata),
     .PSLVERR_DEBUG(CPU_DBG_APB.pslverr),
     .PREADY_DEBUG(CPU_DBG_APB.pready),
+
+
+    .PADDR_DRAM_CFG(DRAM_CFG_APB.paddr),
+    .PWDATA_DRAM_CFG(DRAM_CFG_APB.pwdata),
+    .PWRITE_DRAM_CFG(DRAM_CFG_APB.pwrite),
+    .PENABLE_DRAM_CFG(DRAM_CFG_APB.penable),
+    .PSELx_DRAM_CFG(DRAM_CFG_APB.psel),
+    .PRDATA_DRAM_CFG(DRAM_CFG_APB.prdata),
+    .PSLVERR_DRAM_CFG(DRAM_CFG_APB.pslverr),
+    .PREADY_DRAM_CFG(DRAM_CFG_APB.pready),
+
+    .PADDR_DRAM_PHY_CFG(DRAM_PHY_CFG_APB.paddr),
+    .PWDATA_DRAM_PHY_CFG(DRAM_PHY_CFG_APB.pwdata),
+    .PWRITE_DRAM_PHY_CFG(DRAM_PHY_CFG_APB.pwrite),
+    .PPROT_DRAM_PHY_CFG(DRAM_PHY_CFG_APB.pprot),
+    .PSTRB_DRAM_PHY_CFG(DRAM_PHY_CFG_APB.pstrb),
+    .PENABLE_DRAM_PHY_CFG(DRAM_PHY_CFG_APB.penable),
+    .PSELx_DRAM_PHY_CFG(DRAM_PHY_CFG_APB.psel),
+    .PRDATA_DRAM_PHY_CFG(DRAM_PHY_CFG_APB.prdata),
+    .PSLVERR_DRAM_PHY_CFG(DRAM_PHY_CFG_APB.pslverr),
+    .PREADY_DRAM_PHY_CFG(DRAM_PHY_CFG_APB.pready),
 
     // .PADDR_DMA_CTRL(PADDR_DMA_CTRL),
     // .PWDATA_DMA_CTRL(PWDATA_DMA_CTRL),

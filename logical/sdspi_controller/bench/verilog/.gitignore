@@ -1,0 +1,9 @@
+a.out
+devsim
+tb_sdckgen
+tb_txframe
+report.txt
+sdiosim
+test/
+/cpu/
+/testscript.v

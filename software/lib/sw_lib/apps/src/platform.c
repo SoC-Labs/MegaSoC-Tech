@@ -22,6 +22,7 @@
 // This function handles the aarch64 exec. state async abort
 void sync_ext_abort_handler(void) 
 {
+  printf("Sync_ext_abort_handler\n");
    abort_handler();
 }
 

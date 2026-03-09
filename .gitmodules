@@ -4,6 +4,3 @@
 [submodule "logical/socdebug_tech"]
 	path = logical/socdebug_tech
 	url = https://git.soton.ac.uk/soclabs/socdebug_tech.git
-[submodule "logical/sdspi"]
-	path = logical/sdspi
-	url = https://github.com/ZipCPU/sdspi.git

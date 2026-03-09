@@ -39,6 +39,11 @@
 
 #define DAP_DBG_BASE                        0x01300000UL
 
+#define DRAM_PHY_CFG_BASE                   0x02000000UL
+#define DRAM_CFG_BASE                       0x01500000UL
+
+#define DRAM_BASE                           0x80000000UL
+
 #define PASS_CODE 0xBEEF1AC0
 #define FAIL_CODE 0xDEADBEEF
 #define HOST_CXDT_CODE   0xFFFFFFFF

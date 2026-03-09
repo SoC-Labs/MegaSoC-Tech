@@ -76,7 +76,7 @@
           <ReadAcceptance>32</ReadAcceptance>
           <WriteAcceptance>32</WriteAcceptance>
           <QoSTypeAXI>fixed</QoSTypeAXI>
-          <QoSValue>0</QoSValue>
+          <QoSValue>15</QoSValue>
           <TransactionRateRegulation>false</TransactionRateRegulation>
           <OutstandingTransactionRegulation>false</OutstandingTransactionRegulation>
           <LatencyPeriodRegulation>false</LatencyPeriodRegulation>
@@ -175,12 +175,12 @@
           <RUSEREnabled>false</RUSEREnabled>
           <WUSEREnabled>false</WUSEREnabled>
           <TrustZoneMaster>non_secure</TrustZoneMaster>
-          <ReadIssuing>1</ReadIssuing>
-          <WriteIssuing>1</WriteIssuing>
-          <TotalIssuing>1</TotalIssuing>
+          <ReadIssuing>8</ReadIssuing>
+          <WriteIssuing>8</WriteIssuing>
+          <TotalIssuing>16</TotalIssuing>
           <MultiPorted>false</MultiPorted>
           <IDWidthReduction>true</IDWidthReduction>
-          <OutputSignals>false</OutputSignals>
+          <OutputSignals>true</OutputSignals>
           <VNExternal>false</VNExternal>
         </AXI4MasterProtocol>
         <GeographicDomainRef>gd0</GeographicDomainRef>
@@ -358,6 +358,28 @@
         <GeographicDomainRef>gd0</GeographicDomainRef>
         <ClockRef>clk0</ClockRef>
       </MasterInterface>
+      <MasterInterface>
+        <Name>DRAM_CFG</Name>
+        <APBMasterProtocol>
+          <AddressWidth>32</AddressWidth>
+          <DataWidth>32</DataWidth>
+          <TrustZoneMasterAPB>non_secure</TrustZoneMasterAPB>
+          <APBGroupRef>apb_group0</APBGroupRef>
+        </APBMasterProtocol>
+        <GeographicDomainRef>gd0</GeographicDomainRef>
+        <ClockRef>clk0</ClockRef>
+      </MasterInterface>
+      <MasterInterface>
+        <Name>DRAM_PHY_CFG</Name>
+        <APB4MasterProtocol>
+          <AddressWidth>32</AddressWidth>
+          <DataWidth>32</DataWidth>
+          <TrustZoneMasterAPB>non_secure</TrustZoneMasterAPB>
+          <APBGroupRef>apb_group0</APBGroupRef>
+        </APB4MasterProtocol>
+        <GeographicDomainRef>gd0</GeographicDomainRef>
+        <ClockRef>clk0</ClockRef>
+      </MasterInterface>
     </Interfaces>
     <MemoryMaps>
       <MemoryMap>
@@ -430,6 +452,18 @@
           <InterfaceRef>SDIO_S</InterfaceRef>
           <Offset>16842752</Offset>
           <Range>65536</Range>
+          <Visibility>true</Visibility>
+        </MappedBlock>
+        <MappedBlock>
+          <InterfaceRef>DRAM_PHY_CFG</InterfaceRef>
+          <Offset>33554432</Offset>
+          <Range>8388608</Range>
+          <Visibility>true</Visibility>
+        </MappedBlock>
+        <MappedBlock>
+          <InterfaceRef>DRAM_CFG</InterfaceRef>
+          <Offset>22020096</Offset>
+          <Range>28672</Range>
           <Visibility>true</Visibility>
         </MappedBlock>
       </MemoryMap>
@@ -572,6 +606,18 @@
           <Range>65536</Range>
           <Visibility>true</Visibility>
         </MappedBlock>
+        <MappedBlock>
+          <InterfaceRef>DRAM_PHY_CFG</InterfaceRef>
+          <Offset>33554432</Offset>
+          <Range>8388608</Range>
+          <Visibility>true</Visibility>
+        </MappedBlock>
+        <MappedBlock>
+          <InterfaceRef>DRAM_CFG</InterfaceRef>
+          <Offset>22020096</Offset>
+          <Range>28672</Range>
+          <Visibility>true</Visibility>
+        </MappedBlock>
       </MemoryMap>
     </MemoryMaps>
     <Paths>
@@ -612,6 +658,12 @@
           </Target>
           <Target>
             <InterfaceRef>SDIO_S</InterfaceRef>
+          </Target>
+          <Target>
+            <InterfaceRef>DRAM_CFG</InterfaceRef>
+          </Target>
+          <Target>
+            <InterfaceRef>DRAM_PHY_CFG</InterfaceRef>
           </Target>
         </Targets>
       </Path>
@@ -674,6 +726,12 @@
           </Target>
           <Target>
             <InterfaceRef>EXP_M</InterfaceRef>
+          </Target>
+          <Target>
+            <InterfaceRef>DRAM_CFG</InterfaceRef>
+          </Target>
+          <Target>
+            <InterfaceRef>DRAM_PHY_CFG</InterfaceRef>
           </Target>
         </Targets>
       </Path>
@@ -846,6 +904,26 @@
                     &lt;target&gt;SDIO_S&lt;/target&gt;
                 &lt;/remap&gt;
             &lt;/range&gt;
+            &lt;range&gt;
+                &lt;addr_max&gt;0x27FFFFF&lt;/addr_max&gt;
+                &lt;addr_min&gt;0x2000000&lt;/addr_min&gt;
+                &lt;remap&gt;
+                    &lt;bit&gt;default&lt;/bit&gt;
+                    &lt;present&gt;true&lt;/present&gt;
+                    &lt;region&gt;0&lt;/region&gt;
+                    &lt;target&gt;DRAM_PHY_CFG&lt;/target&gt;
+                &lt;/remap&gt;
+            &lt;/range&gt;
+            &lt;range&gt;
+                &lt;addr_max&gt;0x1506FFF&lt;/addr_max&gt;
+                &lt;addr_min&gt;0x1500000&lt;/addr_min&gt;
+                &lt;remap&gt;
+                    &lt;bit&gt;default&lt;/bit&gt;
+                    &lt;present&gt;true&lt;/present&gt;
+                    &lt;region&gt;0&lt;/region&gt;
+                    &lt;target&gt;DRAM_CFG&lt;/target&gt;
+                &lt;/remap&gt;
+            &lt;/range&gt;
         &lt;/address_ranges&gt;
         &lt;apb_config&gt;false&lt;/apb_config&gt;
         &lt;apb_slave_no def=&quot;true&quot;&gt;2&lt;/apb_slave_no&gt;
@@ -865,7 +943,7 @@
         &lt;/qos_config&gt;
         &lt;qv&gt;
             &lt;type&gt;fixed&lt;/type&gt;
-            &lt;value&gt;0&lt;/value&gt;
+            &lt;value&gt;15&lt;/value&gt;
         &lt;/qv&gt;
         &lt;reg&gt;
             &lt;impl&gt;present&lt;/impl&gt;
@@ -1268,6 +1346,26 @@
                     &lt;present&gt;true&lt;/present&gt;
                     &lt;region&gt;0&lt;/region&gt;
                     &lt;target&gt;SDIO_S&lt;/target&gt;
+                &lt;/remap&gt;
+            &lt;/range&gt;
+            &lt;range&gt;
+                &lt;addr_max&gt;0x27FFFFF&lt;/addr_max&gt;
+                &lt;addr_min&gt;0x2000000&lt;/addr_min&gt;
+                &lt;remap&gt;
+                    &lt;bit&gt;default&lt;/bit&gt;
+                    &lt;present&gt;true&lt;/present&gt;
+                    &lt;region&gt;0&lt;/region&gt;
+                    &lt;target&gt;DRAM_PHY_CFG&lt;/target&gt;
+                &lt;/remap&gt;
+            &lt;/range&gt;
+            &lt;range&gt;
+                &lt;addr_max&gt;0x1506FFF&lt;/addr_max&gt;
+                &lt;addr_min&gt;0x1500000&lt;/addr_min&gt;
+                &lt;remap&gt;
+                    &lt;bit&gt;default&lt;/bit&gt;
+                    &lt;present&gt;true&lt;/present&gt;
+                    &lt;region&gt;0&lt;/region&gt;
+                    &lt;target&gt;DRAM_CFG&lt;/target&gt;
                 &lt;/remap&gt;
             &lt;/range&gt;
         &lt;/address_ranges&gt;
@@ -1993,7 +2091,7 @@
         &lt;multi_region&gt;false&lt;/multi_region&gt;
         &lt;name&gt;DRAM&lt;/name&gt;
         &lt;protocol&gt;axi4&lt;/protocol&gt;
-        &lt;qv_out&gt;false&lt;/qv_out&gt;
+        &lt;qv_out&gt;true&lt;/qv_out&gt;
         &lt;reg&gt;
             &lt;impl&gt;present&lt;/impl&gt;
             &lt;location&gt;master_port&lt;/location&gt;
@@ -2486,6 +2584,20 @@
             &lt;x&gt;0&lt;/x&gt;
             &lt;y&gt;0&lt;/y&gt;
         &lt;/apb_port&gt;
+        &lt;apb_port&gt;
+            &lt;clock_domain&gt;clk0&lt;/clock_domain&gt;
+            &lt;name&gt;DRAM_CFG&lt;/name&gt;
+            &lt;trustzone&gt;nsec&lt;/trustzone&gt;
+            &lt;x&gt;0&lt;/x&gt;
+            &lt;y&gt;0&lt;/y&gt;
+        &lt;/apb_port&gt;
+        &lt;apb_port&gt;
+            &lt;clock_domain&gt;clk0&lt;/clock_domain&gt;
+            &lt;name&gt;DRAM_PHY_CFG&lt;/name&gt;
+            &lt;trustzone&gt;nsec&lt;/trustzone&gt;
+            &lt;x&gt;0&lt;/x&gt;
+            &lt;y&gt;0&lt;/y&gt;
+        &lt;/apb_port&gt;
         &lt;apb_slave_no&gt;57&lt;/apb_slave_no&gt;
         &lt;clock_boundary&gt;none&lt;/clock_boundary&gt;
         &lt;clock_domain_name_master_if&gt;clk0&lt;/clock_domain_name_master_if&gt;
@@ -2576,7 +2688,7 @@
         &lt;vn_external_bridge def=&quot;true&quot;&gt;none&lt;/vn_external_bridge&gt;
         &lt;x&gt;0&lt;/x&gt;
         &lt;y&gt;180&lt;/y&gt;
-        &lt;master_if_port_name&gt;FLASH_CTRL,DEBUG,PCK_CTRL&lt;/master_if_port_name&gt;
+        &lt;master_if_port_name&gt;FLASH_CTRL,DEBUG,PCK_CTRL,DRAM_CFG,DRAM_PHY_CFG&lt;/master_if_port_name&gt;
         &lt;slave_if_port_name&gt;apb_group0_s&lt;/slave_if_port_name&gt;
     &lt;/amib&gt;
     &lt;inter&gt;
@@ -4266,9 +4378,9 @@
         &lt;dest&gt;external&lt;/dest&gt;
         &lt;dest_port&gt;DRAM&lt;/dest_port&gt;
         &lt;lock&gt;false&lt;/lock&gt;
-        &lt;out_reads&gt;1&lt;/out_reads&gt;
-        &lt;out_trans&gt;1&lt;/out_trans&gt;
-        &lt;out_writes&gt;1&lt;/out_writes&gt;
+        &lt;out_reads&gt;8&lt;/out_reads&gt;
+        &lt;out_trans&gt;16&lt;/out_trans&gt;
+        &lt;out_writes&gt;8&lt;/out_writes&gt;
         &lt;protocol&gt;axi4&lt;/protocol&gt;
         &lt;ruser&gt;false&lt;/ruser&gt;
         &lt;src&gt;DRAM&lt;/src&gt;
@@ -4372,6 +4484,38 @@
         &lt;wuser&gt;false&lt;/wuser&gt;
     &lt;/connect&gt;
     &lt;connect&gt;
+        &lt;aruser&gt;false&lt;/aruser&gt;
+        &lt;awuser&gt;false&lt;/awuser&gt;
+        &lt;buser&gt;false&lt;/buser&gt;
+        &lt;dest&gt;external&lt;/dest&gt;
+        &lt;dest_port&gt;DRAM_CFG&lt;/dest_port&gt;
+        &lt;lock&gt;false&lt;/lock&gt;
+        &lt;out_reads&gt;1&lt;/out_reads&gt;
+        &lt;out_trans&gt;1&lt;/out_trans&gt;
+        &lt;out_writes&gt;1&lt;/out_writes&gt;
+        &lt;protocol&gt;apb3&lt;/protocol&gt;
+        &lt;ruser&gt;false&lt;/ruser&gt;
+        &lt;src&gt;apb_group0&lt;/src&gt;
+        &lt;src_port&gt;DRAM_CFG&lt;/src_port&gt;
+        &lt;wuser&gt;false&lt;/wuser&gt;
+    &lt;/connect&gt;
+    &lt;connect&gt;
+        &lt;aruser&gt;false&lt;/aruser&gt;
+        &lt;awuser&gt;false&lt;/awuser&gt;
+        &lt;buser&gt;false&lt;/buser&gt;
+        &lt;dest&gt;external&lt;/dest&gt;
+        &lt;dest_port&gt;DRAM_PHY_CFG&lt;/dest_port&gt;
+        &lt;lock&gt;false&lt;/lock&gt;
+        &lt;out_reads&gt;1&lt;/out_reads&gt;
+        &lt;out_trans&gt;1&lt;/out_trans&gt;
+        &lt;out_writes&gt;1&lt;/out_writes&gt;
+        &lt;protocol&gt;apb4&lt;/protocol&gt;
+        &lt;ruser&gt;false&lt;/ruser&gt;
+        &lt;src&gt;apb_group0&lt;/src&gt;
+        &lt;src_port&gt;DRAM_PHY_CFG&lt;/src_port&gt;
+        &lt;wuser&gt;false&lt;/wuser&gt;
+    &lt;/connect&gt;
+    &lt;connect&gt;
         &lt;dest&gt;bm0&lt;/dest&gt;
         &lt;dest_port&gt;axi_s_0&lt;/dest_port&gt;
         &lt;lock&gt;false&lt;/lock&gt;
@@ -4430,9 +4574,9 @@
         &lt;dest&gt;DRAM&lt;/dest&gt;
         &lt;dest_port&gt;DRAM_s&lt;/dest_port&gt;
         &lt;lock&gt;false&lt;/lock&gt;
-        &lt;out_reads&gt;1&lt;/out_reads&gt;
-        &lt;out_trans&gt;1&lt;/out_trans&gt;
-        &lt;out_writes&gt;1&lt;/out_writes&gt;
+        &lt;out_reads&gt;8&lt;/out_reads&gt;
+        &lt;out_trans&gt;16&lt;/out_trans&gt;
+        &lt;out_writes&gt;8&lt;/out_writes&gt;
         &lt;protocol&gt;axi4&lt;/protocol&gt;
         &lt;src&gt;bm0&lt;/src&gt;
         &lt;src_port&gt;axi_m_4&lt;/src_port&gt;
@@ -4562,9 +4706,9 @@
         &lt;dest&gt;ib5&lt;/dest&gt;
         &lt;dest_port&gt;ib5_s&lt;/dest_port&gt;
         &lt;lock&gt;false&lt;/lock&gt;
-        &lt;out_reads def=&quot;true&quot;&gt;17&lt;/out_reads&gt;
-        &lt;out_trans&gt;34&lt;/out_trans&gt;
-        &lt;out_writes def=&quot;true&quot;&gt;17&lt;/out_writes&gt;
+        &lt;out_reads def=&quot;true&quot;&gt;24&lt;/out_reads&gt;
+        &lt;out_trans&gt;48&lt;/out_trans&gt;
+        &lt;out_writes def=&quot;true&quot;&gt;24&lt;/out_writes&gt;
         &lt;protocol&gt;axi4&lt;/protocol&gt;
         &lt;src&gt;bm2&lt;/src&gt;
         &lt;src_port&gt;axi_m_1&lt;/src_port&gt;
@@ -4573,9 +4717,9 @@
         &lt;dest&gt;bm0&lt;/dest&gt;
         &lt;dest_port&gt;axi_s_3&lt;/dest_port&gt;
         &lt;lock&gt;false&lt;/lock&gt;
-        &lt;out_reads def=&quot;true&quot;&gt;17&lt;/out_reads&gt;
-        &lt;out_trans&gt;34&lt;/out_trans&gt;
-        &lt;out_writes def=&quot;true&quot;&gt;17&lt;/out_writes&gt;
+        &lt;out_reads def=&quot;true&quot;&gt;24&lt;/out_reads&gt;
+        &lt;out_trans&gt;48&lt;/out_trans&gt;
+        &lt;out_writes def=&quot;true&quot;&gt;24&lt;/out_writes&gt;
         &lt;protocol&gt;axi4&lt;/protocol&gt;
         &lt;src&gt;ib5&lt;/src&gt;
         &lt;src_port&gt;ib5_m&lt;/src_port&gt;
@@ -4615,23 +4759,18 @@
         &lt;/link&gt;
         &lt;link&gt;
             &lt;slave_if&gt;
-                &lt;name&gt;EXP_S&lt;/name&gt;
-                &lt;master_if&gt;FLASH&lt;/master_if&gt;
-                &lt;master_if&gt;DRAM&lt;/master_if&gt;
-                &lt;master_if&gt;RAM&lt;/master_if&gt;
-                &lt;master_if&gt;ROM&lt;/master_if&gt;
-            &lt;/slave_if&gt;
-        &lt;/link&gt;
-        &lt;link&gt;
-            &lt;slave_if&gt;
-                &lt;name&gt;ADP&lt;/name&gt;
-                &lt;master_if&gt;apb_group0&lt;/master_if&gt;
+                &lt;name&gt;A53&lt;/name&gt;
+                &lt;master_if&gt;SDIO_S&lt;/master_if&gt;
                 &lt;master_if&gt;GIC&lt;/master_if&gt;
                 &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
                 &lt;master_if&gt;FLASH&lt;/master_if&gt;
-                &lt;master_if&gt;SDIO_S&lt;/master_if&gt;
+                &lt;master_if&gt;DRAM_PHY_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;/master_if&gt;
+                &lt;master_if&gt;DRAM_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;/master_if&gt;
                 &lt;master_if&gt;PCK_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
+                &lt;master_if&gt;apb_group0&lt;/master_if&gt;
                 &lt;master_if&gt;DEBUG&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
                 &lt;master_if&gt;FLASH_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
@@ -4644,14 +4783,27 @@
         &lt;/link&gt;
         &lt;link&gt;
             &lt;slave_if&gt;
-                &lt;name&gt;A53&lt;/name&gt;
-                &lt;master_if&gt;apb_group0&lt;/master_if&gt;
+                &lt;name&gt;EXP_S&lt;/name&gt;
+                &lt;master_if&gt;FLASH&lt;/master_if&gt;
+                &lt;master_if&gt;DRAM&lt;/master_if&gt;
+                &lt;master_if&gt;RAM&lt;/master_if&gt;
+                &lt;master_if&gt;ROM&lt;/master_if&gt;
+            &lt;/slave_if&gt;
+        &lt;/link&gt;
+        &lt;link&gt;
+            &lt;slave_if&gt;
+                &lt;name&gt;ADP&lt;/name&gt;
+                &lt;master_if&gt;SDIO_S&lt;/master_if&gt;
                 &lt;master_if&gt;GIC&lt;/master_if&gt;
                 &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
                 &lt;master_if&gt;FLASH&lt;/master_if&gt;
-                &lt;master_if&gt;SDIO_S&lt;/master_if&gt;
+                &lt;master_if&gt;DRAM_PHY_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;/master_if&gt;
+                &lt;master_if&gt;DRAM_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;/master_if&gt;
                 &lt;master_if&gt;PCK_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
+                &lt;master_if&gt;apb_group0&lt;/master_if&gt;
                 &lt;master_if&gt;DEBUG&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
                 &lt;master_if&gt;FLASH_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;

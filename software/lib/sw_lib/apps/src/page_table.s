@@ -592,10 +592,10 @@ pgtbl2:
     .quad (0x0040000001a00409) // 26-28MB
     .quad (0x0040000001c00409) // 28-30MB
     .quad (0x0040000001e00409) // 30-32MB 
-    .quad (0x0000000002000401) // 32-34MB Volatile Memory - Normal, Inner/Outer WB/WA/RA
-    .quad (0x0000000002200401) // 34-36MB
-    .quad (0x0000000002400401) // 36-38MB
-    .quad (0x0000000002600401) // 38-40MB
+    .quad (0x0060000002000409) // 32-34MB DRAM PHY configuration
+    .quad (0x0060000002200409) // 34-36MB DRAM PHY configuration
+    .quad (0x0060000002400409) // 36-38MB DRAM PHY configuration
+    .quad (0x0060000002600409) // 38-40MB DRAM PHY configuration
     .quad (0x0000000002800401) // 40-42MB
     .quad (0x0000000002a00401) // 42-44MB
     .quad (0x0000000002c00401) // 44-46MB

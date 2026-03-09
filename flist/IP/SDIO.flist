@@ -1,20 +1,20 @@
 
 
 
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/afifo.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdio.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdckgen.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdwb.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdskid.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdaxil.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdcmd.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sddma_mm2s.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sddma_rxgears.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sddma_s2mm.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sddma_txgears.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdax_mm2s.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdax_s2mm.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdfifo.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sddma.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdtxframe.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdrxframe.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/afifo.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sdio.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sdckgen.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sdwb.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sdskid.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sdaxil.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sdcmd.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sddma_mm2s.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sddma_rxgears.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sddma_s2mm.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sddma_txgears.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sdax_mm2s.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sdax_s2mm.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sdfifo.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sddma.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sdtxframe.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi_controller/rtl/sdrxframe.v
