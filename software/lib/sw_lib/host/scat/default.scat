@@ -22,14 +22,15 @@ ROM 0x00400000
         boot.s.v8-a.o (SECURE_ROM_BOOT, +FIRST)
         *(+RO)
     }
-}
 
-SRAM 0x00800000
-{
     RWZI 0x00800000 0x4000
     {
         *(+RW,+ZI)
     }
+}
+
+SRAM 0x00800000
+{
 
     ARM_LIB_STACK   0x00804000 EMPTY 0x2000 
     {

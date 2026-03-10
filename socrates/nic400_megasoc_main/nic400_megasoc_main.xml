@@ -403,7 +403,7 @@
         <MappedBlock>
           <InterfaceRef>RAM</InterfaceRef>
           <Offset>8388608</Offset>
-          <Range>65536</Range>
+          <Range>524288</Range>
           <Visibility>true</Visibility>
         </MappedBlock>
         <MappedBlock>
@@ -488,7 +488,7 @@
         <MappedBlock>
           <InterfaceRef>RAM</InterfaceRef>
           <Offset>8388608</Offset>
-          <Range>65536</Range>
+          <Range>524288</Range>
           <Visibility>true</Visibility>
         </MappedBlock>
         <MappedBlock>
@@ -524,7 +524,7 @@
         <MappedBlock>
           <InterfaceRef>RAM</InterfaceRef>
           <Offset>8388608</Offset>
-          <Range>65536</Range>
+          <Range>524288</Range>
           <Visibility>true</Visibility>
         </MappedBlock>
         <MappedBlock>
@@ -555,7 +555,7 @@
         <MappedBlock>
           <InterfaceRef>RAM</InterfaceRef>
           <Offset>8388608</Offset>
-          <Range>65536</Range>
+          <Range>524288</Range>
           <Visibility>true</Visibility>
         </MappedBlock>
         <MappedBlock>
@@ -815,7 +815,7 @@
                 &lt;/remap&gt;
             &lt;/range&gt;
             &lt;range&gt;
-                &lt;addr_max&gt;0x80FFFF&lt;/addr_max&gt;
+                &lt;addr_max&gt;0x87FFFF&lt;/addr_max&gt;
                 &lt;addr_min&gt;0x800000&lt;/addr_min&gt;
                 &lt;remap&gt;
                     &lt;bit&gt;default&lt;/bit&gt;
@@ -1077,7 +1077,7 @@
                 &lt;/remap&gt;
             &lt;/range&gt;
             &lt;range&gt;
-                &lt;addr_max&gt;0x80FFFF&lt;/addr_max&gt;
+                &lt;addr_max&gt;0x87FFFF&lt;/addr_max&gt;
                 &lt;addr_min&gt;0x800000&lt;/addr_min&gt;
                 &lt;remap&gt;
                     &lt;bit&gt;default&lt;/bit&gt;
@@ -1259,7 +1259,7 @@
                 &lt;/remap&gt;
             &lt;/range&gt;
             &lt;range&gt;
-                &lt;addr_max&gt;0x80FFFF&lt;/addr_max&gt;
+                &lt;addr_max&gt;0x87FFFF&lt;/addr_max&gt;
                 &lt;addr_min&gt;0x800000&lt;/addr_min&gt;
                 &lt;remap&gt;
                     &lt;bit&gt;default&lt;/bit&gt;
@@ -1497,7 +1497,7 @@
                 &lt;/remap&gt;
             &lt;/range&gt;
             &lt;range&gt;
-                &lt;addr_max&gt;0x80FFFF&lt;/addr_max&gt;
+                &lt;addr_max&gt;0x87FFFF&lt;/addr_max&gt;
                 &lt;addr_min&gt;0x800000&lt;/addr_min&gt;
                 &lt;remap&gt;
                     &lt;bit&gt;default&lt;/bit&gt;
@@ -4749,69 +4749,69 @@
     &lt;architecture&gt;
         &lt;link&gt;
             &lt;slave_if&gt;
-                &lt;name&gt;SDIO_M&lt;/name&gt;
-                &lt;master_if&gt;FLASH&lt;/master_if&gt;
-                &lt;master_if&gt;EXP_M&lt;/master_if&gt;
-                &lt;master_if&gt;DRAM&lt;/master_if&gt;
-                &lt;master_if&gt;RAM&lt;/master_if&gt;
-                &lt;master_if&gt;ROM&lt;/master_if&gt;
-            &lt;/slave_if&gt;
-        &lt;/link&gt;
-        &lt;link&gt;
-            &lt;slave_if&gt;
                 &lt;name&gt;A53&lt;/name&gt;
-                &lt;master_if&gt;SDIO_S&lt;/master_if&gt;
-                &lt;master_if&gt;GIC&lt;/master_if&gt;
-                &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
+                &lt;master_if&gt;ROM&lt;/master_if&gt;
                 &lt;master_if&gt;FLASH&lt;/master_if&gt;
-                &lt;master_if&gt;DRAM_PHY_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;master_if&gt;RAM&lt;/master_if&gt;
+                &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
+                &lt;master_if&gt;DRAM&lt;/master_if&gt;
+                &lt;master_if&gt;GIC&lt;/master_if&gt;
+                &lt;master_if&gt;EXP_M&lt;/master_if&gt;
+                &lt;master_if&gt;SDIO_S&lt;/master_if&gt;
+                &lt;master_if&gt;apb_group0&lt;/master_if&gt;
+                &lt;master_if&gt;FLASH_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
-                &lt;master_if&gt;DRAM_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;master_if&gt;DEBUG&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
                 &lt;master_if&gt;PCK_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
-                &lt;master_if&gt;apb_group0&lt;/master_if&gt;
-                &lt;master_if&gt;DEBUG&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;master_if&gt;DRAM_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
-                &lt;master_if&gt;FLASH_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;master_if&gt;DRAM_PHY_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
-                &lt;master_if&gt;EXP_M&lt;/master_if&gt;
-                &lt;master_if&gt;DRAM&lt;/master_if&gt;
-                &lt;master_if&gt;RAM&lt;/master_if&gt;
-                &lt;master_if&gt;ROM&lt;/master_if&gt;
             &lt;/slave_if&gt;
         &lt;/link&gt;
         &lt;link&gt;
             &lt;slave_if&gt;
-                &lt;name&gt;EXP_S&lt;/name&gt;
-                &lt;master_if&gt;FLASH&lt;/master_if&gt;
-                &lt;master_if&gt;DRAM&lt;/master_if&gt;
-                &lt;master_if&gt;RAM&lt;/master_if&gt;
+                &lt;name&gt;SDIO_M&lt;/name&gt;
                 &lt;master_if&gt;ROM&lt;/master_if&gt;
+                &lt;master_if&gt;FLASH&lt;/master_if&gt;
+                &lt;master_if&gt;RAM&lt;/master_if&gt;
+                &lt;master_if&gt;DRAM&lt;/master_if&gt;
+                &lt;master_if&gt;EXP_M&lt;/master_if&gt;
             &lt;/slave_if&gt;
         &lt;/link&gt;
         &lt;link&gt;
             &lt;slave_if&gt;
                 &lt;name&gt;ADP&lt;/name&gt;
-                &lt;master_if&gt;SDIO_S&lt;/master_if&gt;
-                &lt;master_if&gt;GIC&lt;/master_if&gt;
-                &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
+                &lt;master_if&gt;ROM&lt;/master_if&gt;
                 &lt;master_if&gt;FLASH&lt;/master_if&gt;
-                &lt;master_if&gt;DRAM_PHY_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;master_if&gt;RAM&lt;/master_if&gt;
+                &lt;master_if&gt;PERIPHERAL&lt;/master_if&gt;
+                &lt;master_if&gt;DRAM&lt;/master_if&gt;
+                &lt;master_if&gt;GIC&lt;/master_if&gt;
+                &lt;master_if&gt;EXP_M&lt;/master_if&gt;
+                &lt;master_if&gt;SDIO_S&lt;/master_if&gt;
+                &lt;master_if&gt;apb_group0&lt;/master_if&gt;
+                &lt;master_if&gt;FLASH_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
-                &lt;master_if&gt;DRAM_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;master_if&gt;DEBUG&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
                 &lt;master_if&gt;PCK_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
-                &lt;master_if&gt;apb_group0&lt;/master_if&gt;
-                &lt;master_if&gt;DEBUG&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;master_if&gt;DRAM_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
-                &lt;master_if&gt;FLASH_CTRL&lt;parent&gt;apb_group0&lt;/parent&gt;
+                &lt;master_if&gt;DRAM_PHY_CFG&lt;parent&gt;apb_group0&lt;/parent&gt;
                 &lt;/master_if&gt;
-                &lt;master_if&gt;EXP_M&lt;/master_if&gt;
-                &lt;master_if&gt;DRAM&lt;/master_if&gt;
-                &lt;master_if&gt;RAM&lt;/master_if&gt;
+            &lt;/slave_if&gt;
+        &lt;/link&gt;
+        &lt;link&gt;
+            &lt;slave_if&gt;
+                &lt;name&gt;EXP_S&lt;/name&gt;
                 &lt;master_if&gt;ROM&lt;/master_if&gt;
+                &lt;master_if&gt;FLASH&lt;/master_if&gt;
+                &lt;master_if&gt;RAM&lt;/master_if&gt;
+                &lt;master_if&gt;DRAM&lt;/master_if&gt;
             &lt;/slave_if&gt;
         &lt;/link&gt;
     &lt;/architecture&gt;

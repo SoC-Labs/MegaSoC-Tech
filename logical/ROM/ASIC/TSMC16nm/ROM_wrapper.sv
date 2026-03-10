@@ -106,7 +106,7 @@ bootrom u_ROM (
     .AY(),
 
     .PRDYN(),
-    .PGEN(~pwr_qreqn),
+    .PGEN(~(ROM_qchan_p.qreqn)),
 
     .EMA(3'b011),
     .TEN(1'b1),
