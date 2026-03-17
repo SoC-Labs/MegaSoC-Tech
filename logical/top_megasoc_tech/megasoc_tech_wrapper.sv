@@ -31,7 +31,7 @@ module megasoc_tech_wrapper(
     input  wire             SYS_CLK,
     input  wire             SYS_CLKEN,
     input  wire             RT_CLK, // 32kHz real time clock
-    input  wire             SYS_RESETn,
+    input  wire             SYS_RESETn,   // (Here SYS_RESETn is PORESETn)
 
     // MegaSoC system AXI Manager
     axi4.master             EXP_M_AXI,
@@ -215,6 +215,43 @@ module megasoc_tech_wrapper(
     input  wire [31:0]      SDIO_AD_DATA
 );
 
+wire SYS_HRESETn;
+wire SYS_PRESETn;
+
+wire rst_ahb_ctrl_n_o_from_pss;
+wire rst_apb_ctrl_n_o_from_pss;
+wire rst_dbg_ctrl_n_o_from_pss;
+
+logic sys_reset_req_from_pss;
+logic SYS_RESETn_int;
+logic sys_reset_req_sync1, sys_reset_req_sync2;
+logic [1:0] ahb_ctrl_sync, apb_ctrl_sync;
+
+always_ff @(posedge SYS_CLK or negedge SYS_RESETn) begin
+  if (!SYS_RESETn) begin
+    ahb_ctrl_sync <= 2'b00;
+    apb_ctrl_sync <= 2'b00;
+  end else begin
+    ahb_ctrl_sync <= {ahb_ctrl_sync[0], rst_ahb_ctrl_n_o_from_pss};
+    apb_ctrl_sync <= {apb_ctrl_sync[0], rst_apb_ctrl_n_o_from_pss};
+  end
+end
+
+assign SYS_HRESETn = ahb_ctrl_sync[1];
+assign SYS_PRESETn = apb_ctrl_sync[1];
+
+always_ff @(posedge SYS_CLK or negedge SYS_RESETn) begin
+  if (!SYS_RESETn) begin
+    sys_reset_req_sync1 <= 1'b0;
+    sys_reset_req_sync2 <= 1'b0;
+  end else begin
+    sys_reset_req_sync1 <= sys_reset_req_from_pss;
+    sys_reset_req_sync2 <= sys_reset_req_sync1;
+  end
+end
+
+assign SYS_RESETn_int = SYS_RESETn & ~sys_reset_req_sync2;
+
 
 parameter ID_W=9;
 parameter NUM_SPIS=480;
@@ -239,6 +276,10 @@ qchannel CPU_L2_q();
 wire     CPU_CORE_PORESETn;
 wire     CPU_CORE_WRMRSTn;
 wire     CPU_L2_RESETn;
+wire CPU_CORE_WRMRSTn_final;
+wire CPU_L2_RESETn_final;
+wire CPU_CORE_WRMRSTn_pc;
+wire CPU_L2_RESETn_pc;
 
 //--------------------------------------
 //  Bus Interfaces
@@ -266,7 +307,7 @@ wire                CPU_nPRESETDBG;
 wire                CPU_PCLKENDBG;
 
 
-assign CPU_nPRESETDBG = SYS_RESETn;
+assign CPU_nPRESETDBG = SYS_RESETn_int;
 assign CPU_PCLKENDBG = 1'b1;
 
 wire [(NUM_SPIS-1):0]   CPU_IRQS;
@@ -288,11 +329,11 @@ megasoc_cpu_ss #(
     ) u_megasoc_cpu_ss(
     // Clocks and Reset
     .CPU_CLK(SYS_CLK),
-    .RESETn(SYS_RESETn),
+    .RESETn(SYS_RESETn_int),
     .nPRESETDBG(CPU_nPRESETDBG),
     .CPU_CORE_PORESETn(CPU_CORE_PORESETn),
-    .CPU_CORE_WRMRSTn(CPU_CORE_WRMRSTn),
-    .CPU_L2_RESETn(CPU_L2_RESETn),
+    .CPU_CORE_WRMRSTn(CPU_CORE_WRMRSTn_final),
+    .CPU_L2_RESETn(CPU_L2_RESETn_final),
 
     // Clock Enable signals
     .ACLKENM(1'b1),
@@ -370,9 +411,9 @@ ROM_wrapper u_ROM_wrapper(
 
 top_ahb_qspi #(.DATA_W(32)) u_sl_ahb_qspi(
     .HCLK(SYS_CLK),
-    .HRESETn(SYS_RESETn),
+    .HRESETn(SYS_HRESETn),
     .PCLK(SYS_CLK),
-    .PRESETn(SYS_RESETn),
+    .PRESETn(SYS_PRESETn),
 
     .HADDR(FLASH_AHB.HADDR),
     .HTRANS(FLASH_AHB.HTRANS),
@@ -428,10 +469,19 @@ SRAM_wrapper u_SRAM_wrapper(
 megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
     // Clocks and Resets
     .PCLK(SYS_CLK),
-    .PRESETn(SYS_RESETn),
+    .PRESETn(SYS_PRESETn),
     .HCLK(SYS_CLK),
-    .HRESETn(SYS_RESETn),
+    .HRESETn(SYS_HRESETn),
     .RT_CLK(RT_CLK),
+
+    .FCLK(SYS_CLK),      //Make sure SYS_CLK is not gated
+    .PORESETn(SYS_RESETn),  //here SYS_RESETn is PORESETn
+    .DBGRESETREQ(1'b0),
+
+    .rst_ahb_ctrl_n_o(rst_ahb_ctrl_n_o_from_pss),
+    .rst_apb_ctrl_n_o(rst_apb_ctrl_n_o_from_pss),
+    .rst_dbg_ctrl_n_o(rst_dbg_ctrl_n_o_from_pss),
+    .sys_reset_req_o(sys_reset_req_from_pss),
 
     // ADP - AHB manager
     .ADP_AHB(ADP_AHB),
@@ -519,19 +569,22 @@ megasoc_power_control u_megasoc_power_control(
     // CPU Core Power management interfaces
     .CPU_CORE_q(CPU_CORE_q),
     .CPU_CORE_PORESETn(CPU_CORE_PORESETn),
-    .CPU_CORE_WRMRSTn(CPU_CORE_WRMRSTn),
+    .CPU_CORE_WRMRSTn(CPU_CORE_WRMRSTn_pc),
 
     // CPU Advanced SIMD Power management interfaces
     .CPU_NEON_q(CPU_NEON_q),
 
     // CPU L2 Power management interfaces
     .CPU_L2_q(CPU_L2_q),
-    .CPU_L2_RESETn(CPU_L2_RESETn)
+    .CPU_L2_RESETn(CPU_L2_RESETn_pc)
 );
+
+assign CPU_CORE_WRMRSTn_final = CPU_CORE_WRMRSTn_pc & SYS_RESETn_int;
+assign CPU_L2_RESETn_final = CPU_L2_RESETn_pc & SYS_RESETn_int;
 
 mkaxi2axil_bridge u_axi2axil (
     .CLK(SYS_CLK),
-    .RST_N(SYS_RESETn),
+    .RST_N(SYS_RESETn_int),
 
     .AXI4_AWVALID(SDIO_S_AXI.AWVALID),
     .AXI4_AWID(SDIO_S_AXI.AWID),
@@ -1167,7 +1220,7 @@ nic400_megasoc_main u_nic400_megasoc_main(
 
     .clk0clk(SYS_CLK),
     .clk0clken(SYS_CLKEN),
-    .clk0resetn(SYS_RESETn)
+    .clk0resetn(SYS_RESETn_int)    //if SDIO is treated like a peripheral change to SYS_PRESETn.
 );
 
 
