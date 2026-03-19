@@ -193,7 +193,7 @@ static int test_resetctrl_swreset_functional(void) {
     return errors;
 }
 
-// ------------------------- main -------------------------
+// ------------------------- main -----------------------
 int main(void) {
     int errors = 0;
 
