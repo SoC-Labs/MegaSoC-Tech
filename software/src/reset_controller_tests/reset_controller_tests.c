@@ -112,83 +112,58 @@ static int test_resetctrl_undefined_offsets(void) {
     return errors;
 }
 
-// ------------------------- TC5 (Final SWRESET functional) -------------------------
-static int test_resetctrl_swreset_functional(void) {
-    int errors = 0;
+// ------------------------- TC5 -------------------------
+static int test_resetctrl_swreset_issue_only(void) {
+    printf("Test5A: issue SW reset\n");
 
-    const uint32_t CLEAR_ALL_CAUSES  = 0x1Fu; // STATUS[4:0]
-    const uint32_t SWRESET_CAUSE_BIT = 0x1u;  // STATUS bit0
-    const uint32_t SWRESET_REQ_BIT   = 0x1u;  // REQ bit0
-
-    printf("Test5: RESETCTRL SWRESET functional\n");
-
-    // Clear causes
-    MEGASOC_RESETCTRL->RESET_STATUS = CLEAR_ALL_CAUSES;
+    // Clear any old sticky causes before starting the SWRESET test
+    MEGASOC_RESETCTRL->RESET_STATUS = RESET_STATUS_ALL_Msk;
     short_settle(2000);
 
-    if (poll_until_clear(&MEGASOC_RESETCTRL->RESET_STATUS, CLEAR_ALL_CAUSES, 500000u) != 0) {
+    if (poll_until_clear(&MEGASOC_RESETCTRL->RESET_STATUS, RESET_STATUS_ALL_Msk, 500000u) != 0) {
         printf("  ERROR: timeout clearing causes before SWRESET\n");
         return 1;
     }
 
-    printf("  STATUS after clear-all = 0x%08x\n", (unsigned)MEGASOC_RESETCTRL->RESET_STATUS);
+    printf("  STATUS before SWRESET request = 0x%08x\n",(unsigned)MEGASOC_RESETCTRL->RESET_STATUS);
 
-    // Trigger SWRESET
-    printf("  Writing RESET_REQ=SWRESET\n");
-    MEGASOC_RESETCTRL->RESET_REQ = SWRESET_REQ_BIT;
+    printf("  Triggering software reset...\n");
+    MEGASOC_RESETCTRL->RESET_REQ = RESET_REQ_SWRESET_Msk;
 
-    // Wait for cause latch
-    if (poll_until_set(&MEGASOC_RESETCTRL->RESET_STATUS, SWRESET_CAUSE_BIT, 500000u) != 0) {
-        printf("  ERROR: timeout waiting SWRESET cause latch\n");
-        errors++;
-        return errors;
+    if (poll_until_set(&MEGASOC_RESETCTRL->RESET_STATUS, RESET_STATUS_SWRESET_Msk, 500000u) == 0) {
+        printf("  INFO: SWRESET cause latched before CPU restart\n");
     }
 
-    uint32_t s1 = MEGASOC_RESETCTRL->RESET_STATUS;
-    printf("  STATUS after SWRESET request = 0x%08x\n", (unsigned)s1);
+    while (1) { }
+}
 
-    // Clear SWRESET cause
-    MEGASOC_RESETCTRL->RESET_STATUS = SWRESET_CAUSE_BIT;
-    short_settle(2000);
+static int test_resetctrl_swreset_postcheck(void) {
+    int errors = 0;
+    uint32_t s = MEGASOC_RESETCTRL->RESET_STATUS;
 
-    if (poll_until_clear(&MEGASOC_RESETCTRL->RESET_STATUS, SWRESET_CAUSE_BIT, 500000u) != 0) {
-        printf("  ERROR: timeout clearing SWRESET cause\n");
+    printf("Test5B: post-SWRESET verification\n");
+    printf("  STATUS after reboot = 0x%08x\n", (unsigned)s);
+
+    if ((s & RESET_STATUS_SWRESET_Msk) == 0u) {
+        printf("  ERROR: SWRESET cause bit not set after reboot\n");
         errors++;
+    } else {
+        printf("  PASS: SWRESET cause bit observed after reboot\n");
     }
 
-    uint32_t s2 = MEGASOC_RESETCTRL->RESET_STATUS;
-    printf("  STATUS after clearing SWRESET = 0x%08x\n", (unsigned)s2);
-
-    // Repeatability: second cycle
-    printf("  Repeat SWRESET cycle\n");
-    MEGASOC_RESETCTRL->RESET_STATUS = CLEAR_ALL_CAUSES;
-    short_settle(2000);
-
-    if (poll_until_clear(&MEGASOC_RESETCTRL->RESET_STATUS, CLEAR_ALL_CAUSES, 500000u) != 0) {
-        printf("  ERROR: timeout clearing causes before repeat cycle\n");
-        errors++;
-        return errors;
-    }
-
-    MEGASOC_RESETCTRL->RESET_REQ = SWRESET_REQ_BIT;
-
-    if (poll_until_set(&MEGASOC_RESETCTRL->RESET_STATUS, SWRESET_CAUSE_BIT, 500000u) != 0) {
-        printf("  ERROR: timeout waiting SWRESET cause latch (repeat)\n");
-        errors++;
-        return errors;
-    }
-
-    MEGASOC_RESETCTRL->RESET_STATUS = SWRESET_CAUSE_BIT;
-    short_settle(2000);
-
-    if (poll_until_clear(&MEGASOC_RESETCTRL->RESET_STATUS, SWRESET_CAUSE_BIT, 500000u) != 0) {
-        printf("  ERROR: timeout clearing SWRESET cause (repeat)\n");
-        errors++;
-    }
-
-    // Peripheral sanity
     UartStdOutInit();
-    printf("  UART OK after SWRESET activity\n");
+    printf("  PASS: test method re-entered after SWRESET\n");
+
+    /* Clear the SWRESET cause and confirm clear works */
+    MEGASOC_RESETCTRL->RESET_STATUS = RESET_STATUS_SWRESET_Msk;
+    short_settle(2000);
+
+    if (poll_until_clear(&MEGASOC_RESETCTRL->RESET_STATUS, RESET_STATUS_SWRESET_Msk, 500000u) != 0) {
+        printf("  ERROR: timeout clearing SWRESET cause after reboot\n");
+        errors++;
+    } else {
+        printf("  PASS: SWRESET cause bit cleared successfully\n");
+    }
 
     return errors;
 }
@@ -196,20 +171,41 @@ static int test_resetctrl_swreset_functional(void) {
 // ------------------------- main -------------------------
 int main(void) {
     int errors = 0;
-
+    uint32_t status;
     UartStdOutInit();
     printf("MegaSoC Reset Controller Tests\n");
 
+    status = MEGASOC_RESETCTRL->RESET_STATUS;
+    printf("Entry RESET_STATUS = 0x%08x\n", (unsigned)status);
+
+    /* Post-reset path:
+       If SWRESET cause is set when main() starts, this is the rebooted phase. */
+    if ((status & RESET_STATUS_SWRESET_Msk) != 0u) {
+        errors += test_resetctrl_swreset_postcheck();
+
+        printf("Total issues in Reset Controller = %d\n", errors);
+        if (errors) TEST_FAIL();
+        else        TEST_PASS();
+
+        while (1) { }
+    }
     errors += test_resetctrl_read_stability();
     errors += test_resetctrl_por_sanity();
     errors += test_resetctrl_status_clear_mask();
     errors += test_resetctrl_undefined_offsets();
-    errors += test_resetctrl_swreset_functional();
 
-    printf("Total issues in Reset Controller is = %d\n", errors);
+    if (errors) {
+        printf("Pre-SWRESET tests already failed: %d\n", errors);
+        TEST_FAIL();
+        while (1) { }
+    }
 
-    if (errors) TEST_FAIL();
-    else        TEST_PASS();
+    // This should restart the system and come back through main()
+    errors += test_resetctrl_swreset_issue_only();
+
+    // Reaching here means reset did not happen
+    printf("ERROR: execution continued after SWRESET request\n");
+    TEST_FAIL();
 
     while (1) { }
 }

@@ -411,9 +411,9 @@ ROM_wrapper u_ROM_wrapper(
 
 top_ahb_qspi #(.DATA_W(32)) u_sl_ahb_qspi(
     .HCLK(SYS_CLK),
-    .HRESETn(SYS_HRESETn),
+    .HRESETn(SYS_RESETn),
     .PCLK(SYS_CLK),
-    .PRESETn(SYS_PRESETn),
+    .PRESETn(SYS_RESETn),  //PORESETn
 
     .HADDR(FLASH_AHB.HADDR),
     .HTRANS(FLASH_AHB.HTRANS),
