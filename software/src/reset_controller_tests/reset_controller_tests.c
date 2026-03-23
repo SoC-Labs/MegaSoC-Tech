@@ -154,7 +154,7 @@ static int test_resetctrl_swreset_postcheck(void) {
     UartStdOutInit();
     printf("  PASS: test method re-entered after SWRESET\n");
 
-    /* Clear the SWRESET cause and confirm clear works */
+    // Clear the SWRESET cause and confirm clear works
     MEGASOC_RESETCTRL->RESET_STATUS = RESET_STATUS_SWRESET_Msk;
     short_settle(2000);
 
@@ -178,8 +178,7 @@ int main(void) {
     status = MEGASOC_RESETCTRL->RESET_STATUS;
     printf("Entry RESET_STATUS = 0x%08x\n", (unsigned)status);
 
-    /* Post-reset path:
-       If SWRESET cause is set when main() starts, this is the rebooted phase. */
+    // Post-reset path: If SWRESET is set then reboot phase
     if ((status & RESET_STATUS_SWRESET_Msk) != 0u) {
         errors += test_resetctrl_swreset_postcheck();
 

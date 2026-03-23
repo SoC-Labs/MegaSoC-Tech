@@ -411,7 +411,7 @@ ROM_wrapper u_ROM_wrapper(
 
 top_ahb_qspi #(.DATA_W(32)) u_sl_ahb_qspi(
     .HCLK(SYS_CLK),
-    .HRESETn(SYS_RESETn),
+    .HRESETn(SYS_RESETn),  //PORESETn
     .PCLK(SYS_CLK),
     .PRESETn(SYS_RESETn),  //PORESETn
 
