@@ -14,3 +14,5 @@ socrates/CortexA53_1/build.log
 socrates/sie300/sie300_axi5_sram_ctrl_1/build.log
 .ecmproject
 .project
+
+software/shared/bin/*.bin
