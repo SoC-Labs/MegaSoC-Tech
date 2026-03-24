@@ -411,7 +411,7 @@ ROM_wrapper u_ROM_wrapper(
 
 top_ahb_qspi #(.DATA_W(32)) u_sl_ahb_qspi(
     .HCLK(SYS_CLK),
-    .HRESETn(SYS_RESETn),  //PORESETn
+    .HRESETn(SYS_RESETn),  //PORESETn, External flash will not reset on sw reset
     .PCLK(SYS_CLK),
     .PRESETn(SYS_RESETn),  //PORESETn
 

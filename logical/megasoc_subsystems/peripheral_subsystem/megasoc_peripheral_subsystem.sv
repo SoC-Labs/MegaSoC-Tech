@@ -783,8 +783,6 @@ cmsdk_apb_uart u_apb_uart_1(
 );
 
 wire wdog_reset_req;
-wire wdog_reset_n;
-assign wdog_reset_req = (wdog_reset_n === 1'b0);
 
 cmsdk_apb_watchdog u_apb_watchdog(
     .PCLK(PCLK),
@@ -796,16 +794,16 @@ cmsdk_apb_watchdog u_apb_watchdog(
     .PWRITE(PWRITE),
     .PWDATA(PWDATA),
 
-    .WDOGCLK(),
-    .WDOGCLKEN(),
-    .WDOGRESn(wdog_reset_n),
+    .WDOGCLK(PCLK),
+    .WDOGCLKEN(1'b1),
+    .WDOGRESn(PRESETn),    // Input to WDOG, connect to APB reset
 
     .ECOREVNUM(4'h0),
 
     .PRDATA(PRDATA_WATCHDOG),
 
     .WDOGINT(wdog_int),
-    .WDOGRES()
+    .WDOGRES(wdog_reset_req)    // Output from WDOG
 );
 assign PSLVERR_WATCHDOG = 1'b0;
 assign PREADY_WATCHDOG  = 1'b1;
