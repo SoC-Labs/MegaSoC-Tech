@@ -39,6 +39,14 @@ module megasoc_peripheral_subsystem #(
     input  wire         HRESETn,
     input  wire         RT_CLK, // 32kHz real time clock
 
+    input wire          FCLK,
+    input wire          PORESETn,
+    input wire          DBGRESETREQ,
+
+    output wire         rst_ahb_ctrl_n_o,
+    output wire         rst_apb_ctrl_n_o,
+    output wire         rst_dbg_ctrl_n_o,
+    output wire         sys_reset_req_o,
 
     // ADP AHB bus interface
     ahb.master          ADP_AHB,
@@ -207,6 +215,12 @@ wire        PSEL_UART_PL011;
 wire        PREADY_UART_PL011;
 wire [31:0] PRDATA_UART_PL011;
 wire        PSLVERR_UART_PL011;
+
+// Internal APB signals for Reset control
+wire        PSEL_RESETCTRL;
+wire        PREADY_RESETCTRL;
+wire [31:0] PRDATA_RESETCTRL;
+wire        PSLVERR_RESETCTRL;
 
 // Interrupt Signals 
 wire [15:0] gpio0_int;
@@ -540,7 +554,7 @@ cmsdk_apb_slave_mux #(
     .PORT8_ENABLE(1),
     .PORT9_ENABLE(1),
     .PORT10_ENABLE(1),
-    .PORT11_ENABLE(0),
+    .PORT11_ENABLE(1),   // For Reset controller
     .PORT12_ENABLE(0),
     .PORT13_ENABLE(0),
     .PORT14_ENABLE(0),
@@ -604,10 +618,10 @@ cmsdk_apb_slave_mux #(
     .PRDATA10(PRDATA_UART_PL011),
     .PSLVERR10(PSLVERR_UART_PL011),
 
-    .PSEL11(),
-    .PREADY11(1'b1),
-    .PRDATA11(32'd0),
-    .PSLVERR11(1'b1),  
+    .PSEL11(PSEL_RESETCTRL),
+    .PREADY11(PREADY_RESETCTRL),
+    .PRDATA11(PRDATA_RESETCTRL),
+    .PSLVERR11(PSLVERR_RESETCTRL),  
 
     .PSEL12(),
     .PREADY12(1'b1),
@@ -768,6 +782,8 @@ cmsdk_apb_uart u_apb_uart_1(
     .UARTINT           (uart1_combined_int) // Combined Interrupt
 );
 
+wire wdog_reset_req;
+
 cmsdk_apb_watchdog u_apb_watchdog(
     .PCLK(PCLK),
     .PRESETn(PRESETn),
@@ -778,16 +794,16 @@ cmsdk_apb_watchdog u_apb_watchdog(
     .PWRITE(PWRITE),
     .PWDATA(PWDATA),
 
-    .WDOGCLK(),
-    .WDOGCLKEN(),
-    .WDOGRESn(),
+    .WDOGCLK(PCLK),
+    .WDOGCLKEN(1'b1),
+    .WDOGRESn(PRESETn),    // Input to WDOG, connect to APB reset
 
     .ECOREVNUM(4'h0),
 
     .PRDATA(PRDATA_WATCHDOG),
 
     .WDOGINT(wdog_int),
-    .WDOGRES()
+    .WDOGRES(wdog_reset_req)    // Output from WDOG
 );
 assign PSLVERR_WATCHDOG = 1'b0;
 assign PREADY_WATCHDOG  = 1'b1;
@@ -926,6 +942,31 @@ Uart u_pl011_uart(
 
 assign PREADY_UART_PL011 = 1'b1;
 assign PSLVERR_UART_PL011 = 1'b0;
+
+megasoc_reset_ctrl #(.ADDR_WIDTH(12)) u_megasoc_reset_ctrl (
+    .PCLK(PCLK),
+    .PRESETn(PORESETn),
+    .PSEL(PSEL_RESETCTRL),
+    .PENABLE(PENABLE),
+    .PWRITE(PWRITE),
+    .PADDR(PADDR[11:0]),
+    .PWDATA(PWDATA),
+    .PRDATA(PRDATA_RESETCTRL),
+    .PREADY(PREADY_RESETCTRL),
+    .PSLVERR(PSLVERR_RESETCTRL),
+
+    .FCLK(FCLK),
+    .PORESETn(PORESETn),
+
+    .wdog_reset_req_i (wdog_reset_req),
+    .dbg_reset_req_i(DBGRESETREQ),  //from wrapper
+    .lockup_reset_req_i(1'b0),         //from wrapper
+
+    .rst_ahb_ctrl_n(rst_ahb_ctrl_n_o),
+    .rst_apb_ctrl_n(rst_apb_ctrl_n_o),
+    .rst_dbg_ctrl_n(rst_dbg_ctrl_n_o),
+    .sys_reset_req(sys_reset_req_o)
+);
 
 megasoc_peripheral_debug #(
     .FT1248_WIDTH(1)

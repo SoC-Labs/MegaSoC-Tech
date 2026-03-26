@@ -168,42 +168,42 @@ typedef struct{
   __I   uint32_t CID1;
   __I   uint32_t CID2;
   __I   uint32_t CID3;
-} CMSDK_WDOD_TypeDef;
+} CMSDK_WDOG_TypeDef;
 
 /* CMSDK_WDOG CTRL Register Definitions */
-
-#define CMSDK_WDOG_
 
 #define CMSDK_WDOG_LOAD_Pos              0                                              
 #define CMSDK_WDOG_LOAD_Msk            (0x01ul << CMSDK_WDOG_LOAD_Pos)
 
 #define CMSDK_WDOG_VALUE_Pos            0
-#define CMSDK_WDOG_VALUE_Msk            (0x01u1 << CMSDK_WDOG_VALUE_Pos)
+#define CMSDK_WDOG_VALUE_Msk            (0x01ul << CMSDK_WDOG_VALUE_Pos)
 
 #define CMSDK_WDOG_CONTROL_INTEN_Pos          0
-#define CMSDK_WDOG_CONTROL_INTEN_Msk          (0X01u1 << CMSDK_WDOG_CONTROL_INTEN_Pos)
+#define CMSDK_WDOG_CONTROL_INTEN_Msk          (0x01ul << CMSDK_WDOG_CONTROL_INTEN_Pos)
 
 #define CMSDK_WDOG_CONTROL_RESEN_Pos          1
-#define CMSDK_WDOG_CONTROL_RESEN_Msk          (0x01u1 << CMSDK_WDOG_CONTROL_RESEN_Pos)
+#define CMSDK_WDOG_CONTROL_RESEN_Msk          (0x01ul << CMSDK_WDOG_CONTROL_RESEN_Pos)
 
 #define CMSDK_WDOG_INTCLR_Pos                 0
-#define CMSDK_WDOG_INTCLR_Msk                 (0x01u1 << CMSDK_WDOG_INTCLR_Pos)
+#define CMSDK_WDOG_INTCLR_Msk                 (0x01ul << CMSDK_WDOG_INTCLR_Pos)
 
 #define CMSDK_WDOG_RIS_RWDOGINT_Pos           0
-#define CMSDK_WDOG_RIS_RWDOGINT_Msk           (0x01u1 << CMSDK_WDOG_RIS_RWDOGINT_Pos)
+#define CMSDK_WDOG_RIS_RWDOGINT_Msk           (0x01ul << CMSDK_WDOG_RIS_RWDOGINT_Pos)
 
 #define CMSDK_WDOG_MIS_WDOGINT_Pos            0
-#define CMSDK_WDOG_MIS_WDOGINT_Msk            (0x01u1 << CMSDK_WDOG_MIS_WDOGINT_Pos)
+#define CMSDK_WDOG_MIS_WDOGINT_Msk            (0x01ul << CMSDK_WDOG_MIS_WDOGINT_Pos)
 
 #define CMSDK_WDOG_LOCK_WENSTATUS_Pos         0
-#define CMSDK_WDOG_LOCK_WENSTATTUS_Msk        (0x01u1 << CMSDK_WDOG_LOCK_WENSTATUS_Pos)
+#define CMSDK_WDOG_LOCK_WENSTATTUS_Msk        (0x01ul << CMSDK_WDOG_LOCK_WENSTATUS_Pos)
 
 #define CMSDK_WDOG_ITCR_ITMEN_Pos             0
-#define CMSDK_WDOG_ITCR_ITMEN_Msk             (0x01u1 << CMSDK_WDOG_ITCR_ITMEN_Pos)
+#define CMSDK_WDOG_ITCR_ITMEN_Msk             (0x01ul << CMSDK_WDOG_ITCR_ITMEN_Pos)
 
 #define CMSDK_WDOG_ITOP_WDOGRES_Pos           0
-#define CMSDK_WDOG_ITOP_WDOGRES_Msk           (0x01u1 << CMSDK_WDOG_ITOP_WDOGRES_Pos)
+#define CMSDK_WDOG_ITOP_WDOGRES_Msk           (0x01ul << CMSDK_WDOG_ITOP_WDOGRES_Pos)
 
 #define CMSDK_WDOG_ITOP_WDOGINT_Pos           1
-#define CMSDK_WDOG_ITOP_WDOGINT_Msk           (0x01u1 << CMSDK_WDOG_ITOP_WDOGINT_Pos)
+#define CMSDK_WDOG_ITOP_WDOGINT_Msk           (0x01ul << CMSDK_WDOG_ITOP_WDOGINT_Pos)
+
+#define CMSDK_WDOG            ((CMSDK_WDOG_TypeDef  *) SYS_WATCHDOG_BASE  )
 
