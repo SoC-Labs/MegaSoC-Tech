@@ -9,6 +9,7 @@ logical/dma350
 logical/power_control/logical
 logical/power_control/*.log
 software/build
+software/shared/bin/cxdt.bin
 
 socrates/CortexA53_1/build.log
 socrates/sie300/sie300_axi5_sram_ctrl_1/build.log
