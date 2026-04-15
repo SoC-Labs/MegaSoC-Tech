@@ -29,8 +29,8 @@ module ROM_wrapper (
 
 
 wire [19:0]    memaddr;
-wire [64:0]    memd;
-wire [64:0]    memq;
+wire [63:0]    memd;
+wire [63:0]    memq;
 wire           memcen;
 wire [7:0]     memwen;
 
@@ -99,7 +99,7 @@ sie300_axi5_sram_ctrl_1 u_SMC(
 bootrom u_ROM (
     .CLK(ACLK),
     .CEN(memcen),
-    .A(memaddr[19:3]),
+    .A(memaddr[15:3]),
     .Q(memq),
 
     .CENY(),
@@ -112,7 +112,7 @@ bootrom u_ROM (
     .TEN(1'b1),
     .BEN(1'b1),
     .TCEN(1'b1),
-    .TA(14'd0),
+    .TA(13'd0),
     .TQ(64'd0),
     .KEN(1'b1),
     .STOV(1'b0)

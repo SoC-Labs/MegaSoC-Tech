@@ -124,7 +124,7 @@ generate for(i=0; i<N_MEMS; i=i+1) begin: g_srams
         .CLK(ACLK),
         .CEN(CEN_i[i]),
         .GWEN(gwen_i),
-        .A(memaddr[16:3]),
+        .A(memaddr[14:3]),
         .D(memd),
         .WEN(wena_i),
         .STOV(1'b0),
@@ -156,14 +156,14 @@ always @(posedge ACLK or negedge ARESETn) begin
     if (!ARESETn)
         sel_d <= {SEL_W{1'b0}};
     else
-        sel_d <= memaddr[(SEL_W+17-1):17];
+        sel_d <= memaddr[(SEL_W+15-1):15];
 end
 
 generate
 integer j;
 always @(*) begin
     for(j=0; j<N_MEMS; j=j+1) begin
-        if(j==memaddr[(SEL_W+17-1):17])
+        if(j==memaddr[(SEL_W+15-1):15])
             CEN_i[j] = memcen;
         else
             CEN_i[j] = 1'b1;

@@ -5,3 +5,6 @@ $(SOCLABS_MEGASOC_TECH_DIR)/logical/ROM/behavioural/ROM_wrapper.sv
 $(SOCLABS_PROJECT_DIR)/system/src/bootrom/verilog/bootrom.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/behavioural/SRAM.v 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/behavioural/SRAM_wrapper.sv
+
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/logical/cache_models/generic/cache_ram.v
+$(ARM_IP_LIBRARY_PATH)/CG092/CG092-BU-50000-r2p0-00rel0/p_flash_cache_f0/logical/testbench/execution_tb/verilog/p_flash_cache_f0_sp_ram.v

@@ -16,7 +16,7 @@ int main(void) {
 
     printf("Mem Tests - SoCLabs MegaSoC\n");
 
-    printf(" - First 128KB\n");
+    printf(" - Test 0x00800000 - 0x0081F000\n");
     errors += sram_test(0x00800000);
     errors += sram_test(0x00802000);
     errors += sram_test(0x00804000);
@@ -26,54 +26,6 @@ int main(void) {
     errors += sram_test(0x00814000);
     errors += sram_test(0x00818000);
     errors += sram_test(0x0081F000);
-
-    if(errors!=0){
-        TEST_FAIL();
-    } 
-
-    printf(" - Second 128KB\n");
-    errors += sram_test(0x00820000);
-    errors += sram_test(0x00822000);
-    errors += sram_test(0x00824000);
-    errors += sram_test(0x00828000);
-    errors += sram_test(0x0082F000);
-    errors += sram_test(0x00830000);
-    errors += sram_test(0x00832000);
-    errors += sram_test(0x00834000);
-    errors += sram_test(0x00838000);
-    errors += sram_test(0x0083F000);
-
-    if(errors!=0){
-        TEST_FAIL();
-    } 
-
-    printf(" - Third 128KB\n");
-    errors += sram_test(0x00840000);
-    errors += sram_test(0x00842000);
-    errors += sram_test(0x00844000);
-    errors += sram_test(0x00848000);
-    errors += sram_test(0x0084F000);
-    errors += sram_test(0x00850000);
-    errors += sram_test(0x00852000);
-    errors += sram_test(0x00854000);
-    errors += sram_test(0x00858000);
-    errors += sram_test(0x0085F000);
-
-    if(errors!=0){
-        TEST_FAIL();
-    } 
-
-    printf(" - Final 128KB\n");
-    errors += sram_test(0x00860000);
-    errors += sram_test(0x00862000);
-    errors += sram_test(0x00864000);
-    errors += sram_test(0x00868000);
-    errors += sram_test(0x0086F000);
-    errors += sram_test(0x00870000);
-    errors += sram_test(0x00872000);
-    errors += sram_test(0x00874000);
-    errors += sram_test(0x00878000);
-    errors += sram_test(0x0087F000);
 
     if(errors!=0){
         TEST_FAIL();
@@ -147,6 +99,18 @@ int sram_test(unsigned long int base_address){
     __sev();
     // read 64 bits
     if(*(uint64_t *) base_address!=0x01234567A5A532FE) { result++; }
+
+    *(uint64_t *) (base_address       ) = 0x0000000000000000;
+    *(uint64_t *) (base_address + 0x8 ) = 0x1111111111111111;
+    *(uint64_t *) (base_address + 0x10) = 0x2222222222222222;
+    *(uint64_t *) (base_address + 0x18) = 0x3333333333333333;
+    __dsb(0xf);
+    __sev();
+    if(*(uint64_t *) (base_address)!=0x0000000000000000) { result++; }
+    if(*(uint64_t *) (base_address+0x08)!=0x1111111111111111) { result++; }
+    if(*(uint64_t *) (base_address+0x10)!=0x2222222222222222) { result++; }
+    if(*(uint64_t *) (base_address+0x18)!=0x3333333333333333) { result++; }
+
 
     return result;
 }

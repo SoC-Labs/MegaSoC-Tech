@@ -763,22 +763,22 @@ module ca53_caches_tlb_rams `CA53_L1_RAM_PARAM_DECL
   assign dc_tagram_rdata1_o[1:0] = 2'b0;
   assign dc_tagram_rdata2_o[1:0] = 2'b0;
   assign dc_tagram_rdata3_o[1:0] = 2'b0;
-  wire u_dtag_bank0_UNCONNECTED;
-  wire u_dtag_bank1_UNCONNECTED;
-  wire u_dtag_bank2_UNCONNECTED;
-  wire u_dtag_bank3_UNCONNECTED;      
+  wire [1:0] u_dtag_bank0_UNCONNECTED;
+  wire [1:0] u_dtag_bank1_UNCONNECTED;
+  wire [1:0] u_dtag_bank2_UNCONNECTED;
+  wire [1:0] u_dtag_bank3_UNCONNECTED;      
 
   L1_dtag u_dtag_bank0 (
                                    .CLK       (clk),
                                    .A         (dc_tagram_addr_i[6:0]),
                                    .Q         ({u_dtag_bank0_UNCONNECTED,dc_tagram_rdata0_o[31:2]}), //connection size 32
-                                   .D         ({1'b0,dc_tagram_wdata_i[31:2]}), //connection size 32
+                                   .D         ({2'b00,dc_tagram_wdata_i[31:2]}), //connection size 32
                                    .CEN       (~dc_tagram_en_i[0]),
                                    .GWEN       (~dc_tagram_wr_i),
-                                        .EMA       (3'b111),
-                                        .EMAW      (2'b11),
-                                        .EMAS      (1'b1),
-                                        .STOV      (1'b0),
+                                   .EMA       (3'b111),
+                                   .EMAW      (2'b11),
+                                   .EMAS      (1'b1),
+                                   .STOV      (1'b0),
                                    .TA        (7'b0),
                                    .TD        (32'b0),
                                    .SO        (),
@@ -800,7 +800,7 @@ module ca53_caches_tlb_rams `CA53_L1_RAM_PARAM_DECL
                                    .CLK       (clk),
                                    .A         (dc_tagram_addr_i[6:0]),
                                    .Q         ({u_dtag_bank1_UNCONNECTED,dc_tagram_rdata1_o[31:2]}),
-                                   .D         ({1'b0,dc_tagram_wdata_i[31:2]}),
+                                   .D         ({2'b00,dc_tagram_wdata_i[31:2]}),
                                    .CEN       (~dc_tagram_en_i[1]),
                                    .GWEN       (~dc_tagram_wr_i),
                                         .EMA       (3'b111),
@@ -828,7 +828,7 @@ module ca53_caches_tlb_rams `CA53_L1_RAM_PARAM_DECL
                                    .CLK       (clk),
                                    .A         (dc_tagram_addr_i[6:0]),
                                    .Q         ({u_dtag_bank2_UNCONNECTED,dc_tagram_rdata2_o[31:2]}),
-                                   .D         ({1'b0,dc_tagram_wdata_i[31:2]}),
+                                   .D         ({2'b00,dc_tagram_wdata_i[31:2]}),
                                    .CEN       (~dc_tagram_en_i[2]),
                                    .GWEN       (~dc_tagram_wr_i),
                                         .EMA       (3'b111),
@@ -856,7 +856,7 @@ module ca53_caches_tlb_rams `CA53_L1_RAM_PARAM_DECL
                                    .CLK       (clk),
                                    .A         (dc_tagram_addr_i[6:0]),
                                    .Q         ({u_dtag_bank3_UNCONNECTED,dc_tagram_rdata3_o[31:2]}),
-                                   .D         ({1'b0,dc_tagram_wdata_i[31:2]}),
+                                   .D         ({2'b00,dc_tagram_wdata_i[31:2]}),
                                    .CEN       (~dc_tagram_en_i[3]),
                                    .GWEN       (~dc_tagram_wr_i),
                                         .EMA       (3'b111),

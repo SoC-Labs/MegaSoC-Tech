@@ -17,8 +17,11 @@ int main(void) {
 
   SL_QSPI->CLK_DIV = 0x4;
   SPI_STARTUP(SL_QSPI);
-
+  CACHE_STARTUP(CG092);
   printf("***Flash Enabled...Booting***\n\n\n");
+
+  __dsb(0xf);
+  __sev();
 
   void (*main_code)(void) = (void (*)())0x00400000;
   main_code();

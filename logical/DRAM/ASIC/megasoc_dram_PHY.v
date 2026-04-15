@@ -184,15 +184,15 @@ assign DDR4_CK_T = BP_A[4];
 assign DDR4_CK_C = BP_A[5];
 
 generate
-    for(genvar i=0; i< 2; i++) begin: g_BP_D
+    for(genvar i=0; i< 2; i=i+1) begin: g_BP_D
         tran dm_xmit (DDR4_DM_DBI_N[i] , BP_D[12*i+8]);
         tran dqs_u0_t_xmit (DDR4_DQS_T[i] , BP_D[12*i+9]);
         tran dqs_u0_c_xmit (DDR4_DQS_C[i] , BP_D[12*i+10]);
     end
 endgenerate
 generate
-    for(genvar i=0; i< 2; i++) begin: g_BP_DQ
-    for (genvar j=0; j<8; j++)begin: g_BP_DQ2
+    for(genvar i=0; i< 2; i=i+1) begin: g_BP_DQ
+    for (genvar j=0; j<8; j=j+1)begin: g_BP_DQ2
         tran dqs_dq_xmit   (DDR4_DQ[8*i+j] , BP_D[12*i+j]);
     end
     end

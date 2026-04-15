@@ -206,6 +206,7 @@ wire        PSLVERR_SPI;
 wire        PSEL_UART_PL011;
 wire        PREADY_UART_PL011;
 wire [31:0] PRDATA_UART_PL011;
+assign PRDATA_UART_PL011[31:16] = 16'd0; // upper bits not used
 wire        PSLVERR_UART_PL011;
 
 // Interrupt Signals 
@@ -883,8 +884,8 @@ Uart u_pl011_uart(
     .PENABLE(PENABLE),
     .PWRITE(PWRITE),
     .PADDR(PADDR[11:2]),
-    .PWDATA(PWDATA),
-    .PRDATA(PRDATA_UART_PL011),
+    .PWDATA(PWDATA[15:0]),
+    .PRDATA(PRDATA_UART_PL011[15:0]),
 
     // Pad
     .nUARTCTS(PL011_nUARTCTS),

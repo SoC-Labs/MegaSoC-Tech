@@ -93,7 +93,7 @@ module	sdspi #(
 		//
 		//
 		//
-		localparam	AW = 2, DW = 32
+		parameter	AW = 2, DW = 32
 		// }}}
 	) (
 		// {{{

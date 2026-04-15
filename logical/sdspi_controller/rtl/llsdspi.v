@@ -106,10 +106,10 @@ module	llsdspi #(
 		parameter [0:0]	OPT_SPI_ARBITRATION = 1'b0,
 		//
 		//
-		localparam [0:0]	CSN_ON_STARTUP = 1'b1,
+		parameter [0:0]	CSN_ON_STARTUP = 1'b1,
 		//
 		// The MOSI INACTIVE VALUE *MUST* be 1'b1 to be compliant
-		localparam [0:0]	MOSI_INACTIVE_VALUE = 1'b1,
+		parameter [0:0]	MOSI_INACTIVE_VALUE = 1'b1,
 		//
 		// Normally, an SPI transaction shuts the clock down when
 		// finished.  If OPT_CONTINUOUS_CLOCK is set, the clock will be

@@ -43,7 +43,7 @@ module spirxdata #(
 		// {{{
 		parameter	DW = 32, AW = 8,
 		parameter [0:0]	OPT_LITTLE_ENDIAN = 1'b0,
-		localparam	CRC_POLYNOMIAL = 16'h1021
+		parameter	CRC_POLYNOMIAL = 16'h1021
 		// }}}
 	) (
 		// {{{

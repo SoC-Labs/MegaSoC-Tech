@@ -42,8 +42,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-`timescale 1ns/1ps
-// }}}
+`define SDIO_AXI// }}}
 module	sdio #(
 		// {{{
 		parameter	LGFIFO = 15,//	= log_2(FIFO size in bytes)

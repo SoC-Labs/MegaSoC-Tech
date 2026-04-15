@@ -39,7 +39,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-`timescale 1ns/1ps
 // }}}
 module	sddma_s2mm #(
 		// {{{
@@ -48,8 +47,8 @@ module	sddma_s2mm #(
 		parameter [0:0]	OPT_LITTLE_ENDIAN = 1'b0,
 		parameter	LGPIPE = 10,
 		// Abbreviations
-		localparam	DW = BUS_WIDTH,
-		localparam	AW = ADDRESS_WIDTH-$clog2(DW/8)
+		parameter	DW = BUS_WIDTH,
+		parameter	AW = ADDRESS_WIDTH-$clog2(DW/8)
 		// }}}
 	) (
 		// {{{

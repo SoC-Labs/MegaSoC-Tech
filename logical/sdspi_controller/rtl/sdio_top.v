@@ -56,7 +56,7 @@ module sdio_top #(
 		// ultimate hardware.
 		parameter	NUMIO=4,
 		// }}}
-		localparam	MW=32,	// Bus width.  Do not change.
+		parameter	MW=32,	// Bus width.  Do not change.
 		// ADDRESS_WIDTH: Number of bits to the DMA's address lines,
 		// {{{
 		// as required to access octets of memory.  This is not the word
@@ -83,10 +83,10 @@ module sdio_top #(
 		parameter [AXI_IW-1:0]	AXI_WRITE_ID= 1'b0,
 		parameter [AXI_IW-1:0]	AXI_READ_ID = 1'b0,
 		parameter [0:0]	OPT_LITTLE_ENDIAN = 1'b1,
-		localparam	AW = ADDRESS_WIDTH,
+		parameter	AW = ADDRESS_WIDTH,
 `else
 		parameter [0:0]	OPT_LITTLE_ENDIAN = 1'b0,
-		localparam	AW = ADDRESS_WIDTH-$clog2(DW/8),
+		parameter	AW = ADDRESS_WIDTH-$clog2(DW/8),
 `endif
 		parameter	HWDELAY=0,
 		// OPT_ISTREAM: Enable an incoming AXI stream to specify data

@@ -17,7 +17,10 @@
 
 // $(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/behavioural/SYS_SRAM_wrapper.v
 
--f $(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/flist/Top/ahb_QSPI_SIM.flist
+// -f $(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/flist/Top/ahb_QSPI_SIM.flist
+
+-f $(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/flist/Top/ahb_QSPI.flist 
+-f $(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/flist/VIP/ahb_QSPI_VIP.flist
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/DRAM/behavioural/megasoc_dram_wrapper.sv
 
