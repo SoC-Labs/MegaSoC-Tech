@@ -33,6 +33,7 @@ $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_cpu_subsystem/meg
 //$(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_tech_system_wrapper.v
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_addr_decode.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/reset_controller/megasoc_reset_ctrl.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_subsystem.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/megasoc_peripheral_debug.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/peripheral_subsystem/extio8x4_axis_initiator.v

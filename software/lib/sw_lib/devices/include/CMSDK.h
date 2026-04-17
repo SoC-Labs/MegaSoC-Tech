@@ -62,16 +62,16 @@ typedef struct
 #define CMSDK_UART_CTRL_TXEN_Msk          (0x01ul << CMSDK_UART_CTRL_TXEN_Pos)          /*!< CMSDK_UART CTRL: TXEN Mask */
 
 #define CMSDK_UART_INTSTATUS_RXORIRQ_Pos  3                                             /*!< CMSDK_UART CTRL: RXORIRQ Position */
-#define CMSDK_UART_CTRL_RXORIRQ_Msk       (0x01ul << CMSDK_UART_INTSTATUS_RXORIRQ_Pos)  /*!< CMSDK_UART CTRL: RXORIRQ Mask */
+#define CMSDK_UART_INTSTATUS_RXORIRQ_Msk       (0x01ul << CMSDK_UART_INTSTATUS_RXORIRQ_Pos)  /*!< CMSDK_UART CTRL: RXORIRQ Mask */
 
-#define CMSDK_UART_CTRL_TXORIRQ_Pos       2                                             /*!< CMSDK_UART CTRL: TXORIRQ Position */
-#define CMSDK_UART_CTRL_TXORIRQ_Msk       (0x01ul << CMSDK_UART_CTRL_TXORIRQ_Pos)       /*!< CMSDK_UART CTRL: TXORIRQ Mask */
+#define CMSDK_UART_INTSTATUS_TXORIRQ_Pos       2                                             /*!< CMSDK_UART CTRL: TXORIRQ Position */
+#define CMSDK_UART_INTSTATUS_TXORIRQ_Msk       (0x01ul << CMSDK_UART_INTSTATUS_TXORIRQ_Pos)       /*!< CMSDK_UART CTRL: TXORIRQ Mask */
 
-#define CMSDK_UART_CTRL_RXIRQ_Pos         1                                             /*!< CMSDK_UART CTRL: RXIRQ Position */
-#define CMSDK_UART_CTRL_RXIRQ_Msk         (0x01ul << CMSDK_UART_CTRL_RXIRQ_Pos)         /*!< CMSDK_UART CTRL: RXIRQ Mask */
+#define CMSDK_UART_INTSTATUS_RXIRQ_Pos         1                                             /*!< CMSDK_UART CTRL: RXIRQ Position */
+#define CMSDK_UART_INTSTATUS_RXIRQ_Msk         (0x01ul << CMSDK_UART_INTSTATUS_RXIRQ_Pos)         /*!< CMSDK_UART CTRL: RXIRQ Mask */
 
-#define CMSDK_UART_CTRL_TXIRQ_Pos         0                                             /*!< CMSDK_UART CTRL: TXIRQ Position */
-#define CMSDK_UART_CTRL_TXIRQ_Msk         (0x01ul << CMSDK_UART_CTRL_TXIRQ_Pos)         /*!< CMSDK_UART CTRL: TXIRQ Mask */
+#define CMSDK_UART_INTSTATUS_TXIRQ_Pos         0                                             /*!< CMSDK_UART CTRL: TXIRQ Position */
+#define CMSDK_UART_INTSTATUS_TXIRQ_Msk         (0x01ul << CMSDK_UART_INTSTATUS_TXIRQ_Pos)         /*!< CMSDK_UART CTRL: TXIRQ Mask */
 
 #define CMSDK_UART_BAUDDIV_Pos            0                                             /*!< CMSDK_UART BAUDDIV: BAUDDIV Position */
 #define CMSDK_UART_BAUDDIV_Msk           (0xFFFFFul << CMSDK_UART_BAUDDIV_Pos)          /*!< CMSDK_UART BAUDDIV: BAUDDIV Mask */
@@ -142,3 +142,68 @@ typedef struct
 /*@}*/ /* end of group CMSDK_TIMER */
 
 #define CMSDK_TIMER0            ((CMSDK_TIMER_TypeDef  *) TIMER0_BASE  )
+
+/*------------- CMSDK_WATCHDOG -----------*/
+
+typedef struct{
+  __IO  uint32_t WDOGLOAD;       /*!< Offset: 0x00 Load Register (R/W) */
+  __I   uint32_t WDOGVALUE;      /*!< offset: 0x04 Value Register (R/)*/
+  __IO  uint32_t WDOGCONTROL;    /*!< Offset: 0x08 Control Register (R/W) */
+  __O   uint32_t WDOGINTCLR;     /*!< Offset: 0x0C Clear Interrupt Register (/W)*/
+  __I   uint32_t WDOGRIS;        /*!< Offset: 0x10 Raw Interrupt Status Register (R/)*/
+  __I   uint32_t WDOGMIS;        /*!< Offset: 0x14 Interrupt Status Register (R)*/
+  __IO  uint32_t WDOGLOCK;       /*!< Offset: 0xC00 Lock Register (R/W)*/
+  __IO  uint32_t WDOGITCR;       /*!< Offset: 0xF00 Integration Test Control Register (R/W)*/
+  __O   uint32_t WDOGITOP;       /*!< Offset: 0xFD0 Integration Test Output Set Register (/W)*/
+
+  __I   uint32_t PID4;
+  __I   uint32_t PID5;
+  __I   uint32_t PID6;
+  __I   uint32_t PID7;
+  __I   uint32_t PID0;
+  __I   uint32_t PID1;
+  __I   uint32_t PID2;
+  __I   uint32_t PID3;
+  __I   uint32_t CID0;
+  __I   uint32_t CID1;
+  __I   uint32_t CID2;
+  __I   uint32_t CID3;
+} CMSDK_WDOG_TypeDef;
+
+/* CMSDK_WDOG CTRL Register Definitions */
+
+#define CMSDK_WDOG_LOAD_Pos              0                                              
+#define CMSDK_WDOG_LOAD_Msk            (0x01ul << CMSDK_WDOG_LOAD_Pos)
+
+#define CMSDK_WDOG_VALUE_Pos            0
+#define CMSDK_WDOG_VALUE_Msk            (0x01ul << CMSDK_WDOG_VALUE_Pos)
+
+#define CMSDK_WDOG_CONTROL_INTEN_Pos          0
+#define CMSDK_WDOG_CONTROL_INTEN_Msk          (0x01ul << CMSDK_WDOG_CONTROL_INTEN_Pos)
+
+#define CMSDK_WDOG_CONTROL_RESEN_Pos          1
+#define CMSDK_WDOG_CONTROL_RESEN_Msk          (0x01ul << CMSDK_WDOG_CONTROL_RESEN_Pos)
+
+#define CMSDK_WDOG_INTCLR_Pos                 0
+#define CMSDK_WDOG_INTCLR_Msk                 (0x01ul << CMSDK_WDOG_INTCLR_Pos)
+
+#define CMSDK_WDOG_RIS_RWDOGINT_Pos           0
+#define CMSDK_WDOG_RIS_RWDOGINT_Msk           (0x01ul << CMSDK_WDOG_RIS_RWDOGINT_Pos)
+
+#define CMSDK_WDOG_MIS_WDOGINT_Pos            0
+#define CMSDK_WDOG_MIS_WDOGINT_Msk            (0x01ul << CMSDK_WDOG_MIS_WDOGINT_Pos)
+
+#define CMSDK_WDOG_LOCK_WENSTATUS_Pos         0
+#define CMSDK_WDOG_LOCK_WENSTATTUS_Msk        (0x01ul << CMSDK_WDOG_LOCK_WENSTATUS_Pos)
+
+#define CMSDK_WDOG_ITCR_ITMEN_Pos             0
+#define CMSDK_WDOG_ITCR_ITMEN_Msk             (0x01ul << CMSDK_WDOG_ITCR_ITMEN_Pos)
+
+#define CMSDK_WDOG_ITOP_WDOGRES_Pos           0
+#define CMSDK_WDOG_ITOP_WDOGRES_Msk           (0x01ul << CMSDK_WDOG_ITOP_WDOGRES_Pos)
+
+#define CMSDK_WDOG_ITOP_WDOGINT_Pos           1
+#define CMSDK_WDOG_ITOP_WDOGINT_Msk           (0x01ul << CMSDK_WDOG_ITOP_WDOGINT_Pos)
+
+#define CMSDK_WDOG            ((CMSDK_WDOG_TypeDef  *) SYS_WATCHDOG_BASE  )
+

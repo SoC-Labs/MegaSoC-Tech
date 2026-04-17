@@ -132,6 +132,7 @@ uint32_t UnalignedAccessP(uint32_t BaseAddr, uint32_t TopAddr, uint32_t BackupAd
 uint32_t WordHalfWordAccess(uint32_t BaseAddr, uint32_t TopAddr, uint32_t MaxStep, uint32_t MinOffset, uint32_t* RbAddr);
 uint32_t WordHalfWordAccessP(uint32_t BaseAddr, uint32_t TopAddr, uint32_t BackupAddr, uint32_t Preserve, uint32_t MaxStep, uint32_t MinOffset, uint32_t* RbAddr);
 
+void system_sw_reset(void); //SW RESET Control helper function
 
 #endif //__SYSTEM_LEVEL_FUNCTIONS_H__
 
