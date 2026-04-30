@@ -24,7 +24,7 @@ module megasoc_dram_wrapper #(
     output wire             DDR4_CK_T,
     output wire             DDR4_CK_C,
     output wire [1:0]       DDR4_CKE,
-    output wire             DDR4_CS_N,
+    output wire [1:0]       DDR4_CS_N,
     output wire [5:0]       DDR4_ADR,
     output wire             DDR4_ODT,
     inout  wire [1:0]       DDR4_DQS_T,
@@ -116,7 +116,7 @@ generate
         wire [3:0]      dfi_lp_wakeup;    // DFI LP wakeup
 
         wire            dfi_phymstr_req;        // DFI PHY Master Interface request
-        wire            dfi_phymstr_cs_state;   // DFI PHY Master Interface CS state
+        wire [1:0]      dfi_phymstr_cs_state;   // DFI PHY Master Interface CS state
         wire            dfi_phymstr_state_sel;  // DFI PHY Master Interface state select
         wire [1:0]      dfi_phymstr_type;       // DFI PHY Master Interface time type
         wire            dfi_phymstr_ack;        // DFI PHY Master Interface acknowledge
@@ -232,7 +232,7 @@ generate
         phy_reset_ctrl u_ddr_phy_reset_ctrl(
             .pclk(PCLK),
             .presetn(PRESETn),
-            .paddr(DRAM_RST_CTRL_APB.paddr),
+            .paddr(DRAM_RST_CTRL_APB.paddr[11:0]),
             .pwrite(DRAM_RST_CTRL_APB.pwrite),
             .psel(DRAM_RST_CTRL_APB.psel),
             .penable(DRAM_RST_CTRL_APB.penable),
@@ -272,7 +272,7 @@ generate
             .waq_pop_0(),
             .waq_push_0(),
             .waq_split_0(),
-            .awautopre_0(1'b0),
+            .awautopre_0(DRAM_AXI.AWVALID),
     // AXI Port 0 Write Data Channel
             .wdata_0(DRAM_AXI.WDATA),
             .wstrb_0(DRAM_AXI.WSTRB),
@@ -307,7 +307,7 @@ generate
             .raq_pop_0(),
             .raq_push_0(),
             .raq_split_0(),
-            .arautopre_0(1'b0),
+            .arautopre_0(DRAM_AXI.ARVALID),
     // AXI Port 0 Read Data Channel
     //-----------------------------------------------
             .rid_0(DRAM_AXI.RID),
@@ -373,7 +373,7 @@ generate
 
             .dfi_rddata(dfi_rddata),
             .dfi_rddata_en(dfi_rddata_en),
-            .dfi_rddata_valid(dfi_rddata_valid),
+            .dfi_rddata_valid({2'b00,dfi_rddata_valid[3:0]}),
             .dfi_rddata_dbi(dfi_rddata_dbi),
             
             .dfi_wrdata_cs(dfi_wrdata_cs),
@@ -409,7 +409,7 @@ generate
 
             .dfi_phymstr_req(dfi_phymstr_req),
 
-            .dfi_phymstr_cs_state(dfi_phymstr_cs_state),
+            .dfi_phymstr_cs_state(dfi_phymstr_cs_state[0]),
 
             .dfi_phymstr_state_sel(dfi_phymstr_state_sel),
 
@@ -424,7 +424,7 @@ generate
             .ecc_uncorrected_err_intr_fault(ecc_uncorrected_err_intr_fault),
 
             .dfi_alert_err_intr(dfi_alert_err_intr),
-            .scanmode(0),
+            .scanmode(1'b0),
             .scan_resetn(ARESETn),
 
             .pclk(PCLK),
@@ -458,15 +458,15 @@ generate
             .PWRITE_APB(DRAM_PHY_CFG_APB.pwrite),
             .PSELx_APB(DRAM_PHY_CFG_APB.psel),
             .PENABLE_APB(DRAM_PHY_CFG_APB.penable),
-            .PWDATA_APB(DRAM_PHY_CFG_APB.pwdata),
-            .PSTRB_APB(DRAM_PHY_CFG_APB.pstrb),
+            .PWDATA_APB(DRAM_PHY_CFG_APB.pwdata[15:0]),
+            .PSTRB_APB(DRAM_PHY_CFG_APB.pstrb[1:0]),
             .PPROT_APB(DRAM_PHY_CFG_APB.pprot),
             .PREADY_APB(DRAM_PHY_CFG_APB.pready),
-            .PRDATA_APB(DRAM_PHY_CFG_APB.prdata),
+            .PRDATA_APB(DRAM_PHY_CFG_APB.prdata[15:0]),
             .PSLVERR_APB(DRAM_PHY_CFG_APB.pslverr),
             .PPROT_PIN(3'h1),
 
-            .dfi_reset_n(dfi_reset_n),
+            .dfi_reset_n(dfi_reset_n[0]),
             .dfi0_ctrlupd_ack(dfi_ctrlupd_ack),
             .dfi0_ctrlupd_req(dfi_ctrlupd_req),
             .dfi0_phyupd_ack(dfi_phyupd_ack),
@@ -496,7 +496,7 @@ generate
             .dfi0_cs_P2(2'b11),
             .dfi0_cs_P3(2'b11),
             .dfi0_lp_ack(dfi_lp_ack),
-            .dfi0_lp_ctrl_req(dfi_ctrlupd_req),
+            .dfi0_lp_ctrl_req(dfi_lp_req),
             .dfi0_lp_data_req(dfi_lp_req),
             .dfi0_lp_wakeup(dfi_lp_wakeup),
             .dfi0_error(),
@@ -555,7 +555,7 @@ generate
             .dwc_ddrphy_dto(),
 
             .atpg_se(6'h00),
-            .atpg_si(110'd0),
+            .atpg_si(86'd0),
             .atpg_so(),
             .atpg_mode(1'b0),
             .atpg_lu_ctrl(6'h00),
@@ -586,8 +586,8 @@ generate
             .BypassOutDataDAT(24'd0),
             .BypassInDataDAT(),
             .BypassModeEnMASTER(1'b0),
-            .BypassOutEnMASTER(1'b00),
-            .BypassOutDataMASTER(1'b00),
+            .BypassOutEnMASTER(2'b00),
+            .BypassOutDataMASTER(2'b00),
             .BypassInDataMASTER(),
 
             // Bumps
@@ -627,7 +627,7 @@ generate
         u_iccm(
             .ls(1'b0),
             .clk(pmu_sram_clk_gated),
-            .addr(iccm_data_addr),
+            .addr(iccm_data_addr[14:2]),
             .dout(iccm_data_dout),
             .din(iccm_data_din),
             .cs(iccm_data_ce),
@@ -636,7 +636,7 @@ generate
         );
         dwc_ddrphy_pmu_dccm_ram u_dccm (
             .clk(pmu_sram_clk_gated),
-            .addr(dccm_data_addr),
+            .addr(dccm_data_addr[14:2]),
             .dout(dccm_data_dout),
             .din(dccm_data_din),
             .cs(dccm_data_ce),

@@ -110,8 +110,8 @@ module megasoc_dram_PHY (
 
 
     input  wire [5:0]   atpg_se,
-    input  wire [109:0] atpg_si,
-    output wire [109:0] atpg_so,
+    input  wire [85:0]  atpg_si,
+    output wire [85:0]  atpg_so,
     input  wire         atpg_mode,
     input  wire [5:0]   atpg_lu_ctrl,
 
@@ -171,8 +171,7 @@ module megasoc_dram_PHY (
 
 );
 
-`define DWC_DDRPHY_NUM_DBYTES_2
-`define DWC_DDRPHY_NUM_ANIBS_3
+`include "dwc_ddrphy_VDEFINES.v"
 
 wire [23:0] BP_D;
 wire [11:0] BP_A;

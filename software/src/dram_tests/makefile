@@ -44,6 +44,7 @@ APP_AS_INC_DIR :=
 APP_C_FLAGS := $(APP_TESTDEFINES) $(GLOBAL_TESTDEFINES) -DTTBR0_BASE=0x02100000
 APP_C_INC_DIR := $(TEST_PATH)
 APP_SRC := dram_tests.c
+APP_SRC += $(SOCLABS_MEGASOC_TECH_DIR)/software/lib/sw_lib/devices/ddr/src/snps_dram_phy_init.c
 
 export APP_SRC
 export APP_C_FLAGS

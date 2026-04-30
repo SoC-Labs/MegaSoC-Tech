@@ -1,3 +1,4 @@
++incdir+$(SYNOPSYS_LPDDR4_multiPHY_DIR)/src/
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/DRAM/ASIC/megasoc_dram_PHY.v
 
