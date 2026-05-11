@@ -130,7 +130,7 @@ typedef	uint32_t DWORD, LBA_t, UINT;
 //	SDINFO: Set to turns on a verbose reporting.  This will dump values of
 //		registers, together with their meanings.  When reading,
 //		it will dump sectors read.  Often requires SDDEBUG.
-static	const int	SDINFO = 1, SDDEBUG = 1;
+static	const int	SDINFO = 0, SDDEBUG = 1;
 // }}}
 // Compile time DMA controls
 // {{{
@@ -165,7 +165,7 @@ static	const int	SDMULTI = 1;
 
 
 static	const	uint32_t
-		// Command bit enumerations
+// Command bit enumerations
 		SDIO_NULLCMD  = 0x00000080,
 		SDIO_RNONE    = 0x00000000,
 		SDIO_R1       = 0x00000100,
@@ -193,7 +193,7 @@ static	const	uint32_t
 		SDIO_HWRESET  = 0x02000000,
 		SDIO_ACK      = 0x04000000,	// Expect a CRC ACK token
 		SDIO_RESET    = 0x52000000,
-		// PHY enumerations
+// PHY enumerations
 		SDPHY_DDR     = 0x00004100,	// Requires CK90
 		SDPHY_DS      = 0x00004300,	// Requires DDR & CK90
 		SDPHY_W1      = 0x00000000,
@@ -206,7 +206,7 @@ static	const	uint32_t
 		SDIOCK_CK90   = 0x00004000,
 		SDIOCK_SHUTDN = 0x00008000,
 		SDPHY_PHASEMSK= 0x001f0000,
-		// IO clock speeds
+// IO clock speeds
 		SDIOCK_100KHZ = 0x000000fc,
 		SDIOCK_200KHZ = 0x0000007f,
 		SDIOCK_400KHZ = 0x00000041,
@@ -222,22 +222,22 @@ static	const	uint32_t
 		SDPHY_1P8VSPT = 0x00800000,	// 1.8v is supported
 		SDIOCK_DS     = SDIOCK_25MHZ | SDPHY_W4 | SDPHY_PUSHPULL,
 		SDIOCK_HS     = SDIOCK_50MHZ | SDPHY_W4 | SDPHY_PUSHPULL,
-		// Speed abbreviations
+// Speed abbreviations
 		SDIOCK_SDR12  = SDIOCK_DS | SDPHY_1P8V,
 		SDIOCK_SDR25  = SDIOCK_HS | SDPHY_1P8V,
 		SDIOCK_DDR50  = SDIOCK_50MHZ  | SDPHY_W4 | SDPHY_PUSHPULL | SDPHY_DDR | SDPHY_1P8V,
 		SDIOCK_SDR50  = SDIOCK_100MHZ | SDPHY_W4 | SDPHY_PUSHPULL | SDPHY_1P8V,
 		SDIOCK_SDR104 = SDIOCK_200MHZ | SDPHY_W4 | SDPHY_PUSHPULL | SDPHY_1P8V,
-		//
+//
 		SPEED_SLOW   = SDIOCK_400KHZ,
 		SPEED_DEFAULT= SDIOCK_DS,
 		SPEED_FAST   = SDIOCK_HS,
-		//
+//
 		SECTOR_16B   = 0x04000000,
 		SECTOR_64B   = 0x06000000,
 		SECTOR_512B  = 0x09000000,
 		SECTOR_MASK  = 0x0f000000,
-		//
+//
 		SDIO_CMD     = 0x00000040,
 		SDIO_READREG  = SDIO_CMD | SDIO_R1,
 		SDIO_READREGb = SDIO_CMD | SDIO_R1b,
@@ -249,9 +249,9 @@ static	const	uint32_t
 				| SDIO_ACK
 				| SDIO_WRITE | SDIO_MEM) + 25,
 		SDIO_WRDMA = SDIO_WRMULTI | SDIO_DMA,
-		SDIO_READBLK  = (SDIO_CMD | SDIO_R1
+		SDIO_READBLK  = (SDIO_CMD | SDIO_R1 | SDIO_ERR
 					| SDIO_MEM) + 17,
-		SDIO_RDMULTI  = (SDIO_CMD | SDIO_R1
+		SDIO_RDMULTI  = (SDIO_CMD | SDIO_R1 | SDIO_ERR
 					| SDIO_MEM) + 18,
 		SDIO_READDMA  = SDIO_RDMULTI | SDIO_DMA,
 		SDIO_R1ERR   = 0xff800000,
@@ -259,6 +259,9 @@ static	const	uint32_t
 		XPC          = (1<<28);
 
 static	void	sdio_wait_while_busy(SDIODRV *dev);
+static 	int		sdio_wait_while_busy_timeout(SDIODRV *dev);
+static	int		sdio_wait_for_transfer_start(SDIODRV *dev, unsigned cmdid);
+static	void	sdio_store_word(char *dst, uint32_t word);
 static	void	sdio_go_idle(SDIODRV *dev);
 static	void	sdio_all_send_cid(SDIODRV *dev);
 static	void	sdio_dump_cid(SDIODRV *dev);
@@ -287,7 +290,52 @@ extern	int	sdio_read(SDIODRV *dev, const unsigned sector, const unsigned count, 
 extern	int	sdio_ioctl(SDIODRV *dev, char cmd, char *buf);
 
 
-void	sdio_wait_while_busy(SDIODRV *dev) {
+#ifndef SDIO_BUSY_TIMEOUT_CYCLES
+#define SDIO_BUSY_TIMEOUT_CYCLES 100000u
+#endif
+
+
+static int	sdio_wait_for_transfer_start(SDIODRV *dev, unsigned cmdid) {
+	// {{{
+	uint32_t	st;
+	uint32_t	timeout = SDIO_BUSY_TIMEOUT_CYCLES;
+	const uint32_t expected_cmd = cmdid & 0x3fu;
+
+	// A command write and the reflected busy bits are separated by at least
+	// one controller clock. If software polls too quickly it may observe the
+	// old idle value and incorrectly conclude the transfer has already
+	// finished, then read the FIFO before the RX path has populated it. Very
+	// short data commands, such as ACMD51, may also complete before software
+	// ever observes a busy bit; accept that only once the status belongs to the
+	// command we just issued.
+	st = dev->d_dev->sd_cmd;
+	while((((st & 0x3fu) != expected_cmd)
+			|| (!(st & SDIO_BUSY) && ((st & SDIO_CMDECODE) == SDIO_CMDTMOUT)))
+			&& (timeout > 0u)) {
+		st = dev->d_dev->sd_cmd;
+		timeout--;
+	}
+
+	if (((st & 0x3fu) != expected_cmd)
+			|| (!(st & SDIO_BUSY) && ((st & SDIO_CMDECODE) == SDIO_CMDTMOUT))) {
+		TRIGGER_SCOPE;
+
+		txstr("SDIO TIMEOUT: transfer never started\n");
+		txstr("  cmdid  = "); txhex(expected_cmd); txstr("\n");
+		txstr("  sd_cmd = "); txhex(st); txstr("\n");
+		txstr("  sd_data= "); txhex(dev->d_dev->sd_data); txstr("\n");
+		txstr("  sd_phy = "); txhex(dev->d_dev->sd_phy);  txstr("\n");
+
+		dev->d_dev->sd_cmd = SDIO_ERR | SDIO_NULLCMD;
+		return -1;
+	}
+
+	return 0;
+}
+// }}}
+
+
+static int	sdio_wait_while_busy_timeout(SDIODRV *dev) {
 	// {{{
 
 	// Could also do a system call and yield to the scheduler while waiting
@@ -301,14 +349,83 @@ void	sdio_wait_while_busy(SDIODRV *dev) {
 
 	// Busy wait implementation
 	uint32_t	st;
+	uint32_t	timeout = SDIO_BUSY_TIMEOUT_CYCLES;
+
+	// Phase 1: wait for command/DMA/card-busy to clear with a finite timeout.
+	// SDIO_MEM is deliberately excluded here - a data transfer that has
+	// already started must be allowed to complete; cancelling it with
+	// NULLCMD corrupts the transfer and causes the subsequent FIFO reads
+	// to return stale or empty data.
+	#define SDIO_CMD_BUSY_MASK (SDIO_CMDBUSY | SDIO_DMA | SDIO_CARDBUSY)
 
 	st = dev->d_dev->sd_cmd;
-	while(st & SDIO_BUSY)
+	while((st & SDIO_CMD_BUSY_MASK) && (timeout > 0u)) {
 		st = dev->d_dev->sd_cmd;
+		timeout--;
+	}
+	if (st & SDIO_CMD_BUSY_MASK) {
+        TRIGGER_SCOPE;
 
-	// }
+        txstr("SDIO TIMEOUT: command busy expired\n");
+        txstr("  sd_cmd = "); txhex(st); txstr("\n");
+        txstr("  busy   = CMDBUSY:"); txdecimal((st & SDIO_CMDBUSY) ? 1 : 0);
+        txstr(" MEM:");          txdecimal((st & SDIO_MEM) ? 1 : 0);
+        txstr(" DMA:");          txdecimal((st & SDIO_DMA) ? 1 : 0);
+        txstr(" CARDBUSY:");     txdecimal((st & SDIO_CARDBUSY) ? 1 : 0);
+        txstr("\n");
+        txstr("  sd_data= "); txhex(dev->d_dev->sd_data); txstr("\n");
+        txstr("  sd_phy = "); txhex(dev->d_dev->sd_phy);  txstr("\n");
+
+        // Cancel the stuck command - only safe when no data transfer is
+        // in-flight (MEM=0).  If MEM were also set we would not be here
+        // because SDIO_MEM is not part of SDIO_CMD_BUSY_MASK.
+        dev->d_dev->sd_cmd = SDIO_ERR | SDIO_NULLCMD;
+
+        return -1;
+    }
+
+	// Phase 2: wait for any in-progress data transfer (MEM) to complete.
+	// In bring-up we still want a finite timeout here, otherwise a stuck
+	// MEM bit will hang the whole test forever with no diagnostics.
+	timeout = SDIO_BUSY_TIMEOUT_CYCLES;
+	while((st & SDIO_MEM) && (timeout > 0u)) {
+		st = dev->d_dev->sd_cmd;
+		timeout--;
+	}
+	if (st & SDIO_MEM) {
+		TRIGGER_SCOPE;
+
+		txstr("SDIO TIMEOUT: data transfer busy expired\n");
+		txstr("  sd_cmd = "); txhex(st); txstr("\n");
+		txstr("  busy   = CMDBUSY:"); txdecimal((st & SDIO_CMDBUSY) ? 1 : 0);
+		txstr(" MEM:");          txdecimal((st & SDIO_MEM) ? 1 : 0);
+		txstr(" DMA:");          txdecimal((st & SDIO_DMA) ? 1 : 0);
+		txstr(" CARDBUSY:");     txdecimal((st & SDIO_CARDBUSY) ? 1 : 0);
+		txstr("\n");
+		txstr("  sd_data= "); txhex(dev->d_dev->sd_data); txstr("\n");
+		txstr("  sd_phy = "); txhex(dev->d_dev->sd_phy);  txstr("\n");
+
+		dev->d_dev->sd_cmd = SDIO_ERR | SDIO_NULLCMD;
+		return -1;
+	}
+
+	#undef SDIO_CMD_BUSY_MASK
+	return 0;
 }
 // }}}
+
+static void sdio_wait_while_busy(SDIODRV *dev)
+{
+    (void)sdio_wait_while_busy_timeout(dev);
+}
+
+static void sdio_store_word(char *dst, uint32_t word)
+{
+	dst[0] = (char)((word >> 24) & 0x0ff);
+	dst[1] = (char)((word >> 16) & 0x0ff);
+	dst[2] = (char)((word >>  8) & 0x0ff);
+	dst[3] = (char)( word        & 0x0ff);
+}
 
 void	sdio_go_idle(SDIODRV *dev) {				// CMD0
 	// {{{
@@ -1214,7 +1331,7 @@ void sdio_read_csd(SDIODRV *dev) {	  // CMD 9
 			txstr("  TAAC              : "); txhex(dev->d_CSD[1] & 0x0ff); txstr("\n");
 			txstr("  NSAC              : "); txhex(dev->d_CSD[2] & 0x0ff); txstr("\n");
 			txstr("  TRAN_SPEED        : ");
-			if (TRAN_SPEED = 0x32)
+			if (TRAN_SPEED == 0x32)
 				txstr("400kHz (Startup)\n");
 			else if (TRAN_SPEED == 0x0b)
 				txstr("100Mb/s, SDR50 or DDR50\n");
@@ -1570,8 +1687,10 @@ int	sdio_read_block(SDIODRV *dev, uint32_t sector, uint32_t *buf){// CMD 17
 		CLEAR_DCACHE;
 	} else
 #endif
-		for(int k=0; k<512/sizeof(uint32_t); k++)
-			buf[k] = dev->d_dev->sd_fifa;
+		for(int k=0; k<512/sizeof(uint32_t); k++) {
+			uint32_t	word = dev->d_dev->sd_fifa;
+			sdio_store_word(&((char *)buf)[k * sizeof(uint32_t)], word);
+		}
 
 	if (SDDEBUG && SDINFO)
 		sdio_dump_sector(buf);
@@ -1608,7 +1727,7 @@ int	sdio_read_block(SDIODRV *dev, uint32_t sector, uint32_t *buf){// CMD 17
 	}
 	// }}}
 
-	return 0;
+	return err;
 }
 // }}}
 
@@ -2079,18 +2198,34 @@ SDIODRV *sdio_init(SDIO *dev) {
 
 		sdio_send_cid(dv);	// CMD10
 
-		//sdio_read_csd(dv);	// CMD9
+		sdio_read_csd(dv);	// CMD9
 
 		sdio_select_card(dv);	// CMD7
 
 		dv->d_dev->sd_phy = SECTOR_512B | SDIOCK_25MHZ | SDPHY_PUSHPULL
 				| clk_phase;
-		while(SDIOCK_25MHZ != (dv->d_dev->sd_phy & 0x0ff))
-			; // Wait for the clock to change
+		{
+			uint32_t _t = SDIO_BUSY_TIMEOUT_CYCLES;
+			while(SDIOCK_25MHZ != (dv->d_dev->sd_phy & 0x0ff) && _t-- > 0)
+				; // Wait for the clock to change to 25MHz
+			if (SDIOCK_25MHZ != (dv->d_dev->sd_phy & 0x0ff)) {
+				TRIGGER_SCOPE;
+				RELEASE_MUTEX;
+				if (SDDEBUG)
+					txstr("SDIO TIMEOUT: 25MHz clock switch did not complete\n");
+				free(dv);
+				return NULL;
+			}
+		}
 
 
 		// SEND_SCR
-		//sdio_read_scr(dv);	// ACMD51
+		sdio_read_scr(dv);	// ACMD51
+		if (SDDEBUG) {
+			txstr("SCR[0]="); txhex(dv->d_SCR[0]);
+			txstr(" SCR[1]="); txhex(dv->d_SCR[1]);
+			txstr("\n");
+		}
 
 		// LOCK_UNLOCK ?
 		// SET_BUS_WIDTH
@@ -2203,10 +2338,10 @@ int	sdio_write(SDIODRV *dev, const unsigned sector,
 	// {{{
 	unsigned	card_stat, dev_stat, err = 0;
 
-	if (0 == count)
-		return	RES_OK;
+	if (dev == NULL || buf == NULL || 0 == count)
+		return	RES_PARERR;
 
-	if (!SDMULTI) {
+	if (!SDMULTI || count == 1) {
 		for(unsigned k=0; k<count; k++) {
 			unsigned	st;
 
@@ -2224,7 +2359,7 @@ int	sdio_write(SDIODRV *dev, const unsigned sector,
 		txstr(", ");
 		txhex(count);
 		txstr(", ");
-		txhex(buf);
+		txhex((unsigned)(uintptr_t)buf);
 		txstr("-- [DEV ");
 		txhex(dev->d_dev->sd_cmd);
 		txstr("]\n");
@@ -2419,12 +2554,12 @@ int	sdio_write(SDIODRV *dev, const unsigned sector,
 int	sdio_read(SDIODRV *dev, const unsigned sector,
 				const unsigned count, char *buf) {
 	// {{{
-	unsigned	err = 0, dev_stat, card_stat, err_stat;
+	unsigned	err = 0, dev_stat, card_stat, err_stat = 0;
 
-	if (0 == count)
-		return RES_OK;
+	if (dev == NULL || buf == NULL || 0 == count)
+		return RES_PARERR;
 
-	if (!SDMULTI) {
+	if (!SDMULTI || count == 1) {
 		// {{{
 		for(unsigned k=0; k<count; k++) {
 			unsigned	st;
@@ -2447,7 +2582,7 @@ int	sdio_read(SDIODRV *dev, const unsigned sector,
 		txstr(", ");
 		txhex(count);
 		txstr(", ");
-		txhex(buf);
+		txhex((unsigned)(uintptr_t)buf);
 		txstr("-- [DEV ");
 		txhex(dev->d_dev->sd_cmd);
 		txstr("]\n");
@@ -2495,62 +2630,21 @@ int	sdio_read(SDIODRV *dev, const unsigned sector,
 		dev->d_dev->sd_cmd = SDIO_ERR | SDIO_READDMA;
 		// }}}
 	} else {
-		// Issue the read multiple command
-		// {{{
-		dev->d_dev->sd_cmd  = SDIO_ERR | SDIO_RDMULTI;
-		// }}}
+		// The non-DMA CMD18 path is timing-sensitive: software must
+		// issue CMD12 before the card starts the following block.  If
+		// the controller has no internal DMA to pace and stop the read,
+		// use repeated CMD17 requests instead of racing the card/model.
+		RELEASE_MUTEX;
+		for(unsigned k=0; k<count; k++) {
+			unsigned	st;
 
-		// Read each sector
-		// {{{
-		for(unsigned s=0; s<count; s++) {
-			// Wait until we have a block to read
-			sdio_wait_while_busy(dev);
-
-			// Send the next (or last) command
-			// {{{
-			if (0 != (err_stat = dev->d_dev->sd_cmd & SDIO_ERR)) {
-				err = 1;
-			} if (s + 1 < count && !err) {
-				// Immediately start the next read request
-				dev->d_dev->sd_cmd  = SDIO_MEM
-					| ((s&1) ? 0 : SDIO_FIFO);
-			} else {
-				// Send a STOP_TRANSMISSION request
-				dev->d_dev->sd_data = 0;
-				dev->d_dev->sd_cmd  = (SDIO_CMD | SDIO_R1b |SDIO_ERR) + 12;
-			}
-			// }}}
-
-			// Now copy out the data that we've read
-			// {{{
-#ifdef	INCLUDE_DMA_CONTROLLER
-			if (SDEXTDMA && (0 == (_zip->z_dma.d_ctrl & DMA_BUSY))) {
-				_zip->z_dma.d_len = 512;
-				_zip->z_dma.d_rd  = (s&1)
-					? (char *)&dev->d_dev->sd_fifb
-					: (char *)&dev->d_dev->sd_fifa;
-				_zip->z_dma.d_wr  = (char *)&buf[s*512];
-				_zip->z_dma.d_ctrl= DMAREQUEST|DMACLEAR|DMA_DSTWIDE
-						| DMA_CONSTSRC|DMA_SRCWORD;
-				while(_zip->z_dma.d_ctrl & DMA_BUSY)
-					;
-			} else
-#endif
-			{
-				unsigned *dst;
-				dst = (unsigned *)&buf[s*512];
-
-				if (s&1) {
-					for(int w=0; w<512/sizeof(uint32_t); w++)
-						dst[w] = dev->d_dev->sd_fifb;
-				} else {
-					for(int w=0; w<512/sizeof(uint32_t); w++)
-						dst[w] = dev->d_dev->sd_fifa;
-				}
-			}
-			// }}}
+			st = sdio_read_block(dev, sector+k,
+						(uint32_t *)(&buf[k*512]));
+			if (0 != st)
+				return RES_ERROR;
 		}
-		// }}}
+		CLEAR_DCACHE;
+		return RES_OK;
 	}
 
 	// Check the results of the STOP_TRANSMISSION request

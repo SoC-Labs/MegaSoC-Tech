@@ -660,11 +660,13 @@ sdio #(
     .OPT_SERDES(1'b0),
     .OPT_DDR(1'b0),
     .OPT_EMMC(1'b0),
-    .OPT_1P8V(1'b1),
+    // Bring-up safe mode: keep 1.8V switching disabled until PHY/regulator
+    // status is wired in (do not self-acknowledge voltage switching).
+    .OPT_1P8V(1'b0),
     .OPT_CRCTOKEN(1'b1)
     ) u_sdio_controller (
         .i_clk(SYS_CLK),
-        .i_reset(~SYS_RESETn),
+        .i_reset(~SYS_RESETn_int),
         // Control Interface AXI lite
         .S_AXIL_AWVALID(SDIO_S_AXIL.AWVALID),
         .S_AXIL_AWREADY(SDIO_S_AXIL.AWREADY),
@@ -745,7 +747,7 @@ sdio #(
         .i_card_detect(1'b1),
         .o_hwreset_n(),
         .o_1p8v(sd_1p8v),
-        .i_1p8v(sd_1p8v),
+        .i_1p8v(1'b0),
         .o_int(SDIO_IRQ),
 
         // Interface to PHY
