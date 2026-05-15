@@ -94,4 +94,4 @@ $(SYNOPSYS_LPDDR4_multiPHY_LIB_DIR)/master/Latest/rtl/dwc_ddrphy_cmpana_calmux.v
 
 $(SYNOPSYS_LPDDR4_multiPHY_LIB_DIR)/ctb/Latest/testbench/vc/lpddr4/src/uvmvlog_pkg.sv 
 $(SYNOPSYS_LPDDR4_multiPHY_LIB_DIR)/ctb/Latest/testbench/vc/lpddr4/env/svt_vip_models.sv 
-$(SYNOPSYS_LPDDR4_multiPHY_LIB_DIR)/ctb/Latest/testbench/vc/lpddr4/src/lpddr/lpddr4_dram_uvmvlog.sv
+$(SYNOPSYS_LPDDR4_multiPHY_LIB_DIR)/ctb/Latest/testbench/vc/lpddr4/src/lpddr/lpddr4_1ch_dram_uvmvlog.sv

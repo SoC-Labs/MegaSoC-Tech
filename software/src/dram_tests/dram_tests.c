@@ -182,7 +182,7 @@ int main(void) {
   // values if desired
 
   SNPS_MCTL2_DDRC->RFSHCTL3.B.dis_auto_refresh = 0;
-  SNPS_MCTL2_DDRC->PWRCTL.B.powerdown_en = 1;
+  SNPS_MCTL2_DDRC->PWRCTL.B.powerdown_en = 0;
   SNPS_MCTL2_DDRC->PWRCTL.B.selfref_en=1;
   SNPS_MCTL2_DDRC->PWRCTL.B.en_dfi_dram_clk_disable=1;
 
