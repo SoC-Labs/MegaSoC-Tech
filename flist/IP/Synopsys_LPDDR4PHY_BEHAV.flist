@@ -1,5 +1,5 @@
-/home/dwn1c21/SoC-Labs/Synopsys_ip/LPDDR4-m-PHY-V2_TSMC_16FFC/synopsys/dwc_lpddr4_multiphy_v2_tsmc16ffc18/Latest/ctb/Latest/testbench/rtl/dwc_ddrphy_pmu_dccm_ram.v
-/home/dwn1c21/SoC-Labs/Synopsys_ip/LPDDR4-m-PHY-V2_TSMC_16FFC/synopsys/dwc_lpddr4_multiphy_v2_tsmc16ffc18/Latest/ctb/Latest/testbench/rtl/dwc_ddrphy_pmu_iccm_ram.v
+$(SYNOPSYS_LPDDR4_multiPHY_LIB_DIR)/ctb/Latest/testbench/rtl/dwc_ddrphy_pmu_dccm_ram.v
+$(SYNOPSYS_LPDDR4_multiPHY_LIB_DIR)/ctb/Latest/testbench/rtl/dwc_ddrphy_pmu_iccm_ram.v
 
 +incdir+$(SYNOPSYS_LPDDR4_multiPHY_LIB_DIR)/dbyte_ew/Latest/rtl/
 $(SYNOPSYS_LPDDR4_multiPHY_LIB_DIR)/dbyte_ew/Latest/rtl/dwc_ddrphydbyte_top.v
