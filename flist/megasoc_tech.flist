@@ -13,6 +13,9 @@
 // Abstract : Verilog Command File for MegaSoC Tech IP
 //-----------------------------------------------------------------------------
 
+// SDIO controller is instantiated in AXI mode (sdio.v uses `ifdef SDIO_AXI)
++define+SDIO_AXI
+
 // Interfaces
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/apb3_if.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/interfaces/apb4_if.sv
