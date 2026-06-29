@@ -1,6 +1,7 @@
 
 
 
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdfrontend.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/afifo.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdio.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/sdspi/rtl/sdckgen.v
