@@ -58,8 +58,6 @@ int main(void) {
     SNPS_MCTL2_DDRC->INIT0.B.skip_dram_init=3;
     SNPS_MCTL2_DDRC->PWRCTL.B.selfref_sw=1;
   }
-  // De-assert reset signal core_ddrc_rstn
-  DDR_RESET_CTRL->CORE_RSTn=1;
 
   // Disable self-refresh, power down and assertion of dfi_dram_clk_disable by
   // setting RFSHCTL3.dis_auto_refresh= 1, PWRCTL.powerdown_en = 0,
@@ -86,7 +84,9 @@ int main(void) {
   printf("** Start DDR PHY Init **\n");
   dwc_ddr_phy_init_training();
   printf("** Finish DDR PHY Init **\n");
-  
+  // De-assert reset signal core_ddrc_rstn
+  DDR_RESET_CTRL->CORE_RSTn=1;
+
   // // 9 Poll the PUB register
   // //  APBONLY.UctShadowRegs[0]=1’b0 
   // while((HW16_REG(DRAM_PHY_CFG_BASE+0x340010)&0x1)!=0){__nop();}
@@ -183,8 +183,8 @@ int main(void) {
 
   SNPS_MCTL2_DDRC->RFSHCTL3.B.dis_auto_refresh = 0;
   SNPS_MCTL2_DDRC->PWRCTL.B.powerdown_en = 0;
-  SNPS_MCTL2_DDRC->PWRCTL.B.selfref_en=1;
-  SNPS_MCTL2_DDRC->PWRCTL.B.en_dfi_dram_clk_disable=1;
+  SNPS_MCTL2_DDRC->PWRCTL.B.selfref_en=0;
+  SNPS_MCTL2_DDRC->PWRCTL.B.en_dfi_dram_clk_disable=0;
 
   HW64_REG(DRAM_BASE)=0xA5A5A5A5A5A5A5A5;
 
