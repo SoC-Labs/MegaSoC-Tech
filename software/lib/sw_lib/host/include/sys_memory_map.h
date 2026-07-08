@@ -22,6 +22,9 @@
 #define GIC_VIRTUAL_INTERFACE_CONTROL_BASE  0x01104000UL
 #define GIC_VIRTUAL_CPU_INTERFACE_BASE      0x01106000UL
 
+// SDIO controller control register base (AXI-lite via NIC400)
+#define SYS_SDIO_BASE                       0x01010000UL
+
 #define PERIPHERAL_BASE     0x40000000UL
 #define TIMER0_BASE         PERIPHERAL_BASE
 #define TIMER1_BASE         (PERIPHERAL_BASE + 0x1000UL)

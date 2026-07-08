@@ -4,3 +4,6 @@
 [submodule "logical/socdebug_tech"]
 	path = logical/socdebug_tech
 	url = https://github.com/SoC-Labs/SoCDebug-Tech.git
+[submodule "logical/sdspi"]
+	path = logical/sdspi
+	url = https://github.com/SoC-Labs/sdio-controller.git
