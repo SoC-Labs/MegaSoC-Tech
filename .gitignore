@@ -17,3 +17,6 @@ socrates/sie300/sie300_axi5_sram_ctrl_1/build.log
 .project
 
 software/shared/bin/*.bin
+
+socrates/nic400_megasoc_main/__pycache__
+

@@ -7,3 +7,9 @@
 [submodule "logical/sdspi"]
 	path = logical/sdspi
 	url = https://github.com/SoC-Labs/sdio-controller.git
+[submodule "logical/ptp_clock"]
+	path = logical/ptp_clock
+	url = https://github.com/SoC-Labs/PHC-PTP-Hardware-Clock-AHB.git
+[submodule "logical/ethernet_mac_ahb"]
+	path = logical/ethernet_mac_ahb
+	url = https://github.com/SoC-Labs/Ethernet-MAC-AHB.git

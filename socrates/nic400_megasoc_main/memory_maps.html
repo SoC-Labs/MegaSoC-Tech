@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <title>NIC400 Memory Maps</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f6f8fb; color: #17212b; }
+    .wrap { max-width: 1440px; margin: 0 auto; padding: 24px; }
+    h1 { margin-bottom: 8px; font-size: 1.8rem; }
+    .intro { color: #4b5563; margin-bottom: 20px; font-size: 1rem; }
+    .tab-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .tab-button { border: 1px solid #cbd5e1; background: #fff; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: 600; color: #334155; }
+    .tab-button.active { background: #2563eb; color: white; border-color: #2563eb; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+    .tab-panel { display: none; background: white; border: 1px solid #dbe4ee; border-radius: 14px; padding: 20px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06); }
+    .tab-panel.active { display: block; }
+    .map-card { margin-top: 16px; padding: 18px; border: 2px solid #e2e8f0; border-radius: 14px; background: linear-gradient(180deg, #f8fbff 0%, #f3f7fb 100%); }
+    .map-viewport { overflow-x: auto; overflow-y: hidden; padding-bottom: 8px; cursor: grab; user-select: none; }
+    .map-viewport.dragging { cursor: grabbing; }
+    .map-scale { width: max-content; min-width: 100%; transform-origin: left top; transition: transform 0.2s ease; }
+    .address-bar { display: flex; width: 100%; min-width: 100%; height: 42px; border-radius: 999px; overflow: hidden; border: 2px solid #94a3b8; background: #e2e8f0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.08); }
+    .bar-segment { height: 100%; min-width: 4px; position: relative; }
+    .bar-segment.mapped { border-right: 2px solid rgba(255,255,255,0.8); }
+    .bar-segment.gap { background: repeating-linear-gradient(90deg, #fef2f2 0 6px, #fde68a 6px 12px); }
+    .bar-segment:hover::after { content: attr(data-tooltip); position: absolute; top: -38px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #0f172a; color: white; padding: 6px 8px; border-radius: 6px; font-size: 0.8rem; z-index: 10; }
+    .bar-labels { display: flex; justify-content: space-between; margin-top: 8px; color: #475569; font-size: 0.92rem; font-weight: 600; }
+    .legend-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; }
+    .legend-item { display: flex; align-items: center; font-size: 0.92rem; color: #334155; }
+    .detail-list { margin-top: 16px; padding-left: 18px; color: #334155; }
+    .detail-list li { margin-bottom: 8px; line-height: 1.5; }
+    .legend { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-right: 8px; vertical-align: middle; border: 1px solid rgba(0,0,0,0.15); }
+    .legend.gap { background: #f59e0b; }
+    .zoom-controls { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .zoom-button { border: 1px solid #cbd5e1; background: #fff; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+    .zoom-slider { width: 140px; accent-color: #2563eb; }
+    code { background: #f3f6fa; padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class='wrap'>
+    <h1>NIC400 Memory Maps</h1>
+    <p class='intro'>Select a memory map to inspect the mapped address ranges and interfaces.</p>
+    <div class='tab-bar memory-map-tabs'>
+      <button class='tab-button active' data-target='panel-0'>CPU_MM</button><button class='tab-button ' data-target='panel-1'>SDIO_MM</button><button class='tab-button ' data-target='panel-2'>EXP_MM</button><button class='tab-button ' data-target='panel-3'>ADP_MM</button>
+    </div>
+    
+            <section id='panel-0' class='tab-panel active'>
+              <h2>CPU_MM</h2>
+              <p><strong>Source:</strong> A53</p>
+              <p><strong>Description:</strong> Main Memory map from CPU and ADP</p>
+              <div class='map-card'>
+                <div class='bar-labels'>
+                  <span>0x00000000</span>
+                  <div class='zoom-controls'>
+                    <button class='zoom-button' onclick='zoomOut(this)'>−</button>
+                    <input class='zoom-slider' type='range' min='100' max='400' step='25' value='100' oninput='setZoom(this, this.value)'>
+                    <button class='zoom-button' onclick='zoomIn(this)'>+</button>
+                  </div>
+                  <span>0x27FFFFFFF</span>
+                </div>
+                <div class='map-viewport'>
+                  <div class='map-scale' data-scale='1'>
+                    <div class='address-bar'>
+                      <div class='bar-segment mapped' style='flex-basis:1%;background:#2563eb;' title='ROM: 0x00000000 to 0x0000FFFF' data-tooltip='ROM: 0x00000000 to 0x0000FFFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x00010000 to 0x003FFFFF' data-tooltip='Unmapped gap: 0x00010000 to 0x003FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#7c3aed;' title='FLASH: 0x00400000 to 0x007FFFFF' data-tooltip='FLASH: 0x00400000 to 0x007FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#d97706;' title='RAM: 0x00800000 to 0x0087FFFF' data-tooltip='RAM: 0x00800000 to 0x0087FFFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x00880000 to 0x00FFFFFF' data-tooltip='Unmapped gap: 0x00880000 to 0x00FFFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#0891b2;' title='FLASH_CTRL: 0x01000000 to 0x0100FFFF' data-tooltip='FLASH_CTRL: 0x01000000 to 0x0100FFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#4f46e5;' title='SDIO_S: 0x01010000 to 0x0101FFFF' data-tooltip='SDIO_S: 0x01010000 to 0x0101FFFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x01020000 to 0x010FFFFF' data-tooltip='Unmapped gap: 0x01020000 to 0x010FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#15803d;' title='GIC: 0x01100000 to 0x01107FFF' data-tooltip='GIC: 0x01100000 to 0x01107FFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x01108000 to 0x011FFFFF' data-tooltip='Unmapped gap: 0x01108000 to 0x011FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#0f766e;' title='PCK_CTRL: 0x01200000 to 0x01207FFF' data-tooltip='PCK_CTRL: 0x01200000 to 0x01207FFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x01208000 to 0x012FFFFF' data-tooltip='Unmapped gap: 0x01208000 to 0x012FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#d97706;' title='DEBUG: 0x01300000 to 0x01307FFF' data-tooltip='DEBUG: 0x01300000 to 0x01307FFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x01308000 to 0x014FFFFF' data-tooltip='Unmapped gap: 0x01308000 to 0x014FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#0891b2;' title='DRAM_CFG: 0x01500000 to 0x01506FFF' data-tooltip='DRAM_CFG: 0x01500000 to 0x01506FFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x01507000 to 0x01FFFFFF' data-tooltip='Unmapped gap: 0x01507000 to 0x01FFFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#be185d;' title='DRAM_PHY_CFG: 0x02000000 to 0x027FFFFF' data-tooltip='DRAM_PHY_CFG: 0x02000000 to 0x027FFFFF'></div><div class='bar-segment gap' style='flex-basis:9%;' title='Unmapped gap: 0x02800000 to 0x3FFFFFFF' data-tooltip='Unmapped gap: 0x02800000 to 0x3FFFFFFF'></div><div class='bar-segment mapped' style='flex-basis:5%;background:#2563eb;' title='PERIPHERAL: 0x40000000 to 0x5FFFFFFF' data-tooltip='PERIPHERAL: 0x40000000 to 0x5FFFFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#0f766e;' title='EXP_M: 0x60000000 to 0x60FFFFFF' data-tooltip='EXP_M: 0x60000000 to 0x60FFFFFF'></div><div class='bar-segment gap' style='flex-basis:4%;' title='Unmapped gap: 0x61000000 to 0x7FFFFFFF' data-tooltip='Unmapped gap: 0x61000000 to 0x7FFFFFFF'></div><div class='bar-segment mapped' style='flex-basis:80%;background:#d97706;' title='DRAM: 0x80000000 to 0x27FFFFFFF' data-tooltip='DRAM: 0x80000000 to 0x27FFFFFFF'></div>
+                    </div>
+                  </div>
+                </div>
+                <div class='legend-row'>
+                  <span class='legend-item'><span class='legend'></span>Mapped region</span>
+                  <span class='legend-item'><span class='legend gap'></span>Unmapped gap</span>
+                </div>
+              </div>
+              <ul class='detail-list'>
+                <li><span class='legend mapped' style='background:#2563eb;'></span><strong>ROM</strong> 0x00000000 to 0x0000FFFF (0x00010000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x00010000 to 0x003FFFFF (0x003F0000 bytes)</li><li><span class='legend mapped' style='background:#7c3aed;'></span><strong>FLASH</strong> 0x00400000 to 0x007FFFFF (0x00400000 bytes)</li><li><span class='legend mapped' style='background:#d97706;'></span><strong>RAM</strong> 0x00800000 to 0x0087FFFF (0x00080000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x00880000 to 0x00FFFFFF (0x00780000 bytes)</li><li><span class='legend mapped' style='background:#0891b2;'></span><strong>FLASH_CTRL</strong> 0x01000000 to 0x0100FFFF (0x00010000 bytes)</li><li><span class='legend mapped' style='background:#4f46e5;'></span><strong>SDIO_S</strong> 0x01010000 to 0x0101FFFF (0x00010000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x01020000 to 0x010FFFFF (0x000E0000 bytes)</li><li><span class='legend mapped' style='background:#15803d;'></span><strong>GIC</strong> 0x01100000 to 0x01107FFF (0x00008000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x01108000 to 0x011FFFFF (0x000F8000 bytes)</li><li><span class='legend mapped' style='background:#0f766e;'></span><strong>PCK_CTRL</strong> 0x01200000 to 0x01207FFF (0x00008000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x01208000 to 0x012FFFFF (0x000F8000 bytes)</li><li><span class='legend mapped' style='background:#d97706;'></span><strong>DEBUG</strong> 0x01300000 to 0x01307FFF (0x00008000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x01308000 to 0x014FFFFF (0x001F8000 bytes)</li><li><span class='legend mapped' style='background:#0891b2;'></span><strong>DRAM_CFG</strong> 0x01500000 to 0x01506FFF (0x00007000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x01507000 to 0x01FFFFFF (0x00AF9000 bytes)</li><li><span class='legend mapped' style='background:#be185d;'></span><strong>DRAM_PHY_CFG</strong> 0x02000000 to 0x027FFFFF (0x00800000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x02800000 to 0x3FFFFFFF (0x3D800000 bytes)</li><li><span class='legend mapped' style='background:#2563eb;'></span><strong>PERIPHERAL</strong> 0x40000000 to 0x5FFFFFFF (0x20000000 bytes)</li><li><span class='legend mapped' style='background:#0f766e;'></span><strong>EXP_M</strong> 0x60000000 to 0x60FFFFFF (0x01000000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x61000000 to 0x7FFFFFFF (0x1F000000 bytes)</li><li><span class='legend mapped' style='background:#d97706;'></span><strong>DRAM</strong> 0x80000000 to 0x27FFFFFFF (0x200000000 bytes)</li>
+              </ul>
+            </section>
+            
+            <section id='panel-1' class='tab-panel '>
+              <h2>SDIO_MM</h2>
+              <p><strong>Source:</strong> SDIO_M</p>
+              <p><strong>Description:</strong> From SDIO DMA</p>
+              <div class='map-card'>
+                <div class='bar-labels'>
+                  <span>0x00000000</span>
+                  <div class='zoom-controls'>
+                    <button class='zoom-button' onclick='zoomOut(this)'>−</button>
+                    <input class='zoom-slider' type='range' min='100' max='400' step='25' value='100' oninput='setZoom(this, this.value)'>
+                    <button class='zoom-button' onclick='zoomIn(this)'>+</button>
+                  </div>
+                  <span>0x27FFFFFFF</span>
+                </div>
+                <div class='map-viewport'>
+                  <div class='map-scale' data-scale='1'>
+                    <div class='address-bar'>
+                      <div class='bar-segment mapped' style='flex-basis:1%;background:#2563eb;' title='ROM: 0x00000000 to 0x0000FFFF' data-tooltip='ROM: 0x00000000 to 0x0000FFFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x00010000 to 0x003FFFFF' data-tooltip='Unmapped gap: 0x00010000 to 0x003FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#7c3aed;' title='FLASH: 0x00400000 to 0x007FFFFF' data-tooltip='FLASH: 0x00400000 to 0x007FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#d97706;' title='RAM: 0x00800000 to 0x0087FFFF' data-tooltip='RAM: 0x00800000 to 0x0087FFFF'></div><div class='bar-segment gap' style='flex-basis:14%;' title='Unmapped gap: 0x00880000 to 0x5FFFFFFF' data-tooltip='Unmapped gap: 0x00880000 to 0x5FFFFFFF'></div><div class='bar-segment mapped' style='flex-basis:2%;background:#0891b2;' title='EXP_M: 0x60000000 to 0x6FFFFFFF' data-tooltip='EXP_M: 0x60000000 to 0x6FFFFFFF'></div><div class='bar-segment gap' style='flex-basis:2%;' title='Unmapped gap: 0x70000000 to 0x7FFFFFFF' data-tooltip='Unmapped gap: 0x70000000 to 0x7FFFFFFF'></div><div class='bar-segment mapped' style='flex-basis:80%;background:#be185d;' title='DRAM: 0x80000000 to 0x27FFFFFFF' data-tooltip='DRAM: 0x80000000 to 0x27FFFFFFF'></div>
+                    </div>
+                  </div>
+                </div>
+                <div class='legend-row'>
+                  <span class='legend-item'><span class='legend'></span>Mapped region</span>
+                  <span class='legend-item'><span class='legend gap'></span>Unmapped gap</span>
+                </div>
+              </div>
+              <ul class='detail-list'>
+                <li><span class='legend mapped' style='background:#2563eb;'></span><strong>ROM</strong> 0x00000000 to 0x0000FFFF (0x00010000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x00010000 to 0x003FFFFF (0x003F0000 bytes)</li><li><span class='legend mapped' style='background:#7c3aed;'></span><strong>FLASH</strong> 0x00400000 to 0x007FFFFF (0x00400000 bytes)</li><li><span class='legend mapped' style='background:#d97706;'></span><strong>RAM</strong> 0x00800000 to 0x0087FFFF (0x00080000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x00880000 to 0x5FFFFFFF (0x5F780000 bytes)</li><li><span class='legend mapped' style='background:#0891b2;'></span><strong>EXP_M</strong> 0x60000000 to 0x6FFFFFFF (0x10000000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x70000000 to 0x7FFFFFFF (0x10000000 bytes)</li><li><span class='legend mapped' style='background:#be185d;'></span><strong>DRAM</strong> 0x80000000 to 0x27FFFFFFF (0x200000000 bytes)</li>
+              </ul>
+            </section>
+            
+            <section id='panel-2' class='tab-panel '>
+              <h2>EXP_MM</h2>
+              <p><strong>Source:</strong> EXP_S</p>
+              <p><strong>Description:</strong> No description provided.</p>
+              <div class='map-card'>
+                <div class='bar-labels'>
+                  <span>0x00000000</span>
+                  <div class='zoom-controls'>
+                    <button class='zoom-button' onclick='zoomOut(this)'>−</button>
+                    <input class='zoom-slider' type='range' min='100' max='400' step='25' value='100' oninput='setZoom(this, this.value)'>
+                    <button class='zoom-button' onclick='zoomIn(this)'>+</button>
+                  </div>
+                  <span>0x27FFFFFFF</span>
+                </div>
+                <div class='map-viewport'>
+                  <div class='map-scale' data-scale='1'>
+                    <div class='address-bar'>
+                      <div class='bar-segment mapped' style='flex-basis:1%;background:#2563eb;' title='ROM: 0x00000000 to 0x0000FFFF' data-tooltip='ROM: 0x00000000 to 0x0000FFFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x00010000 to 0x003FFFFF' data-tooltip='Unmapped gap: 0x00010000 to 0x003FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#7c3aed;' title='FLASH: 0x00400000 to 0x007FFFFF' data-tooltip='FLASH: 0x00400000 to 0x007FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#d97706;' title='RAM: 0x00800000 to 0x0087FFFF' data-tooltip='RAM: 0x00800000 to 0x0087FFFF'></div><div class='bar-segment gap' style='flex-basis:19%;' title='Unmapped gap: 0x00880000 to 0x7FFFFFFF' data-tooltip='Unmapped gap: 0x00880000 to 0x7FFFFFFF'></div><div class='bar-segment mapped' style='flex-basis:80%;background:#0891b2;' title='DRAM: 0x80000000 to 0x27FFFFFFF' data-tooltip='DRAM: 0x80000000 to 0x27FFFFFFF'></div>
+                    </div>
+                  </div>
+                </div>
+                <div class='legend-row'>
+                  <span class='legend-item'><span class='legend'></span>Mapped region</span>
+                  <span class='legend-item'><span class='legend gap'></span>Unmapped gap</span>
+                </div>
+              </div>
+              <ul class='detail-list'>
+                <li><span class='legend mapped' style='background:#2563eb;'></span><strong>ROM</strong> 0x00000000 to 0x0000FFFF (0x00010000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x00010000 to 0x003FFFFF (0x003F0000 bytes)</li><li><span class='legend mapped' style='background:#7c3aed;'></span><strong>FLASH</strong> 0x00400000 to 0x007FFFFF (0x00400000 bytes)</li><li><span class='legend mapped' style='background:#d97706;'></span><strong>RAM</strong> 0x00800000 to 0x0087FFFF (0x00080000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x00880000 to 0x7FFFFFFF (0x7F780000 bytes)</li><li><span class='legend mapped' style='background:#0891b2;'></span><strong>DRAM</strong> 0x80000000 to 0x27FFFFFFF (0x200000000 bytes)</li>
+              </ul>
+            </section>
+            
+            <section id='panel-3' class='tab-panel '>
+              <h2>ADP_MM</h2>
+              <p><strong>Source:</strong> ADP</p>
+              <p><strong>Description:</strong> Memory map from ADP</p>
+              <div class='map-card'>
+                <div class='bar-labels'>
+                  <span>0x00000000</span>
+                  <div class='zoom-controls'>
+                    <button class='zoom-button' onclick='zoomOut(this)'>−</button>
+                    <input class='zoom-slider' type='range' min='100' max='400' step='25' value='100' oninput='setZoom(this, this.value)'>
+                    <button class='zoom-button' onclick='zoomIn(this)'>+</button>
+                  </div>
+                  <span>0xFFFFFFFF</span>
+                </div>
+                <div class='map-viewport'>
+                  <div class='map-scale' data-scale='1'>
+                    <div class='address-bar'>
+                      <div class='bar-segment mapped' style='flex-basis:1%;background:#2563eb;' title='ROM: 0x00000000 to 0x0000FFFF' data-tooltip='ROM: 0x00000000 to 0x0000FFFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x00010000 to 0x003FFFFF' data-tooltip='Unmapped gap: 0x00010000 to 0x003FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#7c3aed;' title='FLASH: 0x00400000 to 0x007FFFFF' data-tooltip='FLASH: 0x00400000 to 0x007FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#d97706;' title='RAM: 0x00800000 to 0x0087FFFF' data-tooltip='RAM: 0x00800000 to 0x0087FFFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x00880000 to 0x00FFFFFF' data-tooltip='Unmapped gap: 0x00880000 to 0x00FFFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#0891b2;' title='FLASH_CTRL: 0x01000000 to 0x0100FFFF' data-tooltip='FLASH_CTRL: 0x01000000 to 0x0100FFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#4f46e5;' title='SDIO_S: 0x01010000 to 0x0101FFFF' data-tooltip='SDIO_S: 0x01010000 to 0x0101FFFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x01020000 to 0x010FFFFF' data-tooltip='Unmapped gap: 0x01020000 to 0x010FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#15803d;' title='GIC: 0x01100000 to 0x01107FFF' data-tooltip='GIC: 0x01100000 to 0x01107FFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x01108000 to 0x011FFFFF' data-tooltip='Unmapped gap: 0x01108000 to 0x011FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#0f766e;' title='PCK_CTRL: 0x01200000 to 0x01207FFF' data-tooltip='PCK_CTRL: 0x01200000 to 0x01207FFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x01208000 to 0x012FFFFF' data-tooltip='Unmapped gap: 0x01208000 to 0x012FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#d97706;' title='DEBUG: 0x01300000 to 0x01307FFF' data-tooltip='DEBUG: 0x01300000 to 0x01307FFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x01308000 to 0x014FFFFF' data-tooltip='Unmapped gap: 0x01308000 to 0x014FFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#0891b2;' title='DRAM_CFG: 0x01500000 to 0x01506FFF' data-tooltip='DRAM_CFG: 0x01500000 to 0x01506FFF'></div><div class='bar-segment gap' style='flex-basis:1%;' title='Unmapped gap: 0x01507000 to 0x01FFFFFF' data-tooltip='Unmapped gap: 0x01507000 to 0x01FFFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#be185d;' title='DRAM_PHY_CFG: 0x02000000 to 0x027FFFFF' data-tooltip='DRAM_PHY_CFG: 0x02000000 to 0x027FFFFF'></div><div class='bar-segment gap' style='flex-basis:24%;' title='Unmapped gap: 0x02800000 to 0x3FFFFFFF' data-tooltip='Unmapped gap: 0x02800000 to 0x3FFFFFFF'></div><div class='bar-segment mapped' style='flex-basis:12%;background:#2563eb;' title='PERIPHERAL: 0x40000000 to 0x5FFFFFFF' data-tooltip='PERIPHERAL: 0x40000000 to 0x5FFFFFFF'></div><div class='bar-segment mapped' style='flex-basis:1%;background:#0f766e;' title='EXP_M: 0x60000000 to 0x60FFFFFF' data-tooltip='EXP_M: 0x60000000 to 0x60FFFFFF'></div><div class='bar-segment gap' style='flex-basis:12%;' title='Unmapped gap: 0x61000000 to 0x7FFFFFFF' data-tooltip='Unmapped gap: 0x61000000 to 0x7FFFFFFF'></div><div class='bar-segment mapped' style='flex-basis:50%;background:#d97706;' title='DRAM: 0x80000000 to 0xFFFFFFFF' data-tooltip='DRAM: 0x80000000 to 0xFFFFFFFF'></div>
+                    </div>
+                  </div>
+                </div>
+                <div class='legend-row'>
+                  <span class='legend-item'><span class='legend'></span>Mapped region</span>
+                  <span class='legend-item'><span class='legend gap'></span>Unmapped gap</span>
+                </div>
+              </div>
+              <ul class='detail-list'>
+                <li><span class='legend mapped' style='background:#2563eb;'></span><strong>ROM</strong> 0x00000000 to 0x0000FFFF (0x00010000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x00010000 to 0x003FFFFF (0x003F0000 bytes)</li><li><span class='legend mapped' style='background:#7c3aed;'></span><strong>FLASH</strong> 0x00400000 to 0x007FFFFF (0x00400000 bytes)</li><li><span class='legend mapped' style='background:#d97706;'></span><strong>RAM</strong> 0x00800000 to 0x0087FFFF (0x00080000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x00880000 to 0x00FFFFFF (0x00780000 bytes)</li><li><span class='legend mapped' style='background:#0891b2;'></span><strong>FLASH_CTRL</strong> 0x01000000 to 0x0100FFFF (0x00010000 bytes)</li><li><span class='legend mapped' style='background:#4f46e5;'></span><strong>SDIO_S</strong> 0x01010000 to 0x0101FFFF (0x00010000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x01020000 to 0x010FFFFF (0x000E0000 bytes)</li><li><span class='legend mapped' style='background:#15803d;'></span><strong>GIC</strong> 0x01100000 to 0x01107FFF (0x00008000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x01108000 to 0x011FFFFF (0x000F8000 bytes)</li><li><span class='legend mapped' style='background:#0f766e;'></span><strong>PCK_CTRL</strong> 0x01200000 to 0x01207FFF (0x00008000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x01208000 to 0x012FFFFF (0x000F8000 bytes)</li><li><span class='legend mapped' style='background:#d97706;'></span><strong>DEBUG</strong> 0x01300000 to 0x01307FFF (0x00008000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x01308000 to 0x014FFFFF (0x001F8000 bytes)</li><li><span class='legend mapped' style='background:#0891b2;'></span><strong>DRAM_CFG</strong> 0x01500000 to 0x01506FFF (0x00007000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x01507000 to 0x01FFFFFF (0x00AF9000 bytes)</li><li><span class='legend mapped' style='background:#be185d;'></span><strong>DRAM_PHY_CFG</strong> 0x02000000 to 0x027FFFFF (0x00800000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x02800000 to 0x3FFFFFFF (0x3D800000 bytes)</li><li><span class='legend mapped' style='background:#2563eb;'></span><strong>PERIPHERAL</strong> 0x40000000 to 0x5FFFFFFF (0x20000000 bytes)</li><li><span class='legend mapped' style='background:#0f766e;'></span><strong>EXP_M</strong> 0x60000000 to 0x60FFFFFF (0x01000000 bytes)</li><li><span class='legend gap'></span><strong>Unmapped gap</strong> 0x61000000 to 0x7FFFFFFF (0x1F000000 bytes)</li><li><span class='legend mapped' style='background:#d97706;'></span><strong>DRAM</strong> 0x80000000 to 0xFFFFFFFF (0x80000000 bytes)</li>
+              </ul>
+            </section>
+            
+  </div>
+  <script>
+    function setZoom(input, value) {
+      const card = input.closest('.map-card');
+      const scaleBox = card.querySelector('.map-scale');
+      const viewport = card.querySelector('.map-viewport');
+      const scale = Number(value) / 100;
+      scaleBox.style.transform = 'scaleX(' + scale + ')';
+      scaleBox.dataset.scale = scale;
+      scaleBox.style.width = (100 / scale) + '%';
+      viewport.scrollLeft = 0;
+      viewport.scrollTop = 0;
+    }
+
+    function zoomIn(button) {
+      const card = button.closest('.map-card');
+      const slider = card.querySelector('.zoom-slider');
+      const next = Math.min(400, Number(slider.value) + 25);
+      slider.value = next;
+      setZoom(slider, next);
+    }
+
+    function zoomOut(button) {
+      const card = button.closest('.map-card');
+      const slider = card.querySelector('.zoom-slider');
+      const next = Math.max(100, Number(slider.value) - 25);
+      slider.value = next;
+      setZoom(slider, next);
+    }
+
+    let isPanning = false;
+    let panStartX = 0;
+    let panStartScrollLeft = 0;
+
+    document.querySelectorAll('.map-viewport').forEach(viewport => {
+      viewport.addEventListener('mousedown', (event) => {
+        if (event.button !== 0) return;
+        isPanning = true;
+        viewport.classList.add('dragging');
+        panStartX = event.clientX;
+        panStartScrollLeft = viewport.scrollLeft;
+      });
+
+      viewport.addEventListener('mousemove', (event) => {
+        if (!isPanning) return;
+        const deltaX = event.clientX - panStartX;
+        viewport.scrollLeft = panStartScrollLeft - deltaX;
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (!isPanning) return;
+        isPanning = false;
+        viewport.classList.remove('dragging');
+      });
+    });
+
+    document.querySelectorAll('.tab-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.target).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

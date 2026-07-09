@@ -118,4 +118,22 @@
 #define EXP_DMA350_CH2_INTR             112
 #define EXP_DMA350_CH3_INTR             113
 #define EXP_DMA350_CMB_INTR             114
+#define EXP_IRQ_0                       115
+#define EXP_IRQ_1                       116
+#define EXP_IRQ_2                       117
 
+#define SDIO_IRQ                        118
+
+#define DRAM_TEMP_FAULT                 119
+#define DRAM_TEMP_LIMIT                 120
+#define DRAM_DFI_ALERT                  121
+#define DRAM_ECC_UNCOR_ERR_FAULT        122
+#define DRAM_ECC_UNCOR_ERR              123
+#define DRAM_ECC_COR_ERR_FAULT          124
+#define DRAM_ECC_COR_ERR                125
+#define DRAM_PHY_IRQ                    126
+
+#define ETHMAC_IRQ                      127
+#define ETHMAC_CKSUM_IRQ                128
+#define PTP_PPS_IRQ                     129
+#define PTP_ALARM_IRQ                   130

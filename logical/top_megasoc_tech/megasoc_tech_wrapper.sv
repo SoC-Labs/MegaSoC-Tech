@@ -298,12 +298,18 @@ wire [3:0] DRAM_AXI_ARQOS;
 ahb #(.DATA_W(32), .ADDR_W(32))     FLASH_AHB();
 ahb #(.DATA_W(32), .ADDR_W(32))     PERIPH_AHB();
 ahb #(.DATA_W(32), .ADDR_W(32))     ADP_AHB();
+ahb #(.DATA_W(32), .ADDR_W(32))     ETHMAC_AHB();
+
+wire ETHMAC_AHB_hmastlock;
+
 // APB
 apb3    CPU_DBG_APB();
 apb3    PCK_APB();
 apb4    FLASH_CTRL_APB();
 apb3    DRAM_CFG_APB();
 apb4    DRAM_PHY_CFG_APB();
+apb4    ETHMAC_S_APB();
+apb3    PTP_S_APB();
 
 wire                CPU_nPRESETDBG;
 wire                CPU_PCLKENDBG;
@@ -312,12 +318,44 @@ wire                CPU_PCLKENDBG;
 assign CPU_nPRESETDBG = SYS_RESETn_int;
 assign CPU_PCLKENDBG = 1'b1;
 
+// Interrupts
 wire [(NUM_SPIS-1):0]   CPU_IRQS;
 wire                    QSPI_IRQ;
 wire [71:0]             PERI_IRQS;
 wire                    SDIO_IRQ;
+wire                    dram_PHY_IRQ;
+wire                    dram_ecc_corrected_err_intr;
+wire                    dram_ecc_corrected_err_intr_fault;
+wire                    dram_ecc_uncorrected_err_intr;
+wire                    dram_ecc_uncorrected_err_intr_fault;
+wire                    dram_dfi_alert_err_intr;
+wire                    dram_derate_temp_limit_intr;
+wire                    dram_derate_temp_limit_intr_fault;
 
-assign CPU_IRQS={{(NUM_SPIS-87){1'b0}}, SDIO_IRQ ,EXP_IRQs, QSPI_IRQ, PERI_IRQS, 1'b0, 4'h0};
+wire                    ethmac_int;
+wire                    ethmac_cksum_int;
+wire                    ptp_pps_irq;
+wire                    ptp_alarm_irq;
+assign CPU_IRQS={
+    {(NUM_SPIS-99){1'b0}},
+    ptp_alarm_irq,
+    ptp_pps_irq,
+    ethmac_cksum_int,
+    ethmac_int,
+    dram_PHY_IRQ,
+    dram_ecc_corrected_err_intr,
+    dram_ecc_corrected_err_intr_fault,
+    dram_ecc_uncorrected_err_intr,
+    dram_ecc_uncorrected_err_intr_fault,
+    dram_dfi_alert_err_intr,
+    dram_derate_temp_limit_intr,
+    dram_derate_temp_limit_intr_fault,
+    SDIO_IRQ,
+    EXP_IRQs,
+    QSPI_IRQ,
+    PERI_IRQS,
+    1'b0,
+    4'h0};
 
 // Subordinate AWAKEUP signal generation
 assign AWAKEUP_ROM = (ROM_AXI.AWVALID | ROM_AXI.ARVALID | ROM_AXI.WVALID);
@@ -385,6 +423,15 @@ megasoc_dram_wrapper #(.ID_W(8)) u_megasoc_dram_wrapper(
 
     .DRAM_SYS_Qchannel(DRAM_SYS_Qchannel),
     .DRAM_DDRC_Qchannel(DRAM_DDRC_Qchannel),
+
+    .PHY_IRQ(dram_PHY_IRQ),
+    .ecc_corrected_err_intr(dram_ecc_corrected_err_intr),
+    .ecc_corrected_err_intr_fault(dram_ecc_corrected_err_intr_fault),
+    .ecc_uncorrected_err_intr(dram_ecc_uncorrected_err_intr),
+    .ecc_uncorrected_err_intr_fault(dram_ecc_uncorrected_err_intr_fault),
+    .dfi_alert_err_intr(dram_dfi_alert_err_intr),
+    .derate_temp_limit_intr(dram_derate_temp_limit_intr),
+    .derate_temp_limit_intr_fault(dram_derate_temp_limit_intr_fault),
 
     .DDR4_RESET_N(DDR4_RESET_N),
     .DDR4_CK_T(DDR4_CK_T),
@@ -557,6 +604,220 @@ megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
 
     // Peripheral Interrupts to GIC
     .PERI_IRQS(PERI_IRQS)
+);
+
+wire [31:0] rtc_time_ptp_ns;
+wire [47:0] rtc_time_ptp_sec;
+wire        rtc_time_one_pps;
+
+wire        rx_ptp_event;
+wire        tx_ptp_event;
+
+wire        ha1588_servo_en;
+wire [29:0] ha1588_sync_interval;
+
+wire [47:0] phc_seconds;
+wire [29:0] phc_nanoseconds;
+wire [47:0] phc_hw_cap_seconds;
+wire [29:0] phc_hw_cap_nanoseconds;
+wire [31:0] phc_hw_cap_sub_nanoseconds;
+
+wire        ha1588_hw_capture;
+wire        ha1588_hw_set_time;
+wire [47:0] ha1588_hw_set_seconds;
+wire [29:0] ha1588_hw_set_nanoseconds;
+wire        ha1588_hw_adj_valid;
+wire [31:0] ha1588_hw_adj_ns_incr_frac;
+
+wire        ha1588_servo_locked;
+wire        ha1588_servo_phase_step_active;
+
+ethmac_subsystem_apb #(.SWAP_DMA_BYTES(0)) u_ethmac (
+  // Clock and Reset
+    .pclk(SYS_CLK),
+    .presetn(SYS_HRESETn),
+
+  // AHB Master Interface (DMA)
+    .haddr(ETHMAC_AHB.HADDR),
+    .htrans(ETHMAC_AHB.HTRANS),
+    .hsize(ETHMAC_AHB.HSIZE),
+    .hburst(ETHMAC_AHB.HBURST),
+    .hprot(ETHMAC_AHB.HPROT),
+    .hmastlock(ETHMAC_AHB_hmastlock),
+    .hwrite(ETHMAC_AHB.HWRITE),
+    .hwdata(ETHMAC_AHB.HWDATA),
+    .hrdata(ETHMAC_AHB.HRDATA),
+    .hready(ETHMAC_AHB.HREADY),
+    .hresp(ETHMAC_AHB.HRESP),
+
+  // APB Slave Interface (Register Access — shared)
+    .psel(ETHMAC_S_APB.psel),
+    .penable(ETHMAC_S_APB.penable),
+    .paddr(ETHMAC_S_APB.paddr),
+    .pwrite(ETHMAC_S_APB.pwrite),
+    .pwdata(ETHMAC_S_APB.pwdata),
+    .pstrb(ETHMAC_S_APB.pstrb),
+    .prdata(ETHMAC_S_APB.prdata),
+    .pready(ETHMAC_S_APB.pready),
+    .pslverr(ETHMAC_S_APB.pslverr),
+
+  // RTC Clock
+    .rtc_clk(SYS_CLK),
+
+  // RTC Time Outputs
+    .rtc_time_ptp_ns(rtc_time_ptp_ns),
+    .rtc_time_ptp_sec(rtc_time_ptp_sec),
+    .rtc_time_one_pps(rtc_time_one_pps),
+
+  // MII Transmit
+    .mtx_clk_pad_i(),
+    .mtxd_pad_o(),
+    .mtxen_pad_o(),
+    .mtxerr_pad_o(),
+
+  // MII Receive
+    .mrx_clk_pad_i(),
+    .mrxd_pad_i(),
+    .mrxdv_pad_i(),
+    .mrxerr_pad_i(),
+
+  // MII Common
+    .mcoll_pad_i(),
+    .mcrs_pad_i(),
+
+  // MII Management Interface
+    .md_pad_i(),
+    .mdc_pad_o(),
+    .md_pad_o(),
+    .md_padoe_o(),
+
+  // Interrupt
+    .int_o(ethmac_int),
+
+  // RX Checksum Calculator Interrupt — separate level-sensitive line
+  // from the eth_rx_cksum block. Integrators choose to OR with int_o
+  // at the SoC top, route to its own NVIC line, or leave dangling.
+    .cksum_int_o(ethmac_cksum_int),
+
+  // PTP Event Outputs (synchronized to pclk)
+    .rx_ptp_event(rx_ptp_event),
+    .tx_ptp_event(tx_ptp_event),
+
+  // HA1588 Hardware Servo — Control Inputs (from PHC registers)
+    .ha1588_servo_en(ha1588_servo_en),
+    .ha1588_sync_interval(ha1588_sync_interval),
+
+  // HA1588 Hardware Servo — PHC Capture Readback (from PHC hw_cap outputs)
+    .phc_seconds(phc_seconds),
+    .phc_nanoseconds(phc_nanoseconds),
+    .phc_hw_cap_seconds(phc_hw_cap_seconds),
+    .phc_hw_cap_nanoseconds(phc_hw_cap_nanoseconds),
+    .phc_hw_cap_sub_nanoseconds(phc_hw_cap_sub_nanoseconds),
+
+  // HA1588 Hardware Servo — Outputs (to PHC servo source 1)
+    .ha1588_hw_capture(ha1588_hw_capture),
+    .ha1588_hw_set_time(ha1588_hw_set_time),
+    .ha1588_hw_set_seconds(ha1588_hw_set_seconds),
+    .ha1588_hw_set_nanoseconds(ha1588_hw_set_nanoseconds),
+    .ha1588_hw_adj_valid(ha1588_hw_adj_valid),
+    .ha1588_hw_adj_ns_incr_frac(ha1588_hw_adj_ns_incr_frac),
+
+  // HA1588 Hardware Servo — Status Outputs
+    .ha1588_servo_locked(ha1588_servo_locked),
+    .ha1588_servo_phase_step_active(ha1588_servo_phase_step_active)
+
+);
+
+phc #(
+    .SYS_DATA_W(32),
+    .APB_ADDR_W(12)
+    ) u_ptp_clock (
+    // --------------------------------------------------------------------------
+    // Clock and Reset
+    // --------------------------------------------------------------------------
+    .clk(SYS_CLK),
+    .resetn(SYS_PRESETn),
+
+    // --------------------------------------------------------------------------
+    // APB Slave Interface (Configuration and Status Registers)
+    // --------------------------------------------------------------------------
+    .psel(PTP_S_APB.psel),
+    .penable(PTP_S_APB.penable),
+    .pwrite(PTP_S_APB.pwrite),
+    .paddr(PTP_S_APB.paddr),
+    .pwdata(PTP_S_APB.pwdata),
+    .prdata(PTP_S_APB.prdata),
+    .pready(PTP_S_APB.pready),
+    .pslverr(PTP_S_APB.pslverr),
+
+    // --------------------------------------------------------------------------
+    // Interrupt Outputs
+    // --------------------------------------------------------------------------
+    .pps_irq(ptp_pps_irq),
+    .alarm_irq(ptp_alarm_irq),
+
+    // --------------------------------------------------------------------------
+    // Hardware Servo Source 0 — Capture and Adjustment
+    // (e.g. TideLink PTP autonomous servo)
+    // --------------------------------------------------------------------------
+    .hw_capture_0_i(ha1588_hw_capture),
+    .hw_cap_seconds_0_o(phc_hw_cap_seconds),
+    .hw_cap_nanoseconds_0_o(phc_hw_cap_nanoseconds),
+    .hw_cap_sub_nanoseconds_0_o(phc_hw_cap_sub_nanoseconds),
+    .hw_set_time_0_i(ha1588_hw_set_time),
+    .hw_set_seconds_0_i(ha1588_hw_set_seconds),
+    .hw_set_nanoseconds_0_i(ha1588_hw_set_nanoseconds),
+    .hw_adj_valid_0_i(ha1588_hw_adj_valid),
+    .hw_adj_ns_incr_frac_0_i(ha1588_hw_adj_ns_incr_frac),
+
+    // --------------------------------------------------------------------------
+    // Hardware Servo Source 1 — Capture and Adjustment
+    // (e.g. HA1588 hardware servo)
+    // --------------------------------------------------------------------------
+    .hw_capture_1_i(1'b0),
+    .hw_cap_seconds_1_o(),
+    .hw_cap_nanoseconds_1_o(),
+    .hw_cap_sub_nanoseconds_1_o(),
+    .hw_set_time_1_i(1'b0),
+    .hw_set_seconds_1_i(48'd0),
+    .hw_set_nanoseconds_1_i(30'd0),
+    .hw_adj_valid_1_i(1'b0),
+    .hw_adj_ns_incr_frac_1_i(32'd0),
+
+    // --------------------------------------------------------------------------
+    // Servo Status Inputs (directly from external servo, e.g. ha1588_servo)
+    // --------------------------------------------------------------------------
+    .servo_locked_i(ha1588_servo_locked),
+    .servo_phase_step_active_i(ha1588_servo_phase_step_active),
+
+    // --------------------------------------------------------------------------
+    // Ethernet PTP Capture Inputs (from PTP event detector in Ethernet subsystem)
+    // --------------------------------------------------------------------------
+    .eth_rx_capture(rx_ptp_event),
+    .eth_tx_capture(tx_ptp_event),
+
+    // --------------------------------------------------------------------------
+    // PPS Output (directly from clock core)
+    // --------------------------------------------------------------------------
+    .pps_out(),
+
+    // --------------------------------------------------------------------------
+    // Live time outputs (combinational from the clock-core accumulator).
+    // Used by external hardware servos (e.g. HA1588 in the ethernet
+    // subsystem) that need PHC's current time as a reference to compute
+    // an error term before driving the hw_set_*_1 / hw_adj_valid_1 ports.
+    // --------------------------------------------------------------------------
+    .seconds_o(),
+    .nanoseconds_o(),
+    .sub_nanoseconds_o(),
+
+    // --------------------------------------------------------------------------
+    // Servo configuration outputs (SERVO_CTRL/SYNC_INTERVAL registers ->
+    // external hardware servo, e.g. HA1588 in the ethernet subsystem).
+    // --------------------------------------------------------------------------
+    .ha1588_servo_en_o(ha1588_servo_en),
+    .sync_interval_o(ha1588_sync_interval)
+
 );
 
 megasoc_power_control u_megasoc_power_control(

@@ -19,6 +19,16 @@ module megasoc_dram_wrapper #(
     qchannel.subordinate    DRAM_SYS_Qchannel,
     qchannel.subordinate    DRAM_DDRC_Qchannel,
 
+    // Interrupt signals
+    output wire             PHY_IRQ,
+    output wire             ecc_corrected_err_intr,
+    output wire             ecc_corrected_err_intr_fault,
+    output wire             ecc_uncorrected_err_intr,
+    output wire             ecc_uncorrected_err_intr_fault,
+    output wire             dfi_alert_err_intr,
+    output wire             derate_temp_limit_intr,
+    output wire             derate_temp_limit_intr_fault,
+
     // LPDDR4 Signals
     output wire             DDR4_RESET_N,
     output wire             DDR4_CK_T,
@@ -121,13 +131,11 @@ generate
         wire [1:0]      dfi_phymstr_type;       // DFI PHY Master Interface time type
         wire            dfi_phymstr_ack;        // DFI PHY Master Interface acknowledge
 
+        // Interrupt signals
+        wire            dwc_ddrphy_int_n;
         wire            dis_regs_ecc_syndrome;
-        wire            ecc_corrected_err_intr;
-        wire            ecc_corrected_err_intr_fault;
-        wire            ecc_uncorrected_err_intr;
-        wire            ecc_uncorrected_err_intr_fault;
-        wire            dfi_alert_err_intr;
 
+        assign PHY_IRQ = ~dwc_ddrphy_int_n;
         // CCM SRAM Connections
         wire [31:0]  iccm_data_dout;
         wire [31:0]  iccm_data_din;
@@ -146,7 +154,7 @@ generate
         assign iccm_data_addr[1:0]=2'b00;
         assign dccm_data_addr[1:0]=2'b00;
 
-        wire         pmu_sram_clk_gated;
+        wire        pmu_sram_clk_gated;
 
         wire        ddr_phy_reset;
         wire        ddr_phy_pwrok;
@@ -440,8 +448,8 @@ generate
 
             .hif_refresh_req_bank(),
 
-            .derate_temp_limit_intr(),
-            .derate_temp_limit_intr_fault()
+            .derate_temp_limit_intr(derate_temp_limit_intr),
+            .derate_temp_limit_intr_fault(derate_temp_limit_intr_fault)
         );
 
         megasoc_dram_PHY u_dram_PHY(
@@ -551,7 +559,7 @@ generate
             .DdrPhyCsrRdDataTdrUpdateEn(1'b0),
             .DdrPhyCsrRdDataTdr_Tdo(),
 
-            .dwc_ddrphy_int_n(),
+            .dwc_ddrphy_int_n(dwc_ddrphy_int_n),
             .dwc_ddrphy_dto(),
 
             .atpg_se(6'h00),
