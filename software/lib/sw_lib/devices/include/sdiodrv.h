@@ -41,15 +41,15 @@
 
 #define OPT_SDIODMA
 
+// DMA address is exposed as two fixed 32-bit registers (LO then HI, per
+// OPT_LITTLE_ENDIAN=1 in sdaxil.v) rather than a native `void *`. The
+// SDIO_M_AXI master port is 44 bits wide (megasoc_tech_wrapper.sv), wider
+// than a 32-bit pointer can hold, and a host `void *` also varies in size
+// (4 bytes on ILP32, 8 on LP64/AArch64), so its layout can't be pinned to
+// these fixed hardware offsets by struct member sizing alone.
 typedef	struct SDIO_S {
 	volatile uint32_t	sd_cmd, sd_data, sd_fifa, sd_fifb, sd_phy;
-// #if (sizeof(void *) <= 4) && !defined(__LITTLE_ENDIAN__)
-	volatile uint32_t	sd_unused;
-// #endif
-	volatile void		*sd_dma_addr;
-// #if (sizeof(void *) <= 4) &&  defined(__LITTLE_ENDIAN__)
-//	volatile uint32_t	sd_unused;
-// #endif
+	volatile uint32_t	sd_dma_addr_lo, sd_dma_addr_hi;
 	volatile uint32_t	sd_dma_length;
 } SDIO;
 
