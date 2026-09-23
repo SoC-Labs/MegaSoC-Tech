@@ -1,4 +1,5 @@
 adp_tests
+ethernet_tests
 gic_tests
 hello_world
 low_power_tests
