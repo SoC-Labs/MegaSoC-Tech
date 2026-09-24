@@ -2649,7 +2649,11 @@ int	sdio_write(SDIODRV *dev, const unsigned sector,
 
 		// Set up the DMA
 		// {{{
-		dev->d_dev->sd_dma_addr = (char *)buf;
+		{
+			uint64_t dma_addr = (uint64_t)(uintptr_t)buf;
+			dev->d_dev->sd_dma_addr_lo = (uint32_t)dma_addr;
+			dev->d_dev->sd_dma_addr_hi = (uint32_t)(dma_addr >> 32);
+		}
 		// Always transfer in units of 512 bytes
 		// dev->d_dev->sd_dma_length = count;
 		//	Already set above, in order to determine if the DMA
@@ -2865,7 +2869,11 @@ int	sdio_read(SDIODRV *dev, const unsigned sector,
 	if (count == dev->d_dev->sd_dma_length) {
 		// Activate the SDIO DMA
 		// {{{
-		dev->d_dev->sd_dma_addr = buf;
+		{
+			uint64_t dma_addr = (uint64_t)(uintptr_t)buf;
+			dev->d_dev->sd_dma_addr_lo = (uint32_t)dma_addr;
+			dev->d_dev->sd_dma_addr_hi = (uint32_t)(dma_addr >> 32);
+		}
 		dev->d_dev->sd_cmd = SDIO_ERR | SDIO_READDMA;
 		// }}}
 	} else {
