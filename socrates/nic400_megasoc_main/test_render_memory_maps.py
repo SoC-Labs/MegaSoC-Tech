@@ -29,6 +29,7 @@ class RenderMemoryMapsTests(unittest.TestCase):
         self.assertIn("memory-map-tabs", html_text)
         self.assertIn("Unmapped gap", html_text)
         self.assertIn("title=", html_text)
+        self.assertTrue("KiB" in html_text or "MiB" in html_text)
 
 
 if __name__ == "__main__":

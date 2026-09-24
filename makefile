@@ -33,6 +33,9 @@ build_pck:
 
 build_ip: build_nic400 build_cortex_a53 build_sie300_sram_ctrl build_pck
 
+doc_memmap:
+	cd $(SOCLABS_MEGASOC_TECH_DIR)/socrates/nic400_megasoc_main && python3 render_memory_maps.py -o memory_maps.html && python3 -m unittest -v test_render_memory_maps.py
+
 make_project:
 	socrates_cli --project megasoc_tech -data ../ --flow AddNewProject
 

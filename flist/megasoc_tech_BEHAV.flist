@@ -22,7 +22,8 @@
 -f $(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/flist/Top/ahb_QSPI.flist 
 -f $(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/flist/VIP/ahb_QSPI_VIP.flist
 
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/DRAM/behavioural/megasoc_dram_wrapper.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/dram_subsystem/rtl/dram_wrapper.sv
+${LPDDR4_PROJECT_DIR}/rtl/dram_PHY.v
 
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/DRAM/behavioural/dual_port_sram.v
-$(SOCLABS_MEGASOC_TECH_DIR)/logical/DRAM/behavioural/phy_reset_ctrl.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/dram_subsystem/rtl/dual_port_sram.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/dram_subsystem/rtl/phy_reset_ctrl.v

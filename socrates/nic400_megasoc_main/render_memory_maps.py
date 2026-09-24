@@ -14,6 +14,18 @@ def fmt_addr(value: int) -> str:
     return f"0x{value:08X}" if value >= 0 else str(value)
 
 
+def fmt_size(value: int) -> str:
+    if value < 0:
+        return str(value)
+    if value >= 1024 * 1024:
+        mib = value / (1024 * 1024)
+        return f"{mib:.2f} MiB" if mib % 1 else f"{int(mib)} MiB"
+    if value >= 1024:
+        kib = value / 1024
+        return f"{kib:.2f} KiB" if kib % 1 else f"{int(kib)} KiB"
+    return f"{value} B"
+
+
 def parse_memory_maps(xml_path: Path) -> List[Dict[str, Any]]:
     tree = ET.parse(xml_path)
     root = tree.getroot()
@@ -138,11 +150,11 @@ def build_html(memory_maps: List[Dict[str, Any]], title: str) -> str:
                 continue
             if section["kind"] == "gap":
                 detail_items.append(
-                    f"<li><span class='legend gap'></span><strong>Unmapped gap</strong> {fmt_addr(section['start'])} to {fmt_addr(section['end'])} ({fmt_addr(section['size'])} bytes)</li>"
+                    f"<li class='gap-entry'><span class='legend gap'></span><strong>Unmapped gap</strong> {fmt_addr(section['start'])} to {fmt_addr(section['end'])} ({fmt_size(section['size'])})</li>"
                 )
             else:
                 detail_items.append(
-                    f"<li><span class='legend mapped' style='background:{color_palette[len(detail_items) % len(color_palette)]};'></span><strong>{html.escape(section['interface'])}</strong> {fmt_addr(section['start'])} to {fmt_addr(section['end'])} ({fmt_addr(section['size'])} bytes)</li>"
+                    f"<li><span class='legend mapped' style='background:{color_palette[len(detail_items) % len(color_palette)]};'></span><strong>{html.escape(section['interface'])}</strong> {fmt_addr(section['start'])} to {fmt_addr(section['end'])} ({fmt_size(section['size'])})</li>"
                 )
 
         active_class = "active" if idx == 0 else ""
@@ -178,7 +190,11 @@ def build_html(memory_maps: List[Dict[str, Any]], title: str) -> str:
                   <span class='legend-item'><span class='legend gap'></span>Unmapped gap</span>
                 </div>
               </div>
-              <ul class='detail-list'>
+              <div class='toggle-row'>
+                <input type='checkbox' id='toggle-{content_id}' checked onchange='toggleGaps(this, "{content_id}")'>
+                <label for='toggle-{content_id}'>Show unmapped regions</label>
+              </div>
+              <ul class='detail-list {content_id}'>
                 {''.join(detail_items)}
               </ul>
             </section>
@@ -220,6 +236,9 @@ def build_html(memory_maps: List[Dict[str, Any]], title: str) -> str:
     .zoom-controls {{ display: flex; align-items: center; gap: 8px; margin-left: auto; }}
     .zoom-button {{ border: 1px solid #cbd5e1; background: #fff; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }}
     .zoom-slider {{ width: 140px; accent-color: #2563eb; }}
+    .toggle-row {{ display: flex; align-items: center; gap: 8px; margin-top: 10px; color: #334155; font-size: 0.92rem; }}
+    .toggle-row input {{ accent-color: #2563eb; }}
+    .gap-hidden .gap-entry {{ display: none; }}
     code {{ background: #f3f6fa; padding: 2px 6px; border-radius: 4px; }}
   </style>
 </head>
@@ -259,6 +278,11 @@ def build_html(memory_maps: List[Dict[str, Any]], title: str) -> str:
       const next = Math.max(100, Number(slider.value) - 25);
       slider.value = next;
       setZoom(slider, next);
+    }}
+
+    function toggleGaps(checkbox, panelId) {{
+      const list = document.querySelector('#' + panelId + ' .detail-list');
+      list.classList.toggle('gap-hidden', !checkbox.checked);
     }}
 
     let isPanning = false;
