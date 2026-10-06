@@ -22,8 +22,13 @@
 -f $(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/flist/Top/ahb_QSPI.flist 
 -f $(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/flist/VIP/ahb_QSPI_VIP.flist
 
++incdir+${SYNOPSYS_LPDDR4_UMCTL2_DIR}/src/
++incdir+${SYNOPSYS_LPDDR4_multiPHY_DIR}/src/
+
+
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/dram_subsystem/rtl/dram_wrapper.sv
-${LPDDR4_PROJECT_DIR}/rtl/dram_PHY.v
+${LPDDR4_PROJECT_DIR}/rtl/dram_PHY.sv
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/dram_subsystem/rtl/dual_port_sram.v
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/dram_subsystem/rtl/phy_reset_ctrl.v
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/dram_subsystem/rtl/clock_gate.sv

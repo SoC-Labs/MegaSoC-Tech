@@ -205,29 +205,7 @@ module megasoc_tech_wrapper(
     input  wire             SDIO_AC_VALID,
     input  wire [1:0]       SDIO_AC_DATA,
     input  wire             SDIO_AD_VALID,
-    input  wire [31:0]      SDIO_AD_DATA,
-
-    // Ethernet MII Signals
-    input  wire             ETH_MTX_CLK,
-    output wire [3:0]       ETH_MTXD,
-    output wire             ETH_MTXEN,
-    output wire             ETH_MTXERR,
-
-    input  wire             ETH_MRX_CLK,
-    input  wire [3:0]       ETH_MRXD,
-    input  wire             ETH_MRXDV,
-    input  wire             ETH_MRXERR,
-
-    input  wire             ETH_MCOL,
-    input  wire             ETH_MCRS,
-
-    input  wire             ETH_MD_PAD_I,
-    output wire             ETH_MDC_PAD_O,
-    output wire             ETH_MD_PAD_O,
-    output wire             ETH_MD_PADOE_O,
-
-    // Ethernet PTP Reference Clock (125 MHz dedicated)
-    input  wire             PTP_REF_CLK
+    input  wire [31:0]      SDIO_AD_DATA
 );
 
 wire SYS_HRESETn;
@@ -721,6 +699,7 @@ assign SD_O_1P8V = sd_1p8v;
 
 `define SDIO_AXI
 sdio #(
+    .LGFIFO(7),
     .OPT_DMA(1'b1),
     .ADDRESS_WIDTH(44),
     .DMA_DW(64),
