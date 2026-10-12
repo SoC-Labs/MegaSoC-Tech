@@ -463,6 +463,11 @@ cmsdk_ahb_gpio #(
     .COMBINT(gpio0_comb_int)      
 );
 
+// GPIO1 pins start in alternate-function mode on purpose: P1[3:0] carry the
+// UARTs and P1[14:8] the EXTIO debug link, which the boot ROM uses before any
+// software runs. A 16'h0000 default leaves the boot ROM waiting on the debug
+// port and the SoC never boots. Software switches individual pins to GPIO with
+// ALTFUNCCLR; ALTFUNCSET/ALTFUNCCLR therefore read 0xFFFF after reset.
 cmsdk_ahb_gpio #(
     .ALTERNATE_FUNC_MASK(16'hFFFF),
     .ALTERNATE_FUNC_DEFAULT(16'hFFFF),
