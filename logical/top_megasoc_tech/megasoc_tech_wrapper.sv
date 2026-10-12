@@ -19,10 +19,15 @@
 //  megasoc_peripheral_subsystem    (u_megasoc_peripheral_subsystem)
 //  megasoc_power_control           (u_megasoc_power_control)
 //  nic400_megasoc_main             (u_nic400_megasoc_main)
+//  DRAM, selected by INC_LPDDR4:
+//    megasoc_axi_async_bridge      (u_dram_axi_async_bridge)   INC_LPDDR4
+//    dram_wrapper                  (u_lpddr4_subsystem)        INC_LPDDR4
+//    megasoc_ahb_to_apb_async      (u_lpddr4_cfg_bridge)       INC_LPDDR4
+//    megasoc_dram_wrapper          (u_megasoc_dram_wrapper)    otherwise (fast sim model)
 //-----------------------------------------------------------------------------
 // To Do
 //  - Replace sl_ahb_sram with QSPI controller to use external flash
-//  - Add DDR controller for DRAM port on NIC400
+//  - LPDDR4: connect the Q-channels to the power controller
 
 
 `timescale 1ns/1ps
@@ -187,6 +192,25 @@ module megasoc_tech_wrapper(
     input  wire             DDR_nALERT,
     input  wire             DDR_nEVENT,
 
+    // LPDDR4 DRAM (lpddr4_subsystem). Driven only in INC_LPDDR4 builds; idle
+    // otherwise (the default build uses the fast sim DRAM responder).
+    input  wire             DDR_CLK,          // LPDDR4 controller/DFI clock (~400 MHz)
+    output wire             LPDDR4_RESET_N,
+    output wire             LPDDR4_CK_T,
+    output wire             LPDDR4_CK_C,
+    output wire [1:0]       LPDDR4_CKE,
+    output wire [1:0]       LPDDR4_CS,
+    output wire [5:0]       LPDDR4_CA,
+    output wire             LPDDR4_ODT,
+    inout  wire [1:0]       LPDDR4_DQS_T,
+    inout  wire [1:0]       LPDDR4_DQS_C,
+    inout  wire [15:0]      LPDDR4_DQ,
+    inout  wire [1:0]       LPDDR4_DMI,
+    inout  wire             LPDDR4_ALERT_N,
+    inout  wire             LPDDR4_VREF,
+    input  wire             LPDDR4_ZN_SENSE,
+    output wire             LPDDR4_ZN,
+
     // SDIO PHY to MAC Signals
     output wire             SDIO_o_cfg_ddr,
     output wire             SDIO_o_cfg_ds,
@@ -297,6 +321,7 @@ axi4 #(.DATA_W(64), .ID_W(2)   , .ADDR_W(44))   SDIO_M_AXI();
 ahb #(.DATA_W(32), .ADDR_W(32))     FLASH_AHB();
 ahb #(.DATA_W(32), .ADDR_W(32))     PERIPH_AHB();
 ahb #(.DATA_W(32), .ADDR_W(32))     ADP_AHB();
+ahb #(.DATA_W(32), .ADDR_W(32))     LPDDR4_CFG_AHB();   // peripheral window 0x41xx_xxxx
 // APB
 apb3    CPU_DBG_APB();
 apb3    PCK_APB();
@@ -314,8 +339,9 @@ wire [(NUM_SPIS-1):0]   CPU_IRQS;
 wire                    QSPI_IRQ;
 wire [71:0]             PERI_IRQS;
 wire                    SDIO_IRQ;
+wire [7:0]              DRAM_IRQS;      // LPDDR4 subsystem, CPU_IRQS[94:87]; 0 without INC_LPDDR4
 
-assign CPU_IRQS={{(NUM_SPIS-87){1'b0}}, SDIO_IRQ ,EXP_IRQs, QSPI_IRQ, PERI_IRQS, 1'b0, 4'h0};
+assign CPU_IRQS={{(NUM_SPIS-95){1'b0}}, DRAM_IRQS, SDIO_IRQ ,EXP_IRQs, QSPI_IRQ, PERI_IRQS, 1'b0, 4'h0};
 
 // Subordinate AWAKEUP signal generation
 assign AWAKEUP_ROM = (ROM_AXI.AWVALID | ROM_AXI.ARVALID | ROM_AXI.WVALID);
@@ -368,6 +394,131 @@ megasoc_cpu_ss #(
 );
 
 
+//--------------------------------------
+//  DRAM
+//--------------------------------------
+`ifdef INC_LPDDR4
+// LPDDR4 controller + PHY (megasoc_tech/logical/lpddr4_subsystem). The
+// subsystem runs entirely on DDR_CLK (core, AXI and APB clocks tied together,
+// as in its standalone verification); DRAM_AXI crosses from SYS_CLK through
+// an async bridge. The controller stays in reset until firmware releases it
+// through the subsystem's reset-control registers.
+
+// DDR_CLK-domain reset: same source as the NIC-400 (SYS_RESETn_int),
+// asserted asynchronously, released synchronously to DDR_CLK.
+reg [1:0] ddr_resetn_sync;
+wire      DDR_RESETn = ddr_resetn_sync[1];
+
+always @ (posedge DDR_CLK or negedge SYS_RESETn_int)
+  begin
+    if (!SYS_RESETn_int)
+      ddr_resetn_sync <= 2'b00;
+    else
+      ddr_resetn_sync <= {ddr_resetn_sync[0], 1'b1};
+  end
+
+axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(33))   LPDDR4_AXI();
+
+megasoc_axi_async_bridge #(
+    .DATA_W(64),
+    .ID_W(ID_W),
+    .ADDR_W(33),
+    .DEPTH(4)
+    ) u_dram_axi_async_bridge(
+    .s_aclk(SYS_CLK),
+    .s_aresetn(SYS_RESETn_int),
+    .S(DRAM_AXI),
+
+    .m_aclk(DDR_CLK),
+    .m_aresetn(DDR_RESETn),
+    .M(LPDDR4_AXI)
+);
+
+// Configuration registers: peripheral AHB window 0x4100_0000-0x41FF_FFFF
+// (SYS_CLK) -> APB on DDR_CLK.
+//   0x4100_0000 + R      : controller / reset-control register R (64 KB)
+//   0x4140_0000 + (N<<2) : PHY register N (4 MB)
+apb3      LPDDR4_CFG_APB();
+apb4      LPDDR4_PHY_CFG_APB();
+
+// The bridge's two halves must reset together, so its DDR_CLK half takes the
+// peripheral AHB reset (SYS_HRESETn), synchronised to DDR_CLK.
+reg [1:0] ddr_cfg_resetn_sync;
+wire      DDR_CFG_RESETn = ddr_cfg_resetn_sync[1];
+
+always @ (posedge DDR_CLK or negedge SYS_HRESETn)
+  begin
+    if (!SYS_HRESETn)
+      ddr_cfg_resetn_sync <= 2'b00;
+    else
+      ddr_cfg_resetn_sync <= {ddr_cfg_resetn_sync[0], 1'b1};
+  end
+
+megasoc_ahb_to_apb_async u_lpddr4_cfg_bridge(
+    .HCLK(SYS_CLK),
+    .HRESETn(SYS_HRESETn),
+    .AHB(LPDDR4_CFG_AHB),
+
+    .PCLK(DDR_CLK),
+    .PRESETn(DDR_CFG_RESETn),
+    .CTRL_APB(LPDDR4_CFG_APB),
+    .PHY_APB(LPDDR4_PHY_CFG_APB)
+);
+
+// Low-power Q-channels: no power-down request (qreqn high), as in the
+// subsystem's standalone verification. Hook to the PCK-600 later.
+qchannel  LPDDR4_SYS_QCHAN();
+qchannel  LPDDR4_DDRC_QCHAN();
+
+assign LPDDR4_SYS_QCHAN.qreqn  = 1'b1;
+assign LPDDR4_DDRC_QCHAN.qreqn = 1'b1;
+
+dram_wrapper #(.ID_W(ID_W)) u_lpddr4_subsystem(
+    .ACLK(DDR_CLK),
+    .ARESETn(DDR_RESETn),
+
+    .PCLK(DDR_CLK),
+    .PRESETn(DDR_RESETn),
+
+    .DRAM_AXI(LPDDR4_AXI),
+    .DRAM_AXI_AWQOS(4'h0),
+    .DRAM_AXI_ARQOS(4'h0),
+    .DRAM_CFG_APB(LPDDR4_CFG_APB),
+    .DRAM_PHY_CFG_APB(LPDDR4_PHY_CFG_APB),
+
+    .DRAM_SYS_Qchannel(LPDDR4_SYS_QCHAN),
+    .DRAM_DDRC_Qchannel(LPDDR4_DDRC_QCHAN),
+
+    // CPU_IRQS[94:87]
+    .PHY_IRQ(DRAM_IRQS[0]),
+    .ecc_corrected_err_intr(DRAM_IRQS[1]),
+    .ecc_corrected_err_intr_fault(DRAM_IRQS[2]),
+    .ecc_uncorrected_err_intr(DRAM_IRQS[3]),
+    .ecc_uncorrected_err_intr_fault(DRAM_IRQS[4]),
+    .dfi_alert_err_intr(DRAM_IRQS[5]),
+    .derate_temp_limit_intr(DRAM_IRQS[6]),
+    .derate_temp_limit_intr_fault(DRAM_IRQS[7]),
+
+    // The subsystem names its LPDDR4 pins DDR4_*
+    .DDR4_RESET_N(LPDDR4_RESET_N),
+    .DDR4_CK_T(LPDDR4_CK_T),
+    .DDR4_CK_C(LPDDR4_CK_C),
+    .DDR4_CKE(LPDDR4_CKE),
+    .DDR4_CS(LPDDR4_CS),
+    .DDR4_ADR(LPDDR4_CA),
+    .DDR4_ODT(LPDDR4_ODT),
+    .DDR4_DQS_T(LPDDR4_DQS_T),
+    .DDR4_DQS_C(LPDDR4_DQS_C),
+    .DDR4_DQ(LPDDR4_DQ),
+    .DDR4_DM_DBI_N(LPDDR4_DMI),
+    .DDR4_ALERT_N(LPDDR4_ALERT_N),
+    .DDR4_VREF(LPDDR4_VREF),
+    .DDR4_ZN_SENSE(LPDDR4_ZN_SENSE),
+    .DDR4_ZN(LPDDR4_ZN)
+);
+
+`else
+// Fast simulation DRAM model: protocol-level AXI responder (no DDR timing).
 megasoc_dram_wrapper #(.ID_W(8)) u_megasoc_dram_wrapper(
     .ACLK(SYS_CLK),
     .ARESETn(SYS_RESETn),
@@ -392,6 +543,23 @@ megasoc_dram_wrapper #(.ID_W(8)) u_megasoc_dram_wrapper(
     .DDR_nALERT(DDR_nALERT),
     .DDR_nEVENT(DDR_nEVENT)
 );
+
+// LPDDR4 configuration window not decoded: subordinate side idle
+assign LPDDR4_CFG_AHB.HREADYOUT = 1'b1;
+assign LPDDR4_CFG_AHB.HRESP     = 1'b0;
+assign LPDDR4_CFG_AHB.HRDATA    = 32'd0;
+
+// LPDDR4 pins idle
+assign DRAM_IRQS      = 8'd0;
+assign LPDDR4_RESET_N = 1'b0;
+assign LPDDR4_CK_T    = 1'b0;
+assign LPDDR4_CK_C    = 1'b1;
+assign LPDDR4_CKE     = 2'b00;
+assign LPDDR4_CS      = 2'b00;
+assign LPDDR4_CA      = 6'd0;
+assign LPDDR4_ODT     = 1'b0;
+assign LPDDR4_ZN      = 1'b0;
+`endif
 
 ROM_wrapper u_ROM_wrapper(
     .ACLK(SYS_CLK),
@@ -487,6 +655,8 @@ megasoc_peripheral_subsystem u_megasoc_peripheral_subsystem(
     .ADP_AHB(ADP_AHB),
     // Peripheral AHB Subordinate
     .PERIPH_AHB(PERIPH_AHB),
+    // LPDDR4 configuration window (INC_LPDDR4)
+    .LPDDR4_CFG_AHB(LPDDR4_CFG_AHB),
 
     // PL011 DMA request
     .UARTTXDMACLR(1'b0),

@@ -7,3 +7,7 @@
 [submodule "logical/sdspi"]
 	path = logical/sdspi
 	url = https://github.com/SoC-Labs/sdio-controller.git
+[submodule "logical/lpddr4_subsystem"]
+	path = logical/lpddr4_subsystem
+	url = https://github.com/SoC-Labs/Synopsys-LPDDR4-Integration-Subsystem.git
+	branch = main

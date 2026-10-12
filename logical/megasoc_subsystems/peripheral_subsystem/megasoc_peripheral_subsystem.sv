@@ -52,6 +52,9 @@ module megasoc_peripheral_subsystem #(
     ahb.master          ADP_AHB,
     // Peripheral AHB bus interface
     ahb.subordinate     PERIPH_AHB,
+    // LPDDR4 configuration window 0x4100_0000-0x41FF_FFFF (INC_LPDDR4 builds;
+    // HSEL stays low otherwise)
+    ahb.master          LPDDR4_CFG_AHB,
 
     // PL011 DMA request
     input  wire         UARTTXDMACLR,
@@ -147,6 +150,31 @@ wire        gpio1_hsel;   // AHB GPIO bus interface signals
 wire        gpio1_hreadyout;
 wire [31:0] gpio1_hrdata;
 wire        gpio1_hresp;
+
+wire        lpddr4_hsel;  // LPDDR4 configuration window (LPDDR4_CFG_AHB)
+wire        lpddr4_hreadyout;
+wire [31:0] lpddr4_hrdata;
+wire        lpddr4_hresp;
+
+`ifdef INC_LPDDR4
+localparam  LPDDR4_PORT_ENABLE = 1;
+`else
+localparam  LPDDR4_PORT_ENABLE = 0;
+`endif
+
+// The LPDDR4 window is a plain AHB-Lite pass-through to megasoc_tech_wrapper
+assign LPDDR4_CFG_AHB.HSEL   = lpddr4_hsel;
+assign LPDDR4_CFG_AHB.HADDR  = PERIPH_AHB.HADDR;
+assign LPDDR4_CFG_AHB.HTRANS = PERIPH_AHB.HTRANS;
+assign LPDDR4_CFG_AHB.HWRITE = PERIPH_AHB.HWRITE;
+assign LPDDR4_CFG_AHB.HSIZE  = PERIPH_AHB.HSIZE;
+assign LPDDR4_CFG_AHB.HBURST = PERIPH_AHB.HBURST;
+assign LPDDR4_CFG_AHB.HPROT  = PERIPH_AHB.HPROT;
+assign LPDDR4_CFG_AHB.HWDATA = PERIPH_AHB.HWDATA;
+assign LPDDR4_CFG_AHB.HREADY = PERIPH_AHB.HREADY;
+assign lpddr4_hreadyout      = LPDDR4_CFG_AHB.HREADYOUT;
+assign lpddr4_hresp          = LPDDR4_CFG_AHB.HRESP;
+assign lpddr4_hrdata         = LPDDR4_CFG_AHB.HRDATA;
 
 
 
@@ -319,6 +347,7 @@ megasoc_peripheral_addr_decode #(
     .apbsys_hsel(apbsys_hsel),
     .gpio0_hsel(gpio0_hsel),
     .gpio1_hsel(gpio1_hsel),
+    .lpddr4_hsel(lpddr4_hsel),
     .defslv_hsel(defslv_hsel)
 );
 
@@ -328,7 +357,7 @@ cmsdk_ahb_slave_mux #(
     .PORT2_ENABLE  (1), // GPIO Port 1
     .PORT3_ENABLE  (0), // SYS control
     .PORT4_ENABLE  (0), // Default
-    .PORT5_ENABLE  (0), // 
+    .PORT5_ENABLE  (LPDDR4_PORT_ENABLE), // LPDDR4 configuration (INC_LPDDR4)
     .PORT6_ENABLE  (0), // 
     .PORT7_ENABLE  (0),
     .PORT8_ENABLE  (0),
@@ -364,10 +393,10 @@ cmsdk_ahb_slave_mux #(
     .HRESP4       (defslv_hresp),
     .HRDATA4      (defslv_hrdata),
 
-    .HSEL5        (1'b0),     // Input Port 5
-    .HREADYOUT5   (defslv_hreadyout),
-    .HRESP5       (defslv_hresp),
-    .HRDATA5      (defslv_hrdata),
+    .HSEL5        (lpddr4_hsel),     // Input Port 5
+    .HREADYOUT5   (lpddr4_hreadyout),
+    .HRESP5       (lpddr4_hresp),
+    .HRDATA5      (lpddr4_hrdata),
     .HSEL6        (1'b0),     // Input Port 6
     .HREADYOUT6   (defslv_hreadyout),
     .HRESP6       (defslv_hresp),
