@@ -16,6 +16,7 @@
 //-----------------------------------------------------------------------------
 
 #include "lpddr4.h"
+#include "ppu.h"
 #include <stdio.h>
 #include <stdint.h>
 
@@ -356,3 +357,68 @@ int      lpddr4_poll_ctrl(const char *what, uint32_t reg, uint32_t mask, uint32_
   return poll_ctrl(what, reg, mask, want);
 }
 unsigned lpddr4_op_mode(void) { return lpddr4_ctrl_read(0x004) & 7; }
+
+//-----------------------------------------------------------------------------
+// DRAM power domain (lpddr4.h)
+//-----------------------------------------------------------------------------
+#define LPDDR4_PPU ((SCP_PPU_1_1_TypeDef *) LPDDR4_PPU_BASE)
+
+unsigned lpddr4_ppu_state(void) { return LPDDR4_PPU->PPU_PWSR.B.PWR_STATUS; }
+
+_Static_assert(LPDDR4_PPU_ON == ON_F1 && LPDDR4_PPU_FUNC_RET == FUNC_RET_F1, "PPU state values");
+
+static void ppu_dump(const char *what)
+{
+  printf("ERROR: DRAM PPU %s: PWPR 0x%08x PWSR 0x%08x PWCR 0x%08x ISR 0x%08x AISR 0x%08x DISR 0x%08x\n", what,
+         (unsigned)LPDDR4_PPU->PPU_PWRP.W, (unsigned)LPDDR4_PPU->PPU_PWSR.W, (unsigned)LPDDR4_PPU->PPU_PWCR.W,
+         (unsigned)LPDDR4_PPU->PPU_ISR.W, (unsigned)LPDDR4_PPU->PPU_AISR.W, (unsigned)LPDDR4_PPU->PPU_DISR.W);
+  errors_total++;
+}
+
+// Program the policy and wait for the PPU to report the state
+static int ppu_go(unsigned policy, int dynamic)
+{
+  PPU_PWRP_Type pwrp;
+  pwrp.W = 0;
+  pwrp.B.PWR_POLICY = policy;
+  pwrp.B.PWR_DYN_EN = dynamic;
+  LPDDR4_PPU->PPU_ISR.W  = 0x7;                       // clear static events
+  LPDDR4_PPU->PPU_AISR.W = 0x6;                       // clear dynamic accept/deny events
+  LPDDR4_PPU->PPU_PWRP.W = pwrp.W;
+  for (int i = 0; i < LPDDR4_POLL_LIMIT; i++)
+    if (LPDDR4_PPU->PPU_PWSR.B.PWR_STATUS == policy) return LPDDR4_LP_ACCEPTED;
+  return LPDDR4_LP_TIMEOUT;
+}
+
+int lpddr4_lowpower_enter(void)
+{
+  // Dynamic mode, minimum state functional retention: the PPU puts the domain
+  // into retention whenever the AXI port is idle, and back ON as soon as a
+  // transaction is pending (its device-activity input, enabled here, carries
+  // only the AXI port's activity -- see megasoc_DRAM_power_control). With
+  // firmware idle this enters retention straight away; any later DRAM access
+  // wakes the domain and completes after the self-refresh exit.
+  LPDDR4_PPU->PPU_PWCR.B.PWR_DEVACTIVEEN = 1;
+  // Record dynamic transitions in PPU_AISR (they are only recorded when
+  // unmasked, as ppu_clear_irq_mask() does for dynamic mode). The PPU's
+  // interrupt output is not connected, so this raises no interrupt.
+  LPDDR4_PPU->PPU_AIMR.B.DYN_ACCEPT_IRQ_MASK = 0;
+  LPDDR4_PPU->PPU_AIMR.B.DYN_DENY_IRQ_MASK   = 0;
+  int r = ppu_go(FUNC_RET_F1, 1);
+  if (r != LPDDR4_LP_ACCEPTED) ppu_dump("did not enter retention");
+  return r;
+}
+
+int lpddr4_lowpower_exit(void)
+{
+  int r = ppu_go(ON_F1, 0);                           // static ON: stays on
+  if (r != LPDDR4_LP_ACCEPTED) ppu_dump("did not return to ON");
+  return r == LPDDR4_LP_ACCEPTED ? 0 : LPDDR4_LP_TIMEOUT;
+}
+
+unsigned lpddr4_ppu_events(void)
+{
+  unsigned ev = LPDDR4_PPU->PPU_AISR.W & 0x6;
+  LPDDR4_PPU->PPU_AISR.W = ev;                        // write-one-to-clear
+  return ev;
+}

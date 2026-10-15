@@ -72,4 +72,26 @@ static inline uint64_t dram_rd64(uintptr_t off)            { return *(volatile u
 // Print one data mismatch (first 10 per tag/counter); returns 1 for counting
 int      lpddr4_report_mismatch(const char *tag, int errs, uintptr_t off, uint64_t got, uint64_t exp);
 
+// DRAM power domain (PPU at slot 5 of the power-control bus). Low power is
+// functional retention: both low-power channels quiescent (AXI port stopped,
+// DRAM in self-refresh), contents kept, no reset on exit.
+// lpddr4_lowpower_enter() turns on DRAM low-power mode: the domain goes to
+// retention whenever the AXI port is idle and wakes automatically on any DRAM
+// access (CPU, speculative fetch, DMA, debugger), which then completes after
+// the self-refresh exit (~2 us). lpddr4_lowpower_exit() turns the mode off
+// and keeps the domain ON.
+#define LPDDR4_PPU_BASE    0x01205000UL
+#define LPDDR4_LP_ACCEPTED 0
+#define LPDDR4_LP_TIMEOUT  2
+int      lpddr4_lowpower_enter(void);      // LPDDR4_LP_ACCEPTED once in retention
+int      lpddr4_lowpower_exit(void);       // 0 when back on, LPDDR4_LP_TIMEOUT otherwise
+// Dynamic transition events since the last call (and cleared):
+// bit 1 = a transition completed, bit 2 = a transition was denied
+#define LPDDR4_PPU_EV_ACCEPT 0x2
+#define LPDDR4_PPU_EV_DENY   0x4
+unsigned lpddr4_ppu_events(void);
+#define LPDDR4_PPU_ON       8               // PPU power status values used here
+#define LPDDR4_PPU_FUNC_RET 7
+unsigned lpddr4_ppu_state(void);           // PPU power status (LPDDR4_PPU_*)
+
 #endif
