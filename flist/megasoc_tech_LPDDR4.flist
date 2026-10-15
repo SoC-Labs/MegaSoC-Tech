@@ -1,0 +1,18 @@
+//-----------------------------------------------------------------------------
+// MegaSoC Tech LPDDR4 DRAM Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Copyright (C) 2026, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+// Abstract : Files for INC_LPDDR4 builds only (added by the project makefile
+//            when INC_LPDDR4=yes): the SYS_CLK -> DDR_CLK AXI and AHB-to-APB
+//            bridges and the lpddr4_subsystem design. The subsystem's compile
+//            defines are added to DEFINES_VC by the makefile (flist +define+
+//            lines are not passed through by filelist_compile.py).
+//-----------------------------------------------------------------------------
+
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/DRAM/lpddr4/megasoc_async_fifo.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/DRAM/lpddr4/megasoc_axi_async_bridge.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/DRAM/lpddr4/megasoc_ahb_to_apb_async.sv
+
+-f $(LPDDR4_PROJECT_DIR)/flist/lpddr4_rtl.vc
