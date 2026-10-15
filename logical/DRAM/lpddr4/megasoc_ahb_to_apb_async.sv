@@ -24,7 +24,7 @@
 // (read data, error) registers are not synchronised: each is held stable from
 // before its toggle flips until after the other side has acted on it.
 //
-// Every access is a full 32-bit word (PSTRB = 4'hF, PPROT = 0); HSIZE is
+// Every access is a full 32-bit word (PSTRB = 4'hF; PHY PPROT = 3'b001); HSIZE is
 // ignored. Both resets must come from the same source.
 //-----------------------------------------------------------------------------
 
@@ -173,7 +173,11 @@ assign PHY_APB.penable  = p_enable & p_phy_q;
 assign PHY_APB.paddr    = {10'd0, p_addr_q};
 assign PHY_APB.pwrite   = p_write_q;
 assign PHY_APB.pwdata   = p_wdata_q;
-assign PHY_APB.pprot    = 3'd0;
+// The LPDDR4 subsystem configures its PHY to accept only APB accesses with
+// protection 3'b001 and to ignore accesses that do not match, so
+// present every configuration access as privileged (same as the subsystem's
+// standalone testbench). Access control for this window belongs at SoC level.
+assign PHY_APB.pprot    = 3'b001;
 assign PHY_APB.pstrb    = 4'hF;
 
 always @ (posedge PCLK or negedge PRESETn)

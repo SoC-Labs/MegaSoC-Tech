@@ -131,7 +131,7 @@ end
 
 always @(posedge PCLK) if (PRESETn) begin
     if (CTRL_APB.psel && PHY_APB.psel) `FAIL("both APB ports selected")
-    if (PHY_APB.psel && (PHY_APB.pstrb !== 4'hF || PHY_APB.pprot !== 3'd0)) `FAIL("PHY PSTRB/PPROT not F/0")
+    if (PHY_APB.psel && (PHY_APB.pstrb !== 4'hF || PHY_APB.pprot !== 3'b001)) `FAIL("PHY PSTRB/PPROT not F/001")
 end
 
 // ---------------------------------------------------------------------------
