@@ -45,17 +45,21 @@ APP_TESTDEFINES     :=
 #     firmware; takes hours when driven by the A53 in simulation.
 LPDDR4_SKIP_TRAINING ?= 1
 
+# T6 random-traffic batches (8 operations each); fewer = shorter simulation
+LPDDR4_T6_BATCHES ?= 20
+
 APP_SCAT := default
 APP_LD_FLAGS :=
 APP_AS_FLAGS := -DMASTER_CPU_REF=0x0 -DMASTER_CLUS_REF=0x0 -DTTBR0_BASE=0x02100000 -DVBAR_ADDR=0x02000000
 APP_AS_INC_DIR :=
-APP_C_FLAGS := $(APP_TESTDEFINES) $(GLOBAL_TESTDEFINES) -DLPDDR4_SKIP_TRAINING=$(LPDDR4_SKIP_TRAINING) -DTTBR0_BASE=0x02100000
+APP_C_FLAGS := $(APP_TESTDEFINES) $(GLOBAL_TESTDEFINES) -DLPDDR4_SKIP_TRAINING=$(LPDDR4_SKIP_TRAINING) -DLPDDR4_T6_BATCHES=$(LPDDR4_T6_BATCHES) -DTTBR0_BASE=0x02100000
 APP_C_INC_DIR := $(TEST_PATH)
 # Synopsys-generated PHY init body: gitignored, generated per user in the
 # lpddr4_subsystem submodule (make -C $(LPDDR4_PROJECT_DIR) build_phyinit).
 # The test still builds without it and then reports that PHY init is missing.
 APP_C_INC_DIR += $(LPDDR4_PROJECT_DIR)/sw/libs/phyinit
-APP_SRC := lpddr4_dram_tests.c
+# Shared LPDDR4 driver (bring-up + helpers), opt-in for LPDDR4 tests only
+APP_SRC := lpddr4_dram_tests.c $(SOCLABS_MEGASOC_TECH_DIR)/software/lib/sw_lib/devices/src/lpddr4.c
 
 export APP_SRC
 export APP_C_FLAGS

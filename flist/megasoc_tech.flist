@@ -47,6 +47,7 @@ $(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_power_control/meg
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/megasoc_ROM_power_control.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/megasoc_SRAM_power_control.sv
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/megasoc_CPU_power_control.sv
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/power_control/megasoc_DRAM_power_control.sv
 
 // ARM IP
 -f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/ARM_Cortex_A53.flist

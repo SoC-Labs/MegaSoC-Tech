@@ -18,7 +18,13 @@ module megasoc_power_control(
     qchannel.master     CPU_NEON_q,
 
     qchannel.master     CPU_L2_q,
-    output wire         CPU_L2_RESETn
+    output wire         CPU_L2_RESETn,
+
+    // DRAM (LPDDR4) domain: PPU at slot 5 (0x0120_5000). AXI port and
+    // controller core channels, sequenced AXI port first on entry (see
+    // megasoc_DRAM_power_control); answered from the DDR_CLK domain
+    qchannel.master     DRAM_qchan_sys,
+    qchannel.master     DRAM_qchan_ddrc
 );
 
 apb3    ROM_PPU_APB();
@@ -26,6 +32,7 @@ apb3    SRAM_PPU_APB();
 apb3    CPU_CORE_APB();
 apb3    CPU_NEON_APB();
 apb3    CPU_L2_APB();
+apb3    DRAM_PPU_APB();
 
 // Assign direct APB connection (pwrite, paddr, etc)
 assign ROM_PPU_APB.paddr    =   PCK_APB.paddr;
@@ -53,6 +60,11 @@ assign CPU_L2_APB.penable  =   PCK_APB.penable;
 assign CPU_L2_APB.pwrite   =   PCK_APB.pwrite;
 assign CPU_L2_APB.pwdata   =   PCK_APB.pwdata;
 
+assign DRAM_PPU_APB.paddr    =   PCK_APB.paddr;
+assign DRAM_PPU_APB.penable  =   PCK_APB.penable;
+assign DRAM_PPU_APB.pwrite   =   PCK_APB.pwrite;
+assign DRAM_PPU_APB.pwdata   =   PCK_APB.pwdata;
+
 // CMSDK APB Slave Mux (from Corstone 101) 
 cmsdk_apb_slave_mux #(
     .PORT0_ENABLE(1),
@@ -60,7 +72,7 @@ cmsdk_apb_slave_mux #(
     .PORT2_ENABLE(1),
     .PORT3_ENABLE(1),
     .PORT4_ENABLE(1),
-    .PORT5_ENABLE(0),
+    .PORT5_ENABLE(1),
     .PORT6_ENABLE(0),
     .PORT7_ENABLE(0),
     .PORT8_ENABLE(0),
@@ -100,10 +112,10 @@ cmsdk_apb_slave_mux #(
     .PRDATA4(CPU_L2_APB.prdata),
     .PSLVERR4(CPU_L2_APB.pslverr),
 
-    .PSEL5(),
-    .PREADY5(1'b0),
-    .PRDATA5(32'd0),
-    .PSLVERR5(1'b0),
+    .PSEL5(DRAM_PPU_APB.psel),
+    .PREADY5(DRAM_PPU_APB.pready),
+    .PRDATA5(DRAM_PPU_APB.prdata),
+    .PSLVERR5(DRAM_PPU_APB.pslverr),
 
     .PSEL6(),
     .PREADY6(1'b0),
@@ -195,6 +207,15 @@ megasoc_CPU_power_control u_megasoc_CPU_power_control(
 
     .CPU_L2_q(CPU_L2_q),
     .CPU_L2_RESETn(CPU_L2_RESETn)
+);
+
+megasoc_DRAM_power_control u_megasoc_DRAM_power_control(
+    .PCLK(PCLK),
+    .PRESETn(PRESETn),
+
+    .DRAM_PPU_APB(DRAM_PPU_APB),
+    .DRAM_qchan_sys(DRAM_qchan_sys),
+    .DRAM_qchan_ddrc(DRAM_qchan_ddrc)
 );
 
 endmodule

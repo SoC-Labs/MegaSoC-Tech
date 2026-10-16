@@ -297,6 +297,12 @@ wire SRAM_RESETn;
 qchannel CPU_CORE_q();
 qchannel CPU_NEON_q();
 qchannel CPU_L2_q();
+
+// DRAM (LPDDR4) power domain, controller side (SYS_CLK): AXI port and
+// controller core channels (entry order AXI port first, see
+// megasoc_DRAM_power_control)
+qchannel DRAM_qchan_sys();
+qchannel DRAM_qchan_ddrc();
 wire     CPU_CORE_PORESETn;
 wire     CPU_CORE_WRMRSTn;
 wire     CPU_L2_RESETn;
@@ -465,13 +471,26 @@ megasoc_ahb_to_apb_async u_lpddr4_cfg_bridge(
     .PHY_APB(LPDDR4_PHY_CFG_APB)
 );
 
-// Low-power Q-channels: no power-down request (qreqn high), as in the
-// subsystem's standalone verification. Hook to the PCK-600 later.
+// Low-power Q-channels from the DRAM power domain (megasoc_power_control,
+// SYS_CLK) to the subsystem's two low-power interfaces (DDR_CLK). The adapters
+// turn a refused request into a proper Q-channel denial and synchronise the
+// request into DDR_CLK (see megasoc_lpi_qchannel_adapter.sv).
 qchannel  LPDDR4_SYS_QCHAN();
 qchannel  LPDDR4_DDRC_QCHAN();
 
-assign LPDDR4_SYS_QCHAN.qreqn  = 1'b1;
-assign LPDDR4_DDRC_QCHAN.qreqn = 1'b1;
+megasoc_lpi_qchannel_adapter u_lpddr4_sys_qadapter(
+    .clk(DDR_CLK),
+    .resetn(DDR_RESETn),
+    .CTRL(DRAM_qchan_sys),
+    .DEV(LPDDR4_SYS_QCHAN)
+);
+
+megasoc_lpi_qchannel_adapter u_lpddr4_ddrc_qadapter(
+    .clk(DDR_CLK),
+    .resetn(DDR_RESETn),
+    .CTRL(DRAM_qchan_ddrc),
+    .DEV(LPDDR4_DDRC_QCHAN)
+);
 
 dram_wrapper #(.ID_W(ID_W)) u_lpddr4_subsystem(
     .ACLK(DDR_CLK),
@@ -543,6 +562,15 @@ megasoc_dram_wrapper #(.ID_W(8)) u_megasoc_dram_wrapper(
     .DDR_nALERT(DDR_nALERT),
     .DDR_nEVENT(DDR_nEVENT)
 );
+
+// DRAM power domain without LPDDR4: every request is accepted at once (no
+// device behind it), so the PPU behaves the same in both builds
+assign DRAM_qchan_sys.qacceptn  = DRAM_qchan_sys.qreqn;
+assign DRAM_qchan_sys.qdeny     = 1'b0;
+assign DRAM_qchan_sys.qactive   = 1'b0;
+assign DRAM_qchan_ddrc.qacceptn = DRAM_qchan_ddrc.qreqn;
+assign DRAM_qchan_ddrc.qdeny    = 1'b0;
+assign DRAM_qchan_ddrc.qactive  = 1'b0;
 
 // LPDDR4 configuration window not decoded: subordinate side idle
 assign LPDDR4_CFG_AHB.HREADYOUT = 1'b1;
@@ -746,7 +774,11 @@ megasoc_power_control u_megasoc_power_control(
 
     // CPU L2 Power management interfaces
     .CPU_L2_q(CPU_L2_q),
-    .CPU_L2_RESETn(CPU_L2_RESETn_pc)
+    .CPU_L2_RESETn(CPU_L2_RESETn_pc),
+
+    // DRAM (LPDDR4) power domain
+    .DRAM_qchan_sys(DRAM_qchan_sys),
+    .DRAM_qchan_ddrc(DRAM_qchan_ddrc)
 );
 
 assign CPU_CORE_WRMRSTn_final = CPU_CORE_WRMRSTn_pc & SYS_RESETn_int;
