@@ -36,7 +36,15 @@
 
 /* Abort */
 __attribute__((weak)) void abort_handler (void) {
-  printf ("Unexpected abort exception.\n");
+  /* MBT-50 (2026-10-21): report the syndrome, so an undefined instruction, a data abort and an instruction
+     abort can be told apart on the console. ESR_EL3 is the syndrome of the exception taken to EL3. */
+  uint64_t esr, elr, far;
+  __ASM volatile ("mrs %0, esr_el3" : "=r"(esr));
+  __ASM volatile ("mrs %0, elr_el3" : "=r"(elr));
+  __ASM volatile ("mrs %0, far_el3" : "=r"(far));
+  printf ("Unexpected abort exception. ESR_EL3=%08lX (EC=0x%02lX ISS=0x%06lX) ELR_EL3=%016lX FAR_EL3=%016lX\n",
+          (unsigned long)esr, (unsigned long)((esr >> 26) & 0x3F), (unsigned long)(esr & 0x1FFFFFF),
+          (unsigned long)elr, (unsigned long)far);
   TEST_FAIL();
 }
 

@@ -651,9 +651,14 @@ CAL_STACK :
 main_entry:
      //branch to C Library entry 
 #ifdef __ARMCC_VERSION__
-     BL      __rt_lib_init
-#endif
+     // MBT-56 (2026-10-21): enter the C library through __main so that __scatterload runs (RW copied from
+     // its load address in ROM/flash, ZI zeroed) before __rt_entry calls __rt_lib_init and main. The previous
+     // BL __rt_lib_init / BL main skipped scatter-loading: on silicon no global was ever initialised.
+     // __rt_entry also sets SP from ARM_LIB_STACK (same value this routine computed for CPU 0).
+     B       __main
+#else
      BL       main
+#endif
      
                 
 slave_cpu_entry:         
