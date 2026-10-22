@@ -37,7 +37,7 @@ ADDR_WIDTH: 44
 #
 #     Valid values:
 #         [32,64,128]
-DATA_WIDTH: 128
+DATA_WIDTH: 64
 
 #
 # CHID_WIDTH: Width of the configurable channel ID user signal.
@@ -64,7 +64,7 @@ GPO_WIDTH: 1
 #
 #     Valid values:
 #         0-(2^NUM_CHANNELS-1)
-CH_GPO_MASK: 0x3
+CH_GPO_MASK: 0x0
 
 #
 # CH_STREAM_MASK: A bitmask for enabling the stream interfaces for each channel.
@@ -75,7 +75,7 @@ CH_GPO_MASK: 0x3
 #
 #     Valid values:
 #         0-(2^NUM_CHANNELS-1)
-CH_STREAM_MASK: 0x3
+CH_STREAM_MASK: 0x0
 
 #
 # CH_<N>_FIFO_DEPTH: Sets the FIFO depth for channel <N> that defines the number of
@@ -113,14 +113,14 @@ NUM_CHANNELS: 4
 #
 #     Valid values:
 #         0-32
-NUM_TRIGGER_IN: 2
+NUM_TRIGGER_IN: 0
 
 #
 # NUM_TRIGGER_OUT: Number of trigger output ports.
 #
 #     Valid values:
 #         0-32
-NUM_TRIGGER_OUT: 2
+NUM_TRIGGER_OUT: 0
 
 #
 # TRIG_IN_SYNC_EN_MASK: A bitmask for enabling the synchronizers on the trigger in
@@ -150,7 +150,7 @@ TRIG_OUT_SYNC_EN_MASK: 0x0
 #
 #     Valid values:
 #         [0,1]
-AXI5_M1_PRESENT: 1
+AXI5_M1_PRESENT: 0
 
 #
 # SECEXT_PRESENT: Enables TrustZone security support.
