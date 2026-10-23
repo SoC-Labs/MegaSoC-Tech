@@ -117,6 +117,9 @@ static int test_timer_intstatus(){
     errors++;
   }
 
+  // Stop the timer before clearing: with RELOAD = 50 it fires again 50 clocks after the clear, and when the
+  // code is fetched from the flash XIP window with caches off the INTSTATUS read below cannot complete in time.
+  CMSDK_TIMER0->CTRL = 0;
   //clear interrupt
   CMSDK_TIMER0->INTCLEAR = CMSDK_TIMER_INTCLEAR_Msk;
 
