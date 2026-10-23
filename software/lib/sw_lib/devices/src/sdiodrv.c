@@ -78,6 +78,7 @@ typedef	uint16_t WORD;
 typedef	uint32_t DWORD, LBA_t, UINT;
 #include <diskio.h>
 #include "sdiodrv.h"
+#include "cpu_asm_codes.h"
 
 // tx* -- debugging output functions
 // {{{
@@ -218,6 +219,27 @@ static	const int	SDMULTI = 1;
 #ifndef	CLEAR_DCACHE
 #define	CLEAR_DCACHE
 #endif
+
+// SDIO_M_AXI is an external bus master that reads DRAM directly, bypassing
+// the CPU's D-cache. Before arming a DMA write, any dirty cache lines over
+// the source buffer must be pushed out to DRAM first, or the DMA engine can
+// fetch stale (pre-write) data. Root-caused and proven via
+// software/src/sdio_dma_sram_dram_tests/sdio_dma_sram_dram_tests.c's
+// cache_clean_range()/cache_civac() (DRAM_D2 cases failed identically until
+// this clean was added, then passed identically once it was) -- this is the
+// same fix, moved into the shared driver so every sdio_write() DMA caller
+// gets it, not just that one test.
+#define	SDIO_DMA_CACHE_LINE_BYTES	64u
+
+static void sdio_dma_clean_range(const void *buf, unsigned len)
+{
+	unsigned long addr = (unsigned long)(uintptr_t)buf;
+	unsigned long end  = addr + (unsigned long)len;
+
+	addr &= ~(unsigned long)(SDIO_DMA_CACHE_LINE_BYTES - 1u);
+	for (; addr < end; addr += SDIO_DMA_CACHE_LINE_BYTES)
+		invalidateclean_cacheline((uint32_t *)addr);
+}
 
 
 static	const	uint32_t
@@ -469,7 +491,16 @@ static int	sdio_wait_while_busy_timeout(SDIODRV *dev) {
 	// Phase 2: wait for any in-progress data transfer (MEM) to complete.
 	// Keep a finite timeout here; otherwise a stuck MEM bit can hang the
 	// caller forever with no diagnostics.
+	//
+	// `st` must be re-sampled here, not reused from Phase 1: it currently
+	// holds whatever value made Phase 1's own loop condition false (the
+	// CMD_BUSY_MASK bits clearing), which says nothing about MEM's value at
+	// this later point in time. Reusing it let a genuinely-busy transfer
+	// read as already complete if that stale snapshot happened to have
+	// MEM=0, skipping this wait entirely. Mirrors Phase 1's own fresh-read-
+	// before-the-loop pattern above.
 	timeout = SDIO_BUSY_TIMEOUT_CYCLES;
+	st = dev->d_dev->sd_cmd;
 	while((st & SDIO_MEM) && (timeout > 0u)) {
 		st = dev->d_dev->sd_cmd;
 		timeout--;
@@ -2659,6 +2690,12 @@ int	sdio_write(SDIODRV *dev, const unsigned sector,
 		//	Already set above, in order to determine if the DMA
 		//	was present
 		// }}}
+
+		// Push any dirty CPU cache lines over the source buffer out to
+		// DRAM before arming the DMA -- SDIO_M_AXI reads this range
+		// directly and will not see them otherwise. See
+		// sdio_dma_clean_range()'s header comment.
+		sdio_dma_clean_range(buf, count * 512u);
 
 		// Command the transfer, setting SDIO_DMA to use the DMA
 		// {{{
