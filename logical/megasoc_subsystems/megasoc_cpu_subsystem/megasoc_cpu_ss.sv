@@ -409,7 +409,12 @@ DAPLITE u_daplite(
                                  // the system bus
    
   // System Slave port (driven by system APB)
-  .PADDRSYS(CPU_DBG_APB.paddr[30:2]),         // System APB address bus
+  // MBT-58: the NIC-400 DEBUG target is the 32 KB window 0x0130_0000-0x0130_7FFF and the interconnect
+  // presents the FULL system address on this port. The DAP-Lite decodes its ROM table at debug-APB
+  // address 0x0000_0xxx (ROMADDR) and passes everything else to the Cortex-A53 debug APB, so with the
+  // full address every CPU access missed the ROM table, reached the A53 at 0x30_0xxx and got PSLVERR
+  // (synchronous external abort in dap_tests). Present the offset within the window instead.
+  .PADDRSYS({16'b0, CPU_DBG_APB.paddr[14:2]}),  // System APB address bus (offset within the 32 KB window)
   .PSELSYS(CPU_DBG_APB.psel),          // System APB select
   .PWRITESYS(CPU_DBG_APB.pwrite),        // System APB write access
   .PENABLESYS(CPU_DBG_APB.penable),       // System APB enable signal - indicates second
