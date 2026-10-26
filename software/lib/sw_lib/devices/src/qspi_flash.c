@@ -14,6 +14,7 @@ void QPI_SET_CONT_READ_MICRON(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
 void QPI_SET_AHB_MODE(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
 
 void CACHE_STARTUP(CG092_TypeDef *CACHE);
+int  WINBOND_QPI_STARTUP(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI);
 
 void CACHE_STARTUP(CG092_TypeDef *CACHE){
     CACHE->CCR=0;
@@ -30,7 +31,15 @@ int SPI_STARTUP(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
         if((ID==0xFFFFFFFF)||(ID==0x00000000)){
             return 1;
         } else {
-            if((ID&0xFF)!=0xBF){
+            if((ID&0xFF)==0xEF){
+                // Winbond W25Qxx (MBT-47): validated on the HAPS-SX W25Q32FW, October 2026.
+                // QE (SR2 bit 1) through the volatile status-register write, 38h to enter QPI, C0h with
+                // P5:P4 = 11 (8 dummy clocks), then EBh with mode byte A0h for continuous read. The chip
+                // counts the two mode-byte clocks within its eight, so the controller sends 6 dummy clocks.
+                if(WINBOND_QPI_STARTUP(SL_AHB_QSPI) != 0){
+                    return 1;
+                }
+            } else if((ID&0xFF)!=0xBF){
                 SET_QIO_MODE_CMD = 0x35;
                 SL_AHB_QSPI->AHB_CMD = (8<<SL_AHB_QSPI_SPI_CMD_N_Dummy_Pos) + 0x0B;
                 SET_QPI_MODE(SL_AHB_QSPI);
@@ -132,4 +141,47 @@ void SET_QPI_MODE(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
     SL_AHB_QSPI->SPI_CMD = 0x100 + SET_QIO_MODE_CMD;
     SPI_WAIT_BUSY(SL_AHB_QSPI);
     SL_AHB_QSPI->CTRL |= SL_AHB_QSPI_CTRL_QIO_Msk;
+}
+
+// Winbond W25Qxx: QE, enter QPI, 8 dummy clocks, EBh continuous read, XIP window (MBT-47)
+static uint8_t spi_read_byte(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI, uint8_t op){
+    SL_AHB_QSPI->SPI_CMD = op | SL_AHB_QSPI_SPI_CMD_Rd_Enable_Msk;
+    SL_AHB_QSPI->SPI_CMD = op | SL_AHB_QSPI_SPI_CMD_Rd_Enable_Msk | SL_AHB_QSPI_SPI_CMD_Enable_Msk;
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
+    return (uint8_t)(SL_AHB_QSPI->READ_DATA[0] >> 24);   // a 1-byte read lands in bits 31:24
+}
+static void spi_write_byte(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI, uint8_t op, uint8_t val){
+    SL_AHB_QSPI->WRITE_DATA[0] = val;
+    SL_AHB_QSPI->SPI_CMD = op | SL_AHB_QSPI_SPI_CMD_Wr_Enable_Msk;
+    SL_AHB_QSPI->SPI_CMD = op | SL_AHB_QSPI_SPI_CMD_Wr_Enable_Msk | SL_AHB_QSPI_SPI_CMD_Enable_Msk;
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
+}
+int WINBOND_QPI_STARTUP(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
+    uint32_t CMD;
+    if((spi_read_byte(SL_AHB_QSPI, 0x35) & 0x02) == 0){
+        SL_AHB_QSPI->SPI_CMD = 0x50;                      // Volatile SR Write Enable
+        SL_AHB_QSPI->SPI_CMD = 0x150;
+        SPI_WAIT_BUSY(SL_AHB_QSPI);
+        spi_write_byte(SL_AHB_QSPI, 0x31, 0x02);          // SR2 = QE
+        if((spi_read_byte(SL_AHB_QSPI, 0x35) & 0x02) == 0){
+            return 1;                                     // QE did not set: no QPI possible
+        }
+    }
+    SL_AHB_QSPI->SPI_CMD = 0x38;                          // Enter QPI
+    SL_AHB_QSPI->SPI_CMD = 0x138;
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
+    SL_AHB_QSPI->CTRL |= SL_AHB_QSPI_CTRL_QIO_Msk;
+    spi_write_byte(SL_AHB_QSPI, 0xC0, 0x30);              // Set Read Parameters: 8 dummy clocks
+    // EBh + 24-bit address + mode A0h (continuous read) + 6 dummy clocks, 16 bytes
+    SL_AHB_QSPI->CTRL |= SL_AHB_QSPI_CTRL_Cont_Rd_Msk | (SL_AHB_QSPI_CTRL_Mode_Code_Msk & (0xA0<<16));
+    SL_AHB_QSPI->SPI_ADDR = 0;
+    CMD = 0xEB | SL_AHB_QSPI_SPI_CMD_Rd_Enable_Msk | SL_AHB_QSPI_SPI_CMD_Addr_Enable_Msk
+        | (SL_AHB_QSPI_SPI_CMD_N_Dummy_Msk & (6<<12)) | (SL_AHB_QSPI_SPI_CMD_N_RW_Bytes_Msk & (15<<16));
+    SL_AHB_QSPI->SPI_CMD = CMD;
+    SL_AHB_QSPI->SPI_CMD = CMD | SL_AHB_QSPI_SPI_CMD_Enable_Msk;
+    SPI_WAIT_BUSY(SL_AHB_QSPI);
+    SL_AHB_QSPI->AHB_CMD = (6<<SL_AHB_QSPI_SPI_CMD_N_Dummy_Pos) + 0xEB;
+    SL_AHB_QSPI->CTRL |= (1<<25);                         // No_CMD: the chip is in continuous read
+    QPI_SET_AHB_MODE(SL_AHB_QSPI);
+    return 0;
 }
