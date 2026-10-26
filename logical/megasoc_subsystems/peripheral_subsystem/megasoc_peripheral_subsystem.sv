@@ -236,6 +236,7 @@ wire        PSLVERR_RTC;
 wire        PSEL_SPI;
 wire        PREADY_SPI;
 wire [31:0] PRDATA_SPI;
+assign PRDATA_SPI[31:16] = 16'h0000;   // MBT-42: the PL022 returns 16 bits; the upper half was undriven
 wire        PSLVERR_SPI;
 
 // Internal APB signals for PL011 UART
