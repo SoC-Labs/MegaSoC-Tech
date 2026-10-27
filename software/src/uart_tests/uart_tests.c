@@ -168,22 +168,35 @@ static int test_uart_addr_rw (void)
 
     return errors;
  }
+*/
 
-  static void UART1_RX_IRQ(void){
-    string_in[rx_idx++] = CMSDK_UART1-> DATA;
+  static void UART1_RX_IRQ(int id, int src){ (void)id; (void)src;
+    char c = CMSDK_UART1->DATA;
+    if (rx_idx < 63) string_in[rx_idx++] = c;      // bounded: a flood must not overrun the buffer
     CMSDK_UART1->INTCLEAR = 0xFF;
  }
 
- static void UART0_RX_IRQ(void){
-    string_in1[rx_idx++] = CMSDK_UART0->DATA;
+ static void UART0_RX_IRQ(int id, int src){ (void)id; (void)src;
+    char c = CMSDK_UART0->DATA;
+    if (rx_idx < 63) string_in1[rx_idx++] = c;
     CMSDK_UART0->INTCLEAR = 0xFF;
+ }
+
+
+ /* UART0 is the console. TXBF clear only says the holding register is free: the character in the shift
+    register still needs one frame (87 us at 115200). Wait for it before UART0 is reconfigured, or the last
+    character of the previous line goes out at the new rate and is lost. ~2 ms at 20 MHz. */
+ static void console_drain(void)
+ {
+    while (CMSDK_UART0->STATE & CMSDK_UART_STATE_TXBF_Msk) {;}
+    for (volatile int t = 0; t < 4000; t++) {;}
  }
 
  //Bi-directional loopbacks with IRQ's
  static int test_uart_loopback_both_directions(void){
     int errors = 0;
-    char* string_in;
-    char* string_in1;
+
+
     rx_idx = 0;
 
     printf("Test: UART Loopback both directions\n");
@@ -195,7 +208,10 @@ static int test_uart_addr_rw (void)
 
     char* string_out = "Hello UART\n";
     int len = strlen(string_out);
-    //configuring UARTs
+    //configuring UARTs. UART1 RX is wired to UART0 TX (loopback): let the console text above leave UART0
+    //before the receiver is enabled, or UART1 locks on to the middle of a character and loses framing.
+    uint32_t baud_console = CMSDK_UART0->BAUDDIV;
+    console_drain();
     CMSDK_UART0->CTRL = 0;
     CMSDK_UART1->CTRL = 0;
     CMSDK_UART0->BAUDDIV = 10;
@@ -212,19 +228,30 @@ static int test_uart_addr_rw (void)
         //Wait till TX buffer is full
         while (CMSDK_UART0->STATE & CMSDK_UART_STATE_TXBF_Msk) {;}
         CMSDK_UART0->DATA = (uint8_t)string_out[i];
-        call_wfi(); //wait for interrupt
+        // Wait for the RX interrupt to have stored this character. Not WFI: with code fetched from
+        // flash the interrupt can arrive before the WFI is reached (first iteration), and a WFI
+        // entered after its interrupt has already been taken sleeps for ever (seen on the board).
+        uint32_t t = 2000000;
+        while ((rx_idx <= i) && --t) {;}
+        if (!t) { printf("Error: UART1 RX interrupt timeout at char %d\n", i); errors++; break; }
     }
 
-    printf("From UART0 to UART1: %s\n", string_in);
+    // UART0 TX is looped into UART1 RX: stop the receiver and its interrupt BEFORE printing, or every
+    // console byte (sent at the console rate, received at divider 10) raises an RX interrupt and the
+    // handler floods string_in (observed: >600 interrupts, memory corruption, hang).
+    gic_disable_interrupt(UART1_RX_INTR);
+    CMSDK_UART1->CTRL = 0;
+    CMSDK_UART1->INTCLEAR = 0xFF;
+    string_in[len] = 0;
+    CMSDK_UART0->BAUDDIV = baud_console;              // results at the console rate
+    printf("From UART0 to UART1: %s\n", (const char *)string_in);
     for (int i = 0; i < len; i++){
-        printf("reached here this loop");
         if(string_in[i] != string_out[i]){
             printf("Error: UART1 Received missing data from UART0\n");
             errors++;
         }
     }
 
-    gic_disable_interrupt(UART1_RX_INTR);
 
     //case 2: UART1 TX --> UART0 RX
     printf("UART1 TX --> UART0 RX");
@@ -235,6 +262,7 @@ static int test_uart_addr_rw (void)
     gic_install_handler(UART0_RX_INTR, &UART0_RX_IRQ);
     gic_enable_interrupt(UART0_RX_INTR);
 
+    console_drain();                               // let "UART1 TX --> UART0 RX" leave the console first
     CMSDK_UART0->CTRL = 0;
     CMSDK_UART1->CTRL = 0;
     CMSDK_UART0->BAUDDIV = 10;
@@ -243,63 +271,85 @@ static int test_uart_addr_rw (void)
     
 
     CMSDK_UART1->CTRL = CMSDK_UART_CTRL_TXEN_Msk; //Tx
-    CMSDK_UART0->CTRL = CMSDK_UART_CTRL_RXEN_Msk | CMSDK_UART_CTRL_RXIRQEN_Msk; //RX + RXIRQ
+    rx_idx = 0;
+    CMSDK_UART0->CTRL = CMSDK_UART_CTRL_TXEN_Msk | CMSDK_UART_CTRL_RXEN_Msk | CMSDK_UART_CTRL_RXIRQEN_Msk; //RX + RXIRQ; UART0 is also the console: keep TX on
 
     for (int i = 0; i < len_out; i++){
         //WAIT FOR BUFFER TO FILL
         while (CMSDK_UART1->STATE & CMSDK_UART_STATE_TXBF_Msk) {;}
         CMSDK_UART1->DATA = (uint8_t) string_out1[i];
-        call_wfi(); //wait for interrupt
+        uint32_t t = 2000000;                           // see case 1: poll, no WFI
+        while ((rx_idx <= i) && --t) {;}
+        if (!t) { printf("Error: UART0 RX interrupt timeout at char %d\n", i); errors++; break; }
     }
 
-    printf("From UART1 to UART0: %s\n", string_in1);
+    gic_disable_interrupt(UART0_RX_INTR);
+    CMSDK_UART1->CTRL = 0;
+    CMSDK_UART0->CTRL = CMSDK_UART_CTRL_TXEN_Msk;      // console only; RX + RX IRQ off before printing
+    CMSDK_UART0->INTCLEAR = 0xFF;
+    string_in1[len_out] = 0;
+    CMSDK_UART0->BAUDDIV = baud_console;
+    printf("From UART1 to UART0: %s\n", (const char *)string_in1);
     for (int i = 0; i < len_out; i++){
         if(string_in1[i] != string_out1[i]){
             printf("Error: UART0 Received missing data from UART1\n");
             errors++;
         }
     }
-     gic_disable_interrupt(UART0_RX_INTR);
+     CMSDK_UART0->CTRL = CMSDK_UART_CTRL_TXEN_Msk | CMSDK_UART_CTRL_RXEN_Msk;   // console back to TX+RX
 
      return errors;
  }
 
-*/
 
- // TX overrun
+
+ // TX overrun: UART0 (the console) at divider 10. The bytes written here reach the console as two
+ // glitch frames at the fast rate; nothing is printed until the console rate is restored.
  static int test_uart_tx_overrun (void){
     int errors = 0;
+    int not_set = 0, stuck = 0;
     printf("Test: UART TX overrun\n");
+    uint32_t baud_console = CMSDK_UART0->BAUDDIV;
+    console_drain();
     CMSDK_UART0->CTRL = 0;
     CMSDK_UART0->BAUDDIV = 10;
     CMSDK_UART0->INTCLEAR = 0xFF;
 
     //enable tx and tx overrun in uart0
     CMSDK_UART0->CTRL = CMSDK_UART_CTRL_TXEN_Msk | CMSDK_UART_CTRL_TXORIRQEN_Msk;
-    //write data to overrun
+    // Three writes, not two: with the transmitter idle the UART moves the first byte from the holding
+    // register into the shift register on the next PCLK (tx_buf_clear), so a second write finds the
+    // register free and nothing overruns. The third write lands while the second byte waits for the
+    // first to be shifted out (>= 160 PCLK) - that is the overrun.
     CMSDK_UART0->DATA = 0x11;
     CMSDK_UART0->DATA = 0x22;
+    CMSDK_UART0->DATA = 0x33;
 
     //wait for interrupt
     uint32_t timeout1 = 100000;
     while (((CMSDK_UART0->INTSTATUS & CMSDK_UART_INTSTATUS_TXORIRQ_Msk) == 0 ) && --timeout1){}
-    if(!timeout1){
-        printf("Error: UART0 TX overrun IRQ did not signal\n");
-        errors++;
-    }
+    if(!timeout1) not_set = 1;
 
     //Clear and re-check
     CMSDK_UART0->INTCLEAR = CMSDK_UART_INTSTATUS_TXORIRQ_Msk;
-    if(CMSDK_UART0->INTSTATUS & CMSDK_UART_INTSTATUS_TXORIRQ_Msk){
-        printf("Error: UART0 TX overrun stuck after clear\n");
-    }
+    if(CMSDK_UART0->INTSTATUS & CMSDK_UART_INTSTATUS_TXORIRQ_Msk) stuck = 1;
+
+    // console back before anything is printed
+    console_drain();
+    CMSDK_UART0->BAUDDIV = baud_console;
+    CMSDK_UART0->CTRL = CMSDK_UART_CTRL_TXEN_Msk;
+    if (not_set) { printf("Error: UART0 TX overrun IRQ did not signal\n"); errors++; }
+    if (stuck)   { printf("Error: UART0 TX overrun stuck after clear\n"); errors++; }
     return errors;
  }
 
- //RX overrun
+ //RX overrun: UART1 TX -> UART0 RX (loopback) at divider 10, UART0 never reads DATA
  static int test_uart_rx_overrun(void){
     int errors = 0;
+    int not_set = 0, stuck = 0;
     printf("Test: UART RX overrun\n");
+    uint32_t baud_console = CMSDK_UART0->BAUDDIV;
+    console_drain();
     CMSDK_UART0->CTRL = 0;
     CMSDK_UART1->CTRL = 0;
     CMSDK_UART0->BAUDDIV = 10;
@@ -315,19 +365,26 @@ static int test_uart_addr_rw (void)
         while(CMSDK_UART1->STATE & CMSDK_UART_STATE_TXBF_Msk) {;}
         CMSDK_UART1->DATA = (0x30 + (i & 0xF));
     }
+    // TXBF clear only means the last byte has left the holding register: two characters can still be
+    // in flight, and each one that lands on the full RX buffer is a new overrun. Let the line go quiet
+    // before the flag is checked and cleared, otherwise a late character re-sets it between the clear
+    // and the re-check (timing dependent: passed from ROM in simulation, failed from flash on the board).
+    while (CMSDK_UART1->STATE & CMSDK_UART_STATE_TXBF_Msk) {;}
+    for (volatile int t = 0; t < 4000; t++) {;}
 
-    uint32_t timeout2 = 100000;
-    while (((CMSDK_UART0->INTSTATUS & CMSDK_UART_INTSTATUS_RXORIRQ_Msk) == 0) && --timeout2) {}
-    if(!timeout2){
-        printf("Error: UART0 RX overrun did not dignal\n");
-        errors++;
-    }
-    //Clear and verify 
-    CMSDK_UART0-> INTCLEAR = CMSDK_UART_INTSTATUS_RXORIRQ_Msk;
-    if(CMSDK_UART0->INTSTATUS & CMSDK_UART_INTSTATUS_RXORIRQ_Msk){
-        printf("Error: UART0 RXOR IRQ stuck\n");
-        errors++;
-    } 
+    if ((CMSDK_UART0->INTSTATUS & CMSDK_UART_INTSTATUS_RXORIRQ_Msk) == 0) not_set = 1;
+    //Clear and verify
+    CMSDK_UART0->INTCLEAR = CMSDK_UART_INTSTATUS_RXORIRQ_Msk;
+    if (CMSDK_UART0->INTSTATUS & CMSDK_UART_INTSTATUS_RXORIRQ_Msk) stuck = 1;
+
+    // Console back BEFORE anything is printed: UART0 TX is off here and UartPutc() spins on TXBF for
+    // ever when the transmitter is disabled (the first error message hung the board).
+    while (CMSDK_UART0->STATE & CMSDK_UART_STATE_RXBF_Msk) { volatile uint32_t d = CMSDK_UART0->DATA; (void)d; }
+    CMSDK_UART0->INTCLEAR = 0xFF;
+    CMSDK_UART0->BAUDDIV = baud_console;
+    CMSDK_UART0->CTRL = CMSDK_UART_CTRL_TXEN_Msk;
+    if (not_set) { printf("Error: UART0 RX overrun did not signal\n"); errors++; }
+    if (stuck)   { printf("Error: UART0 RXOR IRQ stuck after clear\n"); errors++; }
     return errors;
  }
 
@@ -339,8 +396,14 @@ static int test_uart_addr_rw (void)
 
     errors += test_uart_addr_rw();
     //errors += test_uart_baud_ticks();
-    //errors += test_uart_loopback_both_directions();
+    errors += test_uart_loopback_both_directions();
+#ifdef SKIP_SWRESET_TEST
+    // For builds whose RTL has no megasoc_reset_ctrl (e.g. the HAPS-SX FPGA snapshot, APB slot 11 unconnected):
+    // system_sw_reset() would spin for ever waiting for a reset that never comes. APP_TESTDEFINES=-DSKIP_SWRESET_TEST
+    printf("Test: UART reset via SWRESET - skipped (no reset controller in FPGA build)\n");
+#else
     errors += test_uart_reset_values();   //system soft reset yet to be implemented.
+#endif
     errors += test_uart_rx_overrun();
     errors += test_uart_tx_overrun();
 
