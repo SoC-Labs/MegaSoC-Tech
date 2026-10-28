@@ -215,8 +215,8 @@ module megasoc_cpu_ss #(
        //   - Clock and configuration signals
        .ACLKENM                     (1'b1),
        .ACINACTM                    (1'b1),
-       .RDMEMATTR                   (),
-       .WRMEMATTR                   (),
+       .RDMEMATTR                   (RDMEMATTR),   // MBT-42: were declared as outputs of this module but never driven
+       .WRMEMATTR                   (WRMEMATTR),
        //  - Write address channel signals
        .AWREADYM                    (CPU_AXI.AWREADY),
        .AWVALIDM                    (CPU_AXI.AWVALID),
