@@ -85,7 +85,11 @@ void QPI_SET_AHB_MODE(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
 }
 
 void SPI_WAIT_BUSY(SL_AHB_QSPI_TypeDef *SL_AHB_QSPI){
-    while(((SL_AHB_QSPI->STATUS)&SL_AHB_QSPI_STATUS_Busy_Msk)!=1){;}
+    // Wait for the transaction to start, but not for ever: a short command (2 clocks in QPI mode, e.g. FFh
+    // Reset-QIO) can complete before the first STATUS read, and the old unbounded wait for Busy to rise then
+    // never returned. Then wait for it to finish.
+    uint32_t t = 10000;
+    while((((SL_AHB_QSPI->STATUS)&SL_AHB_QSPI_STATUS_Busy_Msk)!=1) && (--t != 0)){;}
     while(((SL_AHB_QSPI->STATUS)&SL_AHB_QSPI_STATUS_Busy_Msk)!=0){;}
 }
 
