@@ -203,7 +203,7 @@ int c_print_str(const char * fmt) {
   do{
     UartPutc(fmt[i]);
     i++;
-  } while(i<79 && fmt[i]!='\0');
+  } while(i<160 && fmt[i]!='\0');   // MBT-62: same 160-character bound as c_print(); was 79, which cut 80-character lines
   
   return 1;
 }
