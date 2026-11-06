@@ -277,7 +277,14 @@ end
 assign SYS_RESETn_int = SYS_RESETn & ~sys_reset_req_sync2;
 
 
-parameter ID_W=9;
+// AXI ID width on the NIC-400 ROM, RAM and DRAM ports (and the SIE-300 /
+// DRAM controllers behind them). 10 since ETH_M and DMA_M were added to the
+// NIC (global ID = VID 6 + SIID 3 + IID 1); the SIE-300 config
+// (socrates/BP301_SRAM/config/SRAM_ctrl.yaml ID_WIDTH) must match.
+parameter ID_W=10;
+// AXI ID width on the NIC-400 GIC port (the NIC compresses the ID to 7 bits
+// there); independent of ID_W.
+parameter GIC_ID_W=7;
 parameter NUM_SPIS=480;
 
 
@@ -316,7 +323,7 @@ wire CPU_L2_RESETn_pc;
 //--------------------------------------
 // AXI
 axi4 #(.DATA_W(128), .ID_W(6), .ADDR_W(44))     CPU_AXI();
-axi4 #(.DATA_W(32), .ID_W(7), .ADDR_W(32)) GIC_AXI();
+axi4 #(.DATA_W(32), .ID_W(GIC_ID_W), .ADDR_W(32)) GIC_AXI();
 axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(33))   DRAM_AXI();
 axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(32))   SRAM_AXI();
 axi4 #(.DATA_W(64), .ID_W(ID_W), .ADDR_W(32))   ROM_AXI();
@@ -332,6 +339,62 @@ ahb #(.DATA_W(32), .ADDR_W(32))     LPDDR4_CFG_AHB();   // peripheral window 0x4
 apb3    CPU_DBG_APB();
 apb3    PCK_APB();
 apb4    FLASH_CTRL_APB();
+
+// Ethernet subsystem and DMA-350 ports on the NIC-400 (added 2026-11).
+// The blocks are not integrated yet: every NIC input on these ports is
+// tied to idle below, so the NIC behaves as before.
+//   ETH_M  AHB-Lite master into the NIC (Ethernet MAC DMA)
+//   DMA_M  AXI4 master into the NIC (DMA-350)
+//   ETH_S  APB4 target, 0x0102_0000 (Ethernet registers)
+//   DMA_S  APB4 target, 0x0103_0000 (DMA-350 registers)
+ahb #(.DATA_W(32), .ADDR_W(32))                 ETH_M_AHB();
+axi4 #(.DATA_W(64), .ID_W(2), .ADDR_W(44))      DMA_M_AXI();
+apb4    ETH_S_APB();
+apb4    DMA_S_APB();
+
+// ETH_M: no transfers (HTRANS = IDLE)
+assign ETH_M_AHB.HADDR   = 32'h0;
+assign ETH_M_AHB.HTRANS  = 2'b00;
+assign ETH_M_AHB.HWRITE  = 1'b0;
+assign ETH_M_AHB.HSIZE   = 3'b010;
+assign ETH_M_AHB.HBURST  = 3'b000;
+assign ETH_M_AHB.HPROT   = 4'b0011;
+assign ETH_M_AHB.HWDATA  = 32'h0;
+
+// DMA_M: no requests, always ready to take a response
+assign DMA_M_AXI.AWID    = 2'b0;
+assign DMA_M_AXI.AWADDR  = 44'h0;
+assign DMA_M_AXI.AWLEN   = 8'h0;
+assign DMA_M_AXI.AWSIZE  = 3'b011;
+assign DMA_M_AXI.AWBURST = 2'b01;
+assign DMA_M_AXI.AWLOCK  = 1'b0;
+assign DMA_M_AXI.AWCACHE = 4'b0000;
+assign DMA_M_AXI.AWPROT  = 3'b000;
+assign DMA_M_AXI.AWVALID = 1'b0;
+assign DMA_M_AXI.WDATA   = 64'h0;
+assign DMA_M_AXI.WSTRB   = 8'h0;
+assign DMA_M_AXI.WLAST   = 1'b0;
+assign DMA_M_AXI.WVALID  = 1'b0;
+assign DMA_M_AXI.BREADY  = 1'b1;
+assign DMA_M_AXI.ARID    = 2'b0;
+assign DMA_M_AXI.ARADDR  = 44'h0;
+assign DMA_M_AXI.ARLEN   = 8'h0;
+assign DMA_M_AXI.ARSIZE  = 3'b011;
+assign DMA_M_AXI.ARBURST = 2'b01;
+assign DMA_M_AXI.ARLOCK  = 1'b0;
+assign DMA_M_AXI.ARCACHE = 4'b0000;
+assign DMA_M_AXI.ARPROT  = 3'b000;
+assign DMA_M_AXI.ARVALID = 1'b0;
+assign DMA_M_AXI.RREADY  = 1'b1;
+
+// ETH_S / DMA_S: complete every access at once with read data 0 and no
+// error, so a CPU access to either window cannot hang the bus
+assign ETH_S_APB.prdata  = 32'h0;
+assign ETH_S_APB.pready  = 1'b1;
+assign ETH_S_APB.pslverr = 1'b0;
+assign DMA_S_APB.prdata  = 32'h0;
+assign DMA_S_APB.pready  = 1'b1;
+assign DMA_S_APB.pslverr = 1'b0;
 
 
 wire                CPU_nPRESETDBG;
@@ -355,8 +418,8 @@ assign AWAKEUP_SRAM = (SRAM_AXI.AWVALID | SRAM_AXI.ARVALID | SRAM_AXI.WVALID);
 
 
 megasoc_cpu_ss #(
-    .NUM_GICRID_BITS(ID_W-2),
-    .NUM_GICWID_BITS(ID_W-2),
+    .NUM_GICRID_BITS(GIC_ID_W),
+    .NUM_GICWID_BITS(GIC_ID_W),
     .NUM_SPIS(NUM_SPIS)
     ) u_megasoc_cpu_ss(
     // Clocks and Reset
@@ -1258,6 +1321,28 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .PSLVERR_FLASH_CTRL(FLASH_CTRL_APB.pslverr),
     .PREADY_FLASH_CTRL(FLASH_CTRL_APB.pready),
 
+    .PADDR_ETH_S(ETH_S_APB.paddr),
+    .PWDATA_ETH_S(ETH_S_APB.pwdata),
+    .PWRITE_ETH_S(ETH_S_APB.pwrite),
+    .PPROT_ETH_S(ETH_S_APB.pprot),
+    .PSTRB_ETH_S(ETH_S_APB.pstrb),
+    .PENABLE_ETH_S(ETH_S_APB.penable),
+    .PSELx_ETH_S(ETH_S_APB.psel),
+    .PRDATA_ETH_S(ETH_S_APB.prdata),
+    .PSLVERR_ETH_S(ETH_S_APB.pslverr),
+    .PREADY_ETH_S(ETH_S_APB.pready),
+
+    .PADDR_DMA_S(DMA_S_APB.paddr),
+    .PWDATA_DMA_S(DMA_S_APB.pwdata),
+    .PWRITE_DMA_S(DMA_S_APB.pwrite),
+    .PPROT_DMA_S(DMA_S_APB.pprot),
+    .PSTRB_DMA_S(DMA_S_APB.pstrb),
+    .PENABLE_DMA_S(DMA_S_APB.penable),
+    .PSELx_DMA_S(DMA_S_APB.psel),
+    .PRDATA_DMA_S(DMA_S_APB.prdata),
+    .PSLVERR_DMA_S(DMA_S_APB.pslverr),
+    .PREADY_DMA_S(DMA_S_APB.pready),
+
     .PADDR_PCK_CTRL(PCK_APB.paddr),
     .PWDATA_PCK_CTRL(PCK_APB.pwdata),
     .PWRITE_PCK_CTRL(PCK_APB.pwrite),
@@ -1313,6 +1398,53 @@ nic400_megasoc_main u_nic400_megasoc_main(
     .HRDATA_ADP(ADP_AHB.HRDATA),
     .HREADY_ADP(ADP_AHB.HREADY),
     .HRESP_ADP(ADP_AHB.HRESP),
+
+    .HADDR_ETH_M(ETH_M_AHB.HADDR),
+    .HTRANS_ETH_M(ETH_M_AHB.HTRANS),
+    .HWRITE_ETH_M(ETH_M_AHB.HWRITE),
+    .HSIZE_ETH_M(ETH_M_AHB.HSIZE),
+    .HBURST_ETH_M(ETH_M_AHB.HBURST),
+    .HPROT_ETH_M(ETH_M_AHB.HPROT),
+    .HWDATA_ETH_M(ETH_M_AHB.HWDATA),
+    .HRDATA_ETH_M(ETH_M_AHB.HRDATA),
+    .HREADY_ETH_M(ETH_M_AHB.HREADY),
+    .HRESP_ETH_M(ETH_M_AHB.HRESP),
+
+    .AWID_DMA_M(DMA_M_AXI.AWID),
+    .AWADDR_DMA_M(DMA_M_AXI.AWADDR),
+    .AWLEN_DMA_M(DMA_M_AXI.AWLEN),
+    .AWSIZE_DMA_M(DMA_M_AXI.AWSIZE),
+    .AWBURST_DMA_M(DMA_M_AXI.AWBURST),
+    .AWLOCK_DMA_M(DMA_M_AXI.AWLOCK),
+    .AWCACHE_DMA_M(DMA_M_AXI.AWCACHE),
+    .AWPROT_DMA_M(DMA_M_AXI.AWPROT),
+    .AWVALID_DMA_M(DMA_M_AXI.AWVALID),
+    .AWREADY_DMA_M(DMA_M_AXI.AWREADY),
+    .WDATA_DMA_M(DMA_M_AXI.WDATA),
+    .WSTRB_DMA_M(DMA_M_AXI.WSTRB),
+    .WLAST_DMA_M(DMA_M_AXI.WLAST),
+    .WVALID_DMA_M(DMA_M_AXI.WVALID),
+    .WREADY_DMA_M(DMA_M_AXI.WREADY),
+    .BID_DMA_M(DMA_M_AXI.BID),
+    .BRESP_DMA_M(DMA_M_AXI.BRESP),
+    .BVALID_DMA_M(DMA_M_AXI.BVALID),
+    .BREADY_DMA_M(DMA_M_AXI.BREADY),
+    .ARID_DMA_M(DMA_M_AXI.ARID),
+    .ARADDR_DMA_M(DMA_M_AXI.ARADDR),
+    .ARLEN_DMA_M(DMA_M_AXI.ARLEN),
+    .ARSIZE_DMA_M(DMA_M_AXI.ARSIZE),
+    .ARBURST_DMA_M(DMA_M_AXI.ARBURST),
+    .ARLOCK_DMA_M(DMA_M_AXI.ARLOCK),
+    .ARCACHE_DMA_M(DMA_M_AXI.ARCACHE),
+    .ARPROT_DMA_M(DMA_M_AXI.ARPROT),
+    .ARVALID_DMA_M(DMA_M_AXI.ARVALID),
+    .ARREADY_DMA_M(DMA_M_AXI.ARREADY),
+    .RID_DMA_M(DMA_M_AXI.RID),
+    .RDATA_DMA_M(DMA_M_AXI.RDATA),
+    .RRESP_DMA_M(DMA_M_AXI.RRESP),
+    .RLAST_DMA_M(DMA_M_AXI.RLAST),
+    .RVALID_DMA_M(DMA_M_AXI.RVALID),
+    .RREADY_DMA_M(DMA_M_AXI.RREADY),
 
     // .AWID_DMA350(AWID_DMA350),
     // .AWADDR_DMA350(AWADDR_DMA350),
