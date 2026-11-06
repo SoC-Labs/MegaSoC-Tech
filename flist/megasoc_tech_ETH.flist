@@ -1,0 +1,83 @@
+//-----------------------------------------------------------------------------
+// MegaSoC Tech Ethernet Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Copyright (C) 2026, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+// Abstract : Files for INC_ETH builds only (added by the project makefile
+//            when INC_ETH=yes): the Ethernet-MAC-AHB submodule's
+//            ethmac_subsystem_apb (OpenCores ethmac + HA1588 PTP + RX
+//            checksum), MII interface.
+//
+//            Differences from the submodule's own
+//            flist/ethmac_subsystem_apb.flist:
+//            - generic ethmac_sram model (the submodule's default uses an
+//              FPGA RAM model; its ASIC flist uses a process memory macro,
+//              which the backend supplies for MegaSoC)
+//            - cmsdk_apb_slave_mux is not listed: MegaSoC already compiles
+//              it for the peripheral and power-control subsystems
+//            - +define+ETH_WISHBONE_B3 is set by the project makefile
+//              (flist +define+ lines are not passed through by
+//              filelist_compile.py)
+//
+//            ETHMAC_IP_DIR and HA1588_IP_DIR (OpenCores sources) are set in
+//            env/dependency_env.sh.
+//-----------------------------------------------------------------------------
+
+// Must stay first: undo the `default_nettype none left set by the SDIO
+// controller sources (the OpenCores ethmac relies on implicit nets)
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/top_megasoc_tech/megasoc_eth_default_nettype.v
+
++incdir+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl
++incdir+$(ETHMAC_IP_DIR)/rtl/verilog
++incdir+$(HA1588_IP_DIR)/rtl/tsu
+
+// OpenCores Ethernet MAC (rel27)
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_defines.v
+$(ETHMAC_IP_DIR)/rtl/verilog/timescale.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_clockgen.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_cop.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_crc.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_fifo.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_maccontrol.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_macstatus.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_miim.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_outputcontrol.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_random.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_receivecontrol.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_register.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_registers.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_rxaddrcheck.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_rxcounters.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_rxethmac.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_rxstatem.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_shiftreg.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_transmitcontrol.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_txcounters.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_txethmac.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_txstatem.v
+$(ETHMAC_IP_DIR)/rtl/verilog/eth_top.v
+
+// SoC Labs patches to ethmac (replace eth_spram_256x32 / eth_wishbone)
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/ethmac_patches/eth_spram_256x32.v
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/ethmac_patches/eth_wishbone.v
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/generic/ethmac_sram.v
+
+// HA1588 PTP timestamping (SoC Labs patched copies + OpenCores bus wrapper)
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/ha1588_patches/rtc.v
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/ha1588_patches/ptp_parser.v
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/ha1588_patches/ptp_queue.v
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/ha1588_patches/tsu.v
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/ha1588_patches/reg.v
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/ha1588_patches/ha1588.v
+$(HA1588_IP_DIR)/rtl/bus/wishbone/wb_slv_wrapper.v
+
+// Bus bridges (amba_wb_bridges nested submodule)
+$(SOCLABS_ETHMAC_AHB_DIR)/amba_wb_bridges/src/rtl/apb_to_wb.v
+$(SOCLABS_ETHMAC_AHB_DIR)/amba_wb_bridges/src/rtl/wb_to_ahb3lite.v
+
+// Subsystem
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/ptp_event_detector.v
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/ha1588_servo.sv
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/eth_rx_cksum.v
+$(SOCLABS_ETHMAC_AHB_DIR)/src/rtl/ethmac_subsystem_apb.v

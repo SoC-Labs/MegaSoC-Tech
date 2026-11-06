@@ -24,6 +24,7 @@
 //    dram_wrapper                  (u_lpddr4_subsystem)        INC_LPDDR4
 //    megasoc_ahb_to_apb_async      (u_lpddr4_cfg_bridge)       INC_LPDDR4
 //    megasoc_dram_wrapper          (u_megasoc_dram_wrapper)    otherwise (fast sim model)
+//  ethmac_subsystem_apb            (u_ethmac_subsystem)        INC_ETH
 //-----------------------------------------------------------------------------
 // To Do
 //  - Replace sl_ahb_sram with QSPI controller to use external flash
@@ -236,7 +237,25 @@ module megasoc_tech_wrapper(
     input  wire             SDIO_AC_VALID,
     input  wire [1:0]       SDIO_AC_DATA,
     input  wire             SDIO_AD_VALID,
-    input  wire [31:0]      SDIO_AD_DATA
+    input  wire [31:0]      SDIO_AD_DATA,
+
+    // Ethernet MII + MDIO (ethmac_subsystem_apb). Driven only in INC_ETH
+    // builds; otherwise outputs are 0 and inputs are unused. The ports exist
+    // in both builds so the chip pin list does not change.
+    input  wire             ETH_TX_CLK,       // 25 MHz (100 Mb/s) / 2.5 MHz (10 Mb/s) from PHY
+    output wire [3:0]       ETH_TXD,
+    output wire             ETH_TX_EN,
+    output wire             ETH_TX_ER,
+    input  wire             ETH_RX_CLK,
+    input  wire [3:0]       ETH_RXD,
+    input  wire             ETH_RX_DV,
+    input  wire             ETH_RX_ER,
+    input  wire             ETH_COL,
+    input  wire             ETH_CRS,
+    output wire             ETH_MDC,
+    input  wire             ETH_MDIO_i,
+    output wire             ETH_MDIO_o,
+    output wire             ETH_MDIO_e        // 1 = drive ETH_MDIO_o onto the pad
 );
 
 wire SYS_HRESETn;
@@ -341,18 +360,124 @@ apb3    PCK_APB();
 apb4    FLASH_CTRL_APB();
 
 // Ethernet subsystem and DMA-350 ports on the NIC-400 (added 2026-11).
-// The blocks are not integrated yet: every NIC input on these ports is
-// tied to idle below, so the NIC behaves as before.
 //   ETH_M  AHB-Lite master into the NIC (Ethernet MAC DMA)
 //   DMA_M  AXI4 master into the NIC (DMA-350)
 //   ETH_S  APB4 target, 0x0102_0000 (Ethernet registers)
 //   DMA_S  APB4 target, 0x0103_0000 (DMA-350 registers)
+// ETH_M/ETH_S connect to ethmac_subsystem_apb in INC_ETH builds and are
+// tied to idle otherwise. DMA-350 is not integrated yet: DMA_M/DMA_S are
+// always tied to idle, so the NIC behaves as before on those ports.
 ahb #(.DATA_W(32), .ADDR_W(32))                 ETH_M_AHB();
 axi4 #(.DATA_W(64), .ID_W(2), .ADDR_W(44))      DMA_M_AXI();
 apb4    ETH_S_APB();
 apb4    DMA_S_APB();
 
-// ETH_M: no transfers (HTRANS = IDLE)
+wire ETH_IRQ;           // MAC interrupt (INT_SOURCE & INT_MASK), CPU_IRQS[95]
+wire ETH_CKSUM_IRQ;     // RX checksum unit interrupt, CPU_IRQS[96]
+
+`ifdef INC_ETH
+//--------------------------------------
+//  Ethernet subsystem (Ethernet-MAC-AHB submodule, logical/ethernet_mac_ahb)
+//--------------------------------------
+// OpenCores ethmac (10/100, MII) + HA1588 PTP timestamping + RX checksum
+// unit. Register window (ETH_S, 64 KB at 0x0102_0000), decoded inside the
+// block on paddr[15:12]:
+//   +0x0000  MAC registers (0x000-0x3FF) and buffer descriptors (0x400-0x7FF)
+//   +0x1000  HA1588 PTP registers
+//   +0x2000  RX checksum unit
+// The MAC's buffer-descriptor DMA is the AHB master ETH_M (reaches RAM and
+// DRAM only). The block runs on SYS_CLK and the same reset as the NIC and
+// the SDIO controller, so a soft reset cannot cut an ETH_M transfer off
+// while the NIC side stays out of reset. The MII clocks come from the PHY;
+// the crossings to them are inside the block.
+// PTP: rtc_clk = SYS_CLK, servo/PHC inputs tied to 0, PTP outputs unused.
+// SWAP_DMA_BYTES = 1: the MAC DMA otherwise sends byte 3 of each 32-bit word
+// first (big-endian lanes). With 1, bytes go on the wire in memory order, as
+// the little-endian A53's network stack lays frames out. Measured by the
+// byte-order case of eth_loopback_tests (2026-11-06, with 0: the wire-order
+// frame was dropped by the address filter, the word-swapped one received).
+ethmac_subsystem_apb #(
+    .SWAP_DMA_BYTES(1'b1)
+) u_ethmac_subsystem (
+    .pclk                       (SYS_CLK),
+    .presetn                    (SYS_RESETn_int),
+
+    // AHB-Lite master (MAC DMA) -> NIC-400 ETH_M
+    .haddr                      (ETH_M_AHB.HADDR),
+    .htrans                     (ETH_M_AHB.HTRANS),
+    .hsize                      (ETH_M_AHB.HSIZE),
+    .hburst                     (ETH_M_AHB.HBURST),
+    .hprot                      (ETH_M_AHB.HPROT),
+    .hmastlock                  (),                 // no HMASTLOCK on the NIC port; tied 0 in the block
+    .hwrite                     (ETH_M_AHB.HWRITE),
+    .hwdata                     (ETH_M_AHB.HWDATA),
+    .hrdata                     (ETH_M_AHB.HRDATA),
+    .hready                     (ETH_M_AHB.HREADY),
+    .hresp                      (ETH_M_AHB.HRESP),
+
+    // APB4 target <- NIC-400 ETH_S (pprot unused)
+    .psel                       (ETH_S_APB.psel),
+    .penable                    (ETH_S_APB.penable),
+    .paddr                      (ETH_S_APB.paddr),
+    .pwrite                     (ETH_S_APB.pwrite),
+    .pwdata                     (ETH_S_APB.pwdata),
+    .pstrb                      (ETH_S_APB.pstrb),
+    .prdata                     (ETH_S_APB.prdata),
+    .pready                     (ETH_S_APB.pready),
+    .pslverr                    (ETH_S_APB.pslverr),
+
+    // PTP real-time clock
+    .rtc_clk                    (SYS_CLK),
+    .rtc_time_ptp_ns            (),
+    .rtc_time_ptp_sec           (),
+    .rtc_time_one_pps           (),
+
+    // MII
+    .mtx_clk_pad_i              (ETH_TX_CLK),
+    .mtxd_pad_o                 (ETH_TXD),
+    .mtxen_pad_o                (ETH_TX_EN),
+    .mtxerr_pad_o               (ETH_TX_ER),
+    .mrx_clk_pad_i              (ETH_RX_CLK),
+    .mrxd_pad_i                 (ETH_RXD),
+    .mrxdv_pad_i                (ETH_RX_DV),
+    .mrxerr_pad_i               (ETH_RX_ER),
+    .mcoll_pad_i                (ETH_COL),
+    .mcrs_pad_i                 (ETH_CRS),
+
+    // MDIO
+    .md_pad_i                   (ETH_MDIO_i),
+    .mdc_pad_o                  (ETH_MDC),
+    .md_pad_o                   (ETH_MDIO_o),
+    .md_padoe_o                 (ETH_MDIO_e),
+
+    // Interrupts (level, SYS_CLK domain)
+    .int_o                      (ETH_IRQ),
+    .cksum_int_o                (ETH_CKSUM_IRQ),
+
+    // PTP event pulses and servo/PHC interface: unused
+    .rx_ptp_event               (),
+    .tx_ptp_event               (),
+    .ha1588_servo_en            (1'b0),
+    .ha1588_sync_interval       (30'h0),
+    .phc_seconds                (48'h0),
+    .phc_nanoseconds            (30'h0),
+    .phc_hw_cap_seconds         (48'h0),
+    .phc_hw_cap_nanoseconds     (30'h0),
+    .phc_hw_cap_sub_nanoseconds (32'h0),
+    .ha1588_hw_capture          (),
+    .ha1588_hw_set_time         (),
+    .ha1588_hw_set_seconds      (),
+    .ha1588_hw_set_nanoseconds  (),
+    .ha1588_hw_adj_valid        (),
+    .ha1588_hw_adj_ns_incr_frac (),
+    .ha1588_servo_locked        (),
+    .ha1588_servo_phase_step_active ()
+);
+`else
+// No Ethernet subsystem: ETH_M makes no transfers (HTRANS = IDLE), ETH_S
+// completes every access at once with read data 0 and no error (so a CPU
+// access to the window cannot hang the bus), MII/MDIO outputs are 0 and
+// the interrupts are 0.
 assign ETH_M_AHB.HADDR   = 32'h0;
 assign ETH_M_AHB.HTRANS  = 2'b00;
 assign ETH_M_AHB.HWRITE  = 1'b0;
@@ -360,6 +485,21 @@ assign ETH_M_AHB.HSIZE   = 3'b010;
 assign ETH_M_AHB.HBURST  = 3'b000;
 assign ETH_M_AHB.HPROT   = 4'b0011;
 assign ETH_M_AHB.HWDATA  = 32'h0;
+
+assign ETH_S_APB.prdata  = 32'h0;
+assign ETH_S_APB.pready  = 1'b1;
+assign ETH_S_APB.pslverr = 1'b0;
+
+assign ETH_TXD       = 4'h0;
+assign ETH_TX_EN     = 1'b0;
+assign ETH_TX_ER     = 1'b0;
+assign ETH_MDC       = 1'b0;
+assign ETH_MDIO_o    = 1'b0;
+assign ETH_MDIO_e    = 1'b0;
+
+assign ETH_IRQ       = 1'b0;
+assign ETH_CKSUM_IRQ = 1'b0;
+`endif
 
 // DMA_M: no requests, always ready to take a response
 assign DMA_M_AXI.AWID    = 2'b0;
@@ -387,11 +527,8 @@ assign DMA_M_AXI.ARPROT  = 3'b000;
 assign DMA_M_AXI.ARVALID = 1'b0;
 assign DMA_M_AXI.RREADY  = 1'b1;
 
-// ETH_S / DMA_S: complete every access at once with read data 0 and no
-// error, so a CPU access to either window cannot hang the bus
-assign ETH_S_APB.prdata  = 32'h0;
-assign ETH_S_APB.pready  = 1'b1;
-assign ETH_S_APB.pslverr = 1'b0;
+// DMA_S: complete every access at once with read data 0 and no error, so a
+// CPU access to the window cannot hang the bus
 assign DMA_S_APB.prdata  = 32'h0;
 assign DMA_S_APB.pready  = 1'b1;
 assign DMA_S_APB.pslverr = 1'b0;
@@ -410,7 +547,10 @@ wire [71:0]             PERI_IRQS;
 wire                    SDIO_IRQ;
 wire [7:0]              DRAM_IRQS;      // LPDDR4 subsystem, CPU_IRQS[94:87]; 0 without INC_LPDDR4
 
-assign CPU_IRQS={{(NUM_SPIS-95){1'b0}}, DRAM_IRQS, SDIO_IRQ ,EXP_IRQs, QSPI_IRQ, PERI_IRQS, 1'b0, 4'h0};
+// CPU_IRQS[96] ETH_CKSUM_IRQ, [95] ETH_IRQ (0 without INC_ETH). Every SPI
+// passes through megasoc_irq_sync in megasoc_cpu_ss; the ETH interrupts are
+// already on SYS_CLK.
+assign CPU_IRQS={{(NUM_SPIS-97){1'b0}}, ETH_CKSUM_IRQ, ETH_IRQ, DRAM_IRQS, SDIO_IRQ ,EXP_IRQs, QSPI_IRQ, PERI_IRQS, 1'b0, 4'h0};
 
 // Subordinate AWAKEUP signal generation
 assign AWAKEUP_ROM = (ROM_AXI.AWVALID | ROM_AXI.ARVALID | ROM_AXI.WVALID);

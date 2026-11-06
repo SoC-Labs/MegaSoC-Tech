@@ -11,3 +11,6 @@
 	path = logical/lpddr4_subsystem
 	url = https://github.com/SoC-Labs/Synopsys-LPDDR4-Integration-Subsystem.git
 	branch = main
+[submodule "logical/ethernet_mac_ahb"]
+	path = logical/ethernet_mac_ahb
+	url = https://github.com/SoC-Labs/Ethernet-MAC-AHB.git
