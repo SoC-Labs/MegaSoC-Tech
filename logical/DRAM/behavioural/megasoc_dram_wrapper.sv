@@ -61,13 +61,40 @@ initial
       mem[i] = 64'd0;
   end
 
+// Address of the next beat of a burst (AXI4 rules): FIXED keeps the address;
+// INCR moves to the next size-aligned address; WRAP does the same but wraps
+// inside the burst's aligned window (size x (len+1) bytes). Needed for the
+// A53's critical-word-first WRAP line fills (2026-11-06: without it, a line
+// fill that did not start at the line's first word returned the wrong data
+// for the words before the start).
+function automatic [63:0] axi_next_addr(input [63:0] addr, input [2:0] size,
+                                        input [7:0] len, input [1:0] burst);
+  reg [63:0] step, aligned, wrap_bytes, lower;
+  begin
+    step    = 64'd1 << size;
+    aligned = (addr & ~(step - 64'd1)) + step;
+    if (burst == 2'b00)                     // FIXED
+      axi_next_addr = addr;
+    else if (burst == 2'b10)                // WRAP (len+1 = 2, 4, 8 or 16)
+      begin
+        wrap_bytes = step * ({56'd0, len} + 64'd1);
+        lower      = addr & ~(wrap_bytes - 64'd1);
+        axi_next_addr = (aligned >= lower + wrap_bytes) ? lower : aligned;
+      end
+    else                                    // INCR
+      axi_next_addr = aligned;
+  end
+endfunction
+
 // ---- Write address/data/response channel ----
 localparam W_IDLE = 2'd0, W_DATA = 2'd1, W_RESP = 2'd2;
 
 reg [1:0]                        wr_state;
 reg [$bits(DRAM_AXI.AWID)-1:0]   wr_id_q;
 reg [$bits(DRAM_AXI.AWADDR)-1:0] wr_addr_q;
-reg [63:0]                       wr_step_q;
+reg [2:0]                        wr_size_q;
+reg [7:0]                        wr_len_q;
+reg [1:0]                        wr_burst_q;
 integer                          b;
 
 assign DRAM_AXI.AWREADY = (wr_state == W_IDLE);
@@ -83,7 +110,9 @@ always @ (posedge ACLK or negedge ARESETn)
         wr_state  <= W_IDLE;
         wr_id_q   <= {$bits(DRAM_AXI.AWID){1'b0}};
         wr_addr_q <= {$bits(DRAM_AXI.AWADDR){1'b0}};
-        wr_step_q <= 64'd0;
+        wr_size_q  <= 3'd0;
+        wr_len_q   <= 8'd0;
+        wr_burst_q <= 2'b01;
       end
     else
       case (wr_state)
@@ -92,7 +121,9 @@ always @ (posedge ACLK or negedge ARESETn)
             begin
               wr_id_q   <= DRAM_AXI.AWID;
               wr_addr_q <= DRAM_AXI.AWADDR;
-              wr_step_q <= (64'd1 << DRAM_AXI.AWSIZE);
+              wr_size_q  <= DRAM_AXI.AWSIZE;
+              wr_len_q   <= DRAM_AXI.AWLEN;
+              wr_burst_q <= DRAM_AXI.AWBURST;
               wr_state  <= W_DATA;
             end
 
@@ -103,7 +134,7 @@ always @ (posedge ACLK or negedge ARESETn)
                 if (DRAM_AXI.WSTRB[b])
                   mem[wr_addr_q[MEM_ADDR_W+2:3]][b*8 +: 8] <= DRAM_AXI.WDATA[b*8 +: 8];
 
-              wr_addr_q <= wr_addr_q + wr_step_q;
+              wr_addr_q <= axi_next_addr(64'(wr_addr_q), wr_size_q, wr_len_q, wr_burst_q);
 
               if (DRAM_AXI.WLAST)
                 wr_state <= W_RESP;
@@ -124,7 +155,8 @@ localparam R_IDLE = 1'b0, R_DATA = 1'b1;
 reg                              rd_state;
 reg [$bits(DRAM_AXI.ARID)-1:0]   rd_id_q;
 reg [$bits(DRAM_AXI.ARADDR)-1:0] rd_addr_q;
-reg [63:0]                       rd_step_q;
+reg [2:0]                        rd_size_q;
+reg [1:0]                        rd_burst_q;
 reg [7:0]                        rd_len_q;
 reg [7:0]                        rd_beat_q;
 
@@ -142,7 +174,8 @@ always @ (posedge ACLK or negedge ARESETn)
         rd_state  <= R_IDLE;
         rd_id_q   <= {$bits(DRAM_AXI.ARID){1'b0}};
         rd_addr_q <= {$bits(DRAM_AXI.ARADDR){1'b0}};
-        rd_step_q <= 64'd0;
+        rd_size_q  <= 3'd0;
+        rd_burst_q <= 2'b01;
         rd_len_q  <= 8'd0;
         rd_beat_q <= 8'd0;
       end
@@ -153,7 +186,8 @@ always @ (posedge ACLK or negedge ARESETn)
             begin
               rd_id_q   <= DRAM_AXI.ARID;
               rd_addr_q <= DRAM_AXI.ARADDR;
-              rd_step_q <= (64'd1 << DRAM_AXI.ARSIZE);
+              rd_size_q  <= DRAM_AXI.ARSIZE;
+              rd_burst_q <= DRAM_AXI.ARBURST;
               rd_len_q  <= DRAM_AXI.ARLEN;
               rd_beat_q <= 8'd0;
               rd_state  <= R_DATA;
@@ -167,7 +201,7 @@ always @ (posedge ACLK or negedge ARESETn)
               else
                 begin
                   rd_beat_q <= rd_beat_q + 8'd1;
-                  rd_addr_q <= rd_addr_q + rd_step_q;
+                  rd_addr_q <= axi_next_addr(64'(rd_addr_q), rd_size_q, rd_len_q, rd_burst_q);
                 end
             end
 
