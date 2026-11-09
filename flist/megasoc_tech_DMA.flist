@@ -1,0 +1,16 @@
+//-----------------------------------------------------------------------------
+// MegaSoC DMA-350 filelist (INC_DMA builds only)
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Copyright (C) 2026, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+// The DMA-350 RTL is generated into logical/dma350/ (gitignored) by
+// `make build_dma350` in megasoc_tech, from
+// socrates/DMA350/config/cfg_dma_megasoc.yaml. Run that first.
+//-----------------------------------------------------------------------------
+
+// Generated DMA-350 (Arm IP)
+-f $(SOCLABS_MEGASOC_TECH_DIR)/flist/IP/DMA350.flist
+
+// MegaSoC wrapper
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/megasoc_subsystems/megasoc_dma350/megasoc_dma350_wrapper.sv

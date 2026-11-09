@@ -25,6 +25,7 @@
 //    megasoc_ahb_to_apb_async      (u_lpddr4_cfg_bridge)       INC_LPDDR4
 //    megasoc_dram_wrapper          (u_megasoc_dram_wrapper)    otherwise (fast sim model)
 //  ethmac_subsystem_apb            (u_ethmac_subsystem)        INC_ETH
+//  megasoc_dma350_wrapper          (u_megasoc_dma350)          INC_DMA
 //-----------------------------------------------------------------------------
 // To Do
 //  - Replace sl_ahb_sram with QSPI controller to use external flash
@@ -365,8 +366,8 @@ apb4    FLASH_CTRL_APB();
 //   ETH_S  APB4 target, 0x0102_0000 (Ethernet registers)
 //   DMA_S  APB4 target, 0x0103_0000 (DMA-350 registers)
 // ETH_M/ETH_S connect to ethmac_subsystem_apb in INC_ETH builds and are
-// tied to idle otherwise. DMA-350 is not integrated yet: DMA_M/DMA_S are
-// always tied to idle, so the NIC behaves as before on those ports.
+// tied to idle otherwise. DMA_M/DMA_S connect to megasoc_dma350_wrapper in
+// INC_DMA builds and are tied to idle otherwise.
 ahb #(.DATA_W(32), .ADDR_W(32))                 ETH_M_AHB();
 axi4 #(.DATA_W(64), .ID_W(2), .ADDR_W(44))      DMA_M_AXI();
 apb4    ETH_S_APB();
@@ -501,7 +502,79 @@ assign ETH_IRQ       = 1'b0;
 assign ETH_CKSUM_IRQ = 1'b0;
 `endif
 
-// DMA_M: no requests, always ready to take a response
+wire [3:0] DMA_IRQ_CH;      // DMA-350 channel 0-3 interrupts, CPU_IRQS[100:97]
+wire       DMA_IRQ_COMB;    // DMA-350 combined Non-secure interrupt, CPU_IRQS[101]
+
+`ifdef INC_DMA
+//--------------------------------------
+//  DMA-350 (Arm CoreLink DMA-350, generated into logical/dma350/)
+//--------------------------------------
+// Memory-to-memory configuration: 4 channels, 64-bit data, 44-bit address,
+// no triggers, no TrustZone (all channels Non-secure). Registers: DMA_S,
+// first 8 KB of the 64 KB window at 0x0103_0000 (the rest reads 0). Bus
+// manager: DMA_M, reaching ROM, FLASH, RAM, PERIPHERAL and DRAM.
+// Same clock and reset as the NIC and the other bus managers (SDIO, ETH).
+megasoc_dma350_wrapper #(
+    .ADDR_W (44),
+    .DATA_W (64),
+    .ID_W   (2),
+    .NUM_CH (4)
+) u_megasoc_dma350 (
+    .clk                (SYS_CLK),
+    .resetn             (SYS_RESETn_int),
+
+    .psel               (DMA_S_APB.psel),
+    .penable            (DMA_S_APB.penable),
+    .paddr              (DMA_S_APB.paddr),
+    .pwrite             (DMA_S_APB.pwrite),
+    .pwdata             (DMA_S_APB.pwdata),
+    .pstrb              (DMA_S_APB.pstrb),
+    .pprot              (DMA_S_APB.pprot),
+    .prdata             (DMA_S_APB.prdata),
+    .pready             (DMA_S_APB.pready),
+    .pslverr            (DMA_S_APB.pslverr),
+
+    .awid               (DMA_M_AXI.AWID),
+    .awaddr             (DMA_M_AXI.AWADDR),
+    .awlen              (DMA_M_AXI.AWLEN),
+    .awsize             (DMA_M_AXI.AWSIZE),
+    .awburst            (DMA_M_AXI.AWBURST),
+    .awlock             (DMA_M_AXI.AWLOCK),
+    .awcache            (DMA_M_AXI.AWCACHE),
+    .awprot             (DMA_M_AXI.AWPROT),
+    .awvalid            (DMA_M_AXI.AWVALID),
+    .awready            (DMA_M_AXI.AWREADY),
+    .wdata              (DMA_M_AXI.WDATA),
+    .wstrb              (DMA_M_AXI.WSTRB),
+    .wlast              (DMA_M_AXI.WLAST),
+    .wvalid             (DMA_M_AXI.WVALID),
+    .wready             (DMA_M_AXI.WREADY),
+    .bid                (DMA_M_AXI.BID),
+    .bresp              (DMA_M_AXI.BRESP),
+    .bvalid             (DMA_M_AXI.BVALID),
+    .bready             (DMA_M_AXI.BREADY),
+    .arid               (DMA_M_AXI.ARID),
+    .araddr             (DMA_M_AXI.ARADDR),
+    .arlen              (DMA_M_AXI.ARLEN),
+    .arsize             (DMA_M_AXI.ARSIZE),
+    .arburst            (DMA_M_AXI.ARBURST),
+    .arlock             (DMA_M_AXI.ARLOCK),
+    .arcache            (DMA_M_AXI.ARCACHE),
+    .arprot             (DMA_M_AXI.ARPROT),
+    .arvalid            (DMA_M_AXI.ARVALID),
+    .arready            (DMA_M_AXI.ARREADY),
+    .rid                (DMA_M_AXI.RID),
+    .rdata              (DMA_M_AXI.RDATA),
+    .rresp              (DMA_M_AXI.RRESP),
+    .rlast              (DMA_M_AXI.RLAST),
+    .rvalid             (DMA_M_AXI.RVALID),
+    .rready             (DMA_M_AXI.RREADY),
+
+    .irq_channel        (DMA_IRQ_CH),
+    .irq_comb_nonsec    (DMA_IRQ_COMB)
+);
+`else
+// No DMA-350: DMA_M makes no requests and is always ready to take a response
 assign DMA_M_AXI.AWID    = 2'b0;
 assign DMA_M_AXI.AWADDR  = 44'h0;
 assign DMA_M_AXI.AWLEN   = 8'h0;
@@ -533,6 +606,10 @@ assign DMA_S_APB.prdata  = 32'h0;
 assign DMA_S_APB.pready  = 1'b1;
 assign DMA_S_APB.pslverr = 1'b0;
 
+assign DMA_IRQ_CH        = 4'h0;
+assign DMA_IRQ_COMB      = 1'b0;
+`endif
+
 
 wire                CPU_nPRESETDBG;
 wire                CPU_PCLKENDBG;
@@ -547,10 +624,11 @@ wire [71:0]             PERI_IRQS;
 wire                    SDIO_IRQ;
 wire [7:0]              DRAM_IRQS;      // LPDDR4 subsystem, CPU_IRQS[94:87]; 0 without INC_LPDDR4
 
-// CPU_IRQS[96] ETH_CKSUM_IRQ, [95] ETH_IRQ (0 without INC_ETH). Every SPI
-// passes through megasoc_irq_sync in megasoc_cpu_ss; the ETH interrupts are
-// already on SYS_CLK.
-assign CPU_IRQS={{(NUM_SPIS-97){1'b0}}, ETH_CKSUM_IRQ, ETH_IRQ, DRAM_IRQS, SDIO_IRQ ,EXP_IRQs, QSPI_IRQ, PERI_IRQS, 1'b0, 4'h0};
+// CPU_IRQS[101] DMA_IRQ_COMB, [100:97] DMA_IRQ_CH[3:0] (0 without INC_DMA),
+// [96] ETH_CKSUM_IRQ, [95] ETH_IRQ (0 without INC_ETH). GIC interrupt ID =
+// CPU_IRQS bit + 32 (DMA: 129-133). Every SPI passes through megasoc_irq_sync
+// in megasoc_cpu_ss; the ETH and DMA interrupts are already on SYS_CLK.
+assign CPU_IRQS={{(NUM_SPIS-102){1'b0}}, DMA_IRQ_COMB, DMA_IRQ_CH, ETH_CKSUM_IRQ, ETH_IRQ, DRAM_IRQS, SDIO_IRQ ,EXP_IRQs, QSPI_IRQ, PERI_IRQS, 1'b0, 4'h0};
 
 // Subordinate AWAKEUP signal generation
 assign AWAKEUP_ROM = (ROM_AXI.AWVALID | ROM_AXI.ARVALID | ROM_AXI.WVALID);
