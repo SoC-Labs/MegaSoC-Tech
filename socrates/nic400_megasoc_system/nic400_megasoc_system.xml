@@ -82,7 +82,7 @@
           <DataWidth>64</DataWidth>
           <IDWidth>0</IDWidth>
           <MultiRegion>false</MultiRegion>
-          <TrustZoneMaster>secure</TrustZoneMaster>
+          <TrustZoneMaster>non_secure</TrustZoneMaster>
           <ReadIssuing>1</ReadIssuing>
           <WriteIssuing>1</WriteIssuing>
           <TotalIssuing>1</TotalIssuing>

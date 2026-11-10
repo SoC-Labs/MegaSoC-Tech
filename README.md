@@ -24,7 +24,9 @@ For FPGA development you will need a Vivado installation
 We suggest that you use this with the [megaSoC project repository](https://github.com/SoC-Labs/MegaSoC-Project) as the top level
 
 ## Memory Map
+The address map is documented in the MegaSoC-Project datasheet (`docs/src/writing_software.rst`, "Address Map").
 
+Security: megaSoC has no TrustZone partitioning. Every NIC-400 slave interface is configured Secure, so all transactions inside the interconnect are Secure and no region is Secure-only. See `socrates/README.md` and Jira MBT-68.
 
 ## Support
 For support please go to [soclabs.org](https://soclabs.org/)
