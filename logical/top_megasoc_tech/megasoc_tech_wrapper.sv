@@ -922,7 +922,9 @@ top_ahb_qspi #(.DATA_W(32)) u_sl_ahb_qspi(
     .QSPI_IO_i(QSPI_IO_i),
     .QSPI_IO_e(QSPI_IO_e),
 
-    .IRQ_QSPI_FINISHED(QSPI_IRQ)
+    .IRQ_QSPI_FINISHED(QSPI_IRQ),
+    .DBG_XIP_ACTIVE(),   // debug only, unused in MegaSoC
+    .DBG_SOFT_RESET()    // debug only, unused in MegaSoC
 );
 
 
