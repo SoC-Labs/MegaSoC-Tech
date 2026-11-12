@@ -547,12 +547,30 @@ static void sdio_wait_while_busy(SDIODRV *dev)
 
 // FIFO words are in memory byte order: with OPT_LITTLE_ENDIAN the controller
 // puts the first byte from the card in bits [7:0], so byte 0 is stored first.
+// FIFO word order on the READ side.  The SoC Labs sdio-controller (logical/sdspi
+// @ 4106f5a and later) passes OPT_LITTLE_ENDIAN into sdrxframe, so a FIFO word
+// read through sd_fifa/sd_fifb carries the FIRST byte of each 4-byte group in
+// bits 7:0 (little-endian natural; measured on HAPS-SX build 63, 12 Nov 2026:
+// sector-0 word 127 = 0xAA550000).  Older controller copies (HAPS-SX builds up
+// to 62c) carried it in bits 31:24.  The write side is unchanged: the TX frame
+// still sends bits 31:24 first, so sdio_load_word() keeps MSB-first packing.
+// Build with -DSDIO_FIFO_READ_LE=0 for the old controller.  (MBT-74)
+#ifndef SDIO_FIFO_READ_LE
+#define SDIO_FIFO_READ_LE 1
+#endif
 static void sdio_store_word(char *dst, uint32_t word)
 {
-	dst[0] = (char)( word        & 0x0ff);
-	dst[1] = (char)((word >>  8) & 0x0ff);
-	dst[2] = (char)((word >> 16) & 0x0ff);
-	dst[3] = (char)((word >> 24) & 0x0ff);
+	if (SDIO_FIFO_READ_LE) {
+		dst[0] = (char)( word        & 0x0ff);
+		dst[1] = (char)((word >>  8) & 0x0ff);
+		dst[2] = (char)((word >> 16) & 0x0ff);
+		dst[3] = (char)((word >> 24) & 0x0ff);
+		return;
+	}
+	dst[0] = (char)((word >> 24) & 0x0ff);
+	dst[1] = (char)((word >> 16) & 0x0ff);
+	dst[2] = (char)((word >>  8) & 0x0ff);
+	dst[3] = (char)( word        & 0x0ff);
 }
 
 static uint32_t sdio_load_word(const char *src)
