@@ -2,7 +2,8 @@
 
 module megasoc_ROM_power_control(
     input  wire         PCLK,
-    input  wire         PRESETn,
+    input  wire         PRESETn,      // power-on reset: PCSM (power switches) only
+    input  wire         PPU_RESETn,
 
     apb3.subordinate    ROM_PPU_APB,
     qchannel.master     ROM_qchan_q,
@@ -10,7 +11,13 @@ module megasoc_ROM_power_control(
 
     output wire         ROM_RESETn
 );
-
+// Reset for the ROM PPU and LPD:
+// Asserted by power-on reset AND by every warm reset (SW/WDOG), so a warm reset returns
+// the ROM PPU to its default policy (ON, dynamic wake on, PWPR=0x108) and
+// the PPU powers the domain back up (DEN 0051E 4.2.1 "Reset to ON"). The
+// PCSM stays on PRESETn so a powered domain is not switched off by a warm
+// reset (SRAM keeps its contents); a request to its current mode is a
+// no-op for the PCSM (DEN 0051E "PCSM P-Channel Reset").
 wire        pcsm_preq;
 wire [3:0]  pcsm_pstate;
 wire        pcsm_paccept;
@@ -40,7 +47,7 @@ assign dev_qactive  = {ROM_qchan_q.qactive, ROM_qchan_p.qactive};
 
 pck600_ppu_smc_q u_pck_ppu_rom_q(
     .clk(PCLK),
-    .reset_n(PRESETn),
+    .reset_n(PPU_RESETn),
 
     .dftcgen(1'b0),
     .dftisodisable(1'b0),
@@ -54,7 +61,7 @@ pck600_ppu_smc_q u_pck_ppu_rom_q(
     .prdata_o(ROM_PPU_APB.prdata),
     .pready_o(ROM_PPU_APB.pready),
     .pslverr_o(ROM_PPU_APB.pslverr),
-    .pwakeup_i(PRESETn),
+    .pwakeup_i(PPU_RESETn),
 
     .irq_o(),
 
@@ -76,7 +83,7 @@ pck600_ppu_smc_q u_pck_ppu_rom_q(
     .pcsm_pstate_o(pcsm_pstate),
     .pcsm_paccept_i(pcsm_paccept),
 
-    .ppuclk_qreqn_i(PRESETn),
+    .ppuclk_qreqn_i(PPU_RESETn),
     .ppuclk_qacceptn_o(),
     .ppuclk_qdeny_o(),
     .ppuclk_qactive_o(),
@@ -90,7 +97,7 @@ pck600_lpd_q #(
     .ACTIVE_DENY(0)
 ) u_pck_lpd_rom_q(
     .clk(PCLK),
-    .reset_n(PRESETn),
+    .reset_n(PPU_RESETn),
 
     .ctrl_qreqn_i(lpd_qreqn),
     .ctrl_qacceptn_o(lpd_qacceptn),

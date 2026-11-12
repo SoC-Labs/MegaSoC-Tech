@@ -1,6 +1,11 @@
 module megasoc_power_control(
     input  wire         PCLK,
     input  wire         PRESETn,
+    //  warm reset (SYS_RESETn_int), low on POR and on
+    // SW/WDOG resets; released in step with SYS_CLK = PCLK). Resets the ROM
+    // and SRAM PPU+LPD so the boot path's memories come back ON after any
+    // reset that re-runs the boot ROM. CPU and DRAM groups stay on PRESETn.
+    input  wire         WARM_RESETn,
 
     apb3.subordinate    PCK_APB,
     qchannel.master     ROM_qchan_q,
@@ -172,10 +177,13 @@ cmsdk_apb_slave_mux #(
     .PSLVERR(PCK_APB.pslverr)
 );
 
+// ROM and SRAM PPU/LPD reset: power-on reset or any warm reset.
+wire MEM_PPU_RESETn = PRESETn & WARM_RESETn;
 
 megasoc_ROM_power_control u_megasoc_ROM_power_control(
     .PCLK(PCLK),
     .PRESETn(PRESETn),
+    .PPU_RESETn(MEM_PPU_RESETn),
     .ROM_PPU_APB(ROM_PPU_APB),
     .ROM_qchan_q(ROM_qchan_q),
     .ROM_qchan_p(ROM_qchan_p),
@@ -185,6 +193,7 @@ megasoc_ROM_power_control u_megasoc_ROM_power_control(
 megasoc_SRAM_power_control u_megasoc_SRAM_power_control(
     .PCLK(PCLK),
     .PRESETn(PRESETn),
+    .PPU_RESETn(MEM_PPU_RESETn),
     .SRAM_PPU_APB(SRAM_PPU_APB),
     .SRAM_qchan_q(SRAM_qchan_q),
     .SRAM_qchan_p(SRAM_qchan_p),
