@@ -1033,6 +1033,7 @@ megasoc_power_control u_megasoc_power_control(
     // Clock and Reset
     .PCLK(SYS_CLK),
     .PRESETn(SYS_RESETn),
+    .WARM_RESETn(SYS_RESETn_int),   // ROM/SRAM PPUs also reset on SW/WDOG reset
 
     // APB Bus interface to PPUs
     .PCK_APB(PCK_APB),
