@@ -357,7 +357,7 @@ cmsdk_ahb_slave_mux #(
     .PORT1_ENABLE  (1), // GPIO Port 0
     .PORT2_ENABLE  (1), // GPIO Port 1
     .PORT3_ENABLE  (0), // SYS control
-    .PORT4_ENABLE  (0), // Default
+    .PORT4_ENABLE  (1), // Default slave: answers non-decoded space with ERROR (BUG-43; was 0, which cut it out)
     .PORT5_ENABLE  (LPDDR4_PORT_ENABLE), // LPDDR4 configuration (INC_LPDDR4)
     .PORT6_ENABLE  (0), // 
     .PORT7_ENABLE  (0),
@@ -590,10 +590,10 @@ cmsdk_apb_slave_mux #(
     .PORT9_ENABLE(1),
     .PORT10_ENABLE(1),
     .PORT11_ENABLE(1),   // For Reset controller
-    .PORT12_ENABLE(0),
-    .PORT13_ENABLE(0),
-    .PORT14_ENABLE(0),
-    .PORT15_ENABLE(0)
+    .PORT12_ENABLE(1),   // unused slot: PSLVERR=1 tie-off below must reach the bus (BUG-43)
+    .PORT13_ENABLE(1),   // unused slot: PSLVERR=1 tie-off below must reach the bus (BUG-43)
+    .PORT14_ENABLE(1),   // unused slot: PSLVERR=1 tie-off below must reach the bus (BUG-43)
+    .PORT15_ENABLE(1)    // unused slot: PSLVERR=1 tie-off below must reach the bus (BUG-43)
     ) u_apb_slave_mux (
     .DECODE4BIT(PADDR[15:12]),
     .PSEL(PSEL),   
