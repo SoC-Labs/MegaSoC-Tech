@@ -183,6 +183,18 @@ static	const int	SDINFO = 0, SDDEBUG = 1;
 #endif
 // Sample phase for the PYNQ PMOD path.  Phase 24 is the only value found
 // stable at 50 MHz across the full 1-bit/4-bit SDMULTI test matrix.
+// Board capability: request 1.8V signalling (S18R/XPC in ACMD41, then the
+// CMD11 voltage switch) only when the board can really switch the card's I/O
+// rail.  The controller's PHY bit 23 (SDPHY_1P8VSPT) only reflects the RTL
+// parameter OPT_1P8V, not the board.  On a fixed 3.3V socket (PYNQ PMOD,
+// HAPS-SX PMOD) a UHS-I card that accepts S18R and receives CMD11 drives CMD
+// and DAT0 low waiting for 1.8V, never answers again, and needs a power cycle
+// (seen on HAPS-SX build 62c, 11 Nov 2026).  Build with -DSDIO_BOARD_1P8V=1
+// on hardware that has the 1.8V rail and level shifters.
+#ifndef SDIO_BOARD_1P8V
+#define SDIO_BOARD_1P8V 0
+#endif
+
 #ifndef PYNQ_SDIO_TARGET_PHASE
 #define PYNQ_SDIO_TARGET_PHASE    24u
 #endif
@@ -342,6 +354,7 @@ static	int		sdio_wait_for_transfer_start_quiet(SDIODRV *dev,
 			unsigned cmdid, int report);
 static	int		sdio_wait_for_transfer_start(SDIODRV *dev, unsigned cmdid);
 static	void	sdio_store_word(char *dst, uint32_t word);
+static	uint32_t	sdio_load_word(const char *src);
 static	void	sdio_go_idle(SDIODRV *dev);
 static	void	sdio_all_send_cid(SDIODRV *dev);
 static	void	sdio_dump_cid(SDIODRV *dev);
@@ -540,6 +553,19 @@ static void sdio_store_word(char *dst, uint32_t word)
 	dst[1] = (char)((word >>  8) & 0x0ff);
 	dst[2] = (char)((word >> 16) & 0x0ff);
 	dst[3] = (char)((word >> 24) & 0x0ff);
+}
+
+static uint32_t sdio_load_word(const char *src)
+{
+	// Mirror of sdio_store_word(): the controller transmits bits 31:24 of
+	// each FIFO word first, so the first byte of the sector must sit in the
+	// MSB whatever the host endianness.  Writing raw little-endian words
+	// (HAPS-SX build 62c, 12 Nov 2026) sent every 32-bit group byte-reversed
+	// and every write/readback test failed with RX = bswap32(TX).
+	return ((uint32_t)(unsigned char)src[0] << 24)
+		| ((uint32_t)(unsigned char)src[1] << 16)
+		| ((uint32_t)(unsigned char)src[2] <<  8)
+		|  (uint32_t)(unsigned char)src[3];
 }
 
 void	sdio_go_idle(SDIODRV *dev) {				// CMD0
@@ -1712,7 +1738,8 @@ static int sdio_write_block_once(SDIODRV *dev, uint32_t sector, uint32_t *buf){/
 	} else
 #endif
 		for(int k=0; k<512/sizeof(uint32_t); k++)
-			dev->d_dev->sd_fifa = buf[k];
+			dev->d_dev->sd_fifa = sdio_load_word(
+				&((const char *)buf)[k * sizeof(uint32_t)]);
 
 	// Set up the device address
 	// {{{
@@ -2091,8 +2118,10 @@ SDIODRV *sdio_init(SDIO *dev) {
 		// are actually producing.
 		op_cond_query &= 0x0ff8000;
 
-		// If we support 1.8V, let's tell the card that
-		if (dv->d_dev->sd_phy & SDPHY_1P8VSPT)
+		// If the BOARD supports 1.8V signalling, let's tell the card
+		// that (see SDIO_BOARD_1P8V above: the PHY bit alone is not
+		// enough, it only mirrors the RTL parameter)
+		if (SDIO_BOARD_1P8V && (dv->d_dev->sd_phy & SDPHY_1P8VSPT))
 			op_cond_query |= S18R | XPC;
 
 		// Note that an HCS capable card will *not* return 0x40000000
@@ -2134,7 +2163,7 @@ SDIODRV *sdio_init(SDIO *dev) {
 	// Can we go even faster?  Switch to 1.8V signaling if possible
 	// {{{
 	// if 1.8V signaling
-	if ((dv->d_dev->sd_phy & SDPHY_1P8VSPT)
+	if (SDIO_BOARD_1P8V && (dv->d_dev->sd_phy & SDPHY_1P8VSPT)
 			&& (dv->d_OCR & 0x40000000)	// Must support CCS
 			&& (dv->d_OCR & S18R)) {
 		// txstr("Switching to 1.8V\n");
@@ -2731,12 +2760,17 @@ int	sdio_write(SDIODRV *dev, const unsigned sector,
 				unsigned *src;
 				src = (unsigned *)&buf[s*512];
 
+				// Same host-endian packing as the single-block
+				// path: the first byte of each group goes to
+				// bits 31:24 (see sdio_load_word()).
 				if (s&1) {
 					for(int w=0; w<512/sizeof(uint32_t); w++)
-						dev->d_dev->sd_fifb = src[w];
+						dev->d_dev->sd_fifb = sdio_load_word(
+							(const char *)&src[w]);
 				} else {
 					for(int w=0; w<512/sizeof(uint32_t); w++)
-						dev->d_dev->sd_fifa = src[w];
+						dev->d_dev->sd_fifa = sdio_load_word(
+							(const char *)&src[w]);
 				}
 			}
 			// }}}
