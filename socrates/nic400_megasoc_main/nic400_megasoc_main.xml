@@ -120,7 +120,7 @@
           <ReadIssuing>1</ReadIssuing>
           <WriteIssuing>1</WriteIssuing>
           <TotalIssuing>1</TotalIssuing>
-          <TrustZoneMaster>secure</TrustZoneMaster>
+          <TrustZoneMaster>non_secure</TrustZoneMaster>
           <MultiPorted>false</MultiPorted>
           <LockSupport>false</LockSupport>
         </AHBLiteTargetMasterProtocol>
@@ -220,7 +220,7 @@
           <RUSEREnabled>false</RUSEREnabled>
           <WUSEREnabled>false</WUSEREnabled>
           <BUSEREnabled>false</BUSEREnabled>
-          <TrustZoneMaster>secure</TrustZoneMaster>
+          <TrustZoneMaster>non_secure</TrustZoneMaster>
           <ReadIssuing>1</ReadIssuing>
           <WriteIssuing>1</WriteIssuing>
           <TotalIssuing>1</TotalIssuing>
