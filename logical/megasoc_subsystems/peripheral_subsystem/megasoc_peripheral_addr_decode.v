@@ -34,7 +34,10 @@ assign lpddr4_hsel  = hsel & (haddr[31:24]==
 assign lpddr4_hsel  = 1'b0;                   // window not present: default slave
 `endif
 
-assign defslv_hsel  = ~(apbsys_hsel |
+// Gated by hsel (BUG-43, 2026-11-12): the default slave port is now enabled
+// on the AHB slave mux, so it must only be selected for transfers that are
+// really on this bus, like every other HSEL output here.
+assign defslv_hsel  = hsel & ~(apbsys_hsel |
                         gpio0_hsel   | gpio1_hsel |
                         lpddr4_hsel
                         );
