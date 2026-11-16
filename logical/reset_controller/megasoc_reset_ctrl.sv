@@ -34,11 +34,15 @@ output logic sys_reset_req
     localparam logic [ADDR_WIDTH - 1: 2] ADDR_RESET_REQ = 'h000;  // Becasue APB registers are word addressible
     localparam logic [ADDR_WIDTH - 1: 2] ADDR_RESET_STATUS = 'h001;
 
-// RESET_REQ bits (write only preferred)
+// RESET_REQ bits (write only)
+// Bits 0-2 each request a warm reset and record their cause in RESET_STATUS.
+// Bit 3 (LOCKUP) is reserved: writes are ignored. Cortex-A53 has no lockup
+// output, so a software-emulated LOCKUP cause would describe an event this
+// SoC cannot produce. RESET_STATUS.LOCKUP is kept and can only be set by the
+// lockup_reset_req_i port (tied 0 in this integration, kept for reuse).
     localparam int RESET_REQ_SWRESET_BIT   = 0;
     localparam int RESET_REQ_WDOGRESET_BIT = 1;
     localparam int RESET_REQ_DBGRESET_BIT  = 2;
-    localparam int RESET_REQ_LOCKUP_BIT    = 3;    
 
 // RESET_STATUS bits
     localparam int RESET_STS_SWRESET_BIT   = 0;
@@ -62,7 +66,6 @@ output logic sys_reset_req
     logic sw_reset_req_pulse_pclk;
     logic wdog_reset_req_pulse_pclk;
     logic dbg_reset_req_pulse_pclk;
-    logic lockup_reset_req_pulse_pclk;
     logic clear_status_pclk;
     logic [4:0] clear_status_mask_pclk;
     
@@ -74,21 +77,19 @@ output logic sys_reset_req
             sw_reset_req_pulse_pclk <= 1'b0;
             wdog_reset_req_pulse_pclk <= 1'b0;
             dbg_reset_req_pulse_pclk <= 1'b0;
-            lockup_reset_req_pulse_pclk <= 1'b0;
             clear_status_pclk <= 1'b0;
             clear_status_mask_pclk <= 5'b0;
         end else begin
             sw_reset_req_pulse_pclk <= 1'b0;
             wdog_reset_req_pulse_pclk <= 1'b0;
             dbg_reset_req_pulse_pclk <= 1'b0;
-            lockup_reset_req_pulse_pclk <= 1'b0;
             clear_status_pclk <= 1'b0;
 
             if (wr_en && addr_is_req) begin
                 sw_reset_req_pulse_pclk <= PWDATA[RESET_REQ_SWRESET_BIT];
                 wdog_reset_req_pulse_pclk <= PWDATA[RESET_REQ_WDOGRESET_BIT];
                 dbg_reset_req_pulse_pclk <= PWDATA[RESET_REQ_DBGRESET_BIT];
-                lockup_reset_req_pulse_pclk <= PWDATA[RESET_REQ_LOCKUP_BIT];
+                // PWDATA[3] (LOCKUP) is reserved and ignored, see header.
             end
 
             if (wr_en && addr_is_status) begin
@@ -107,45 +108,69 @@ output logic sys_reset_req
         end
     end
 
-// As reset requests are pulses to avoid any CDC issues signals are passed through 2 stage synchronous FF.
+// ---------------------------------------------------------------------------
+// Reset request events, all brought into FCLK and turned into one-cycle
+// events before they are used. Every request (register or hardware) goes
+// through the same path:  2-FF synchroniser -> rising-edge detect -> event.
+//
+// Why edge events for the hardware sources too (they used to feed the OR as
+// raw levels):
+//  * A level held high keeps global_reset_req high, so reset_latch never
+//    clears and the FSM parks in DONE with sys_reset_req=1: AHB/APB released
+//    but the CPU held in reset for as long as the source stays high (spec S5
+//    / MEGASOC-CRP-004). With an edge, one request = exactly one reset
+//    sequence, whatever the source does afterwards.
+//  * dbg_reset_req_i will come from the CPU/debug side, which need not stay
+//    on FCLK; a raw asynchronous level must not drive the FSM directly.
+//  Today PCLK, FCLK, WDOGCLK and CPU_CLK are all SYS_CLK, so the 2-FF stages
+//  only add latency; they make the block safe if FCLK becomes a separate
+//  always-on clock.
+// ---------------------------------------------------------------------------
 
-// Sync SW reset request pulse
-    logic sw_req_sync1, sw_req_sync2;
-    logic dbg_req_sync1, dbg_req_sync2;
-    logic lockup_req_sync1, lockup_req_sync2;
+// Register requests (RESET_REQ bits 0-2), PCLK pulses -> FCLK
+    logic [2:0] reg_req_pclk;
+    logic [2:0] reg_req_sync1, reg_req_sync2;
+    logic [2:0] reg_req_evt;   // [0] SWRESET, [1] WDOGRESET, [2] DBGRESET
+
+    assign reg_req_pclk = {dbg_reset_req_pulse_pclk,
+                           wdog_reset_req_pulse_pclk,   // was never synchronised
+                           sw_reset_req_pulse_pclk};
+
+// Hardware requests (ports), levels -> FCLK
+    logic [2:0] hw_req_in;
+    logic [2:0] hw_req_sync1, hw_req_sync2, hw_req_sync3;
+    logic [2:0] hw_req_evt;    // [0] watchdog, [1] debug, [2] lockup
+
+    assign hw_req_in = {lockup_reset_req_i, dbg_reset_req_i, wdog_reset_req_i};
 
     always_ff @(posedge FCLK or negedge PORESETn)
     begin
-    if (!PORESETn) begin
-        sw_req_sync1 <= 1'b0;
-        sw_req_sync2 <= 1'b0;
-        dbg_req_sync1 <= 1'b0;
-        dbg_req_sync2 <= 1'b0;
-        lockup_req_sync1 <= 1'b0;
-        lockup_req_sync2 <= 1'b0;
-    end else begin
-        sw_req_sync1 <= sw_reset_req_pulse_pclk;
-        sw_req_sync2 <= sw_req_sync1;
-
-        dbg_req_sync1 <= dbg_reset_req_pulse_pclk;
-        dbg_req_sync2 <= dbg_req_sync1;
-
-        lockup_req_sync1 <= lockup_reset_req_pulse_pclk;
-        lockup_req_sync2 <= lockup_req_sync1;
+        if (!PORESETn) begin
+            reg_req_sync1 <= 3'b0;
+            reg_req_sync2 <= 3'b0;
+            hw_req_sync1  <= 3'b0;
+            hw_req_sync2  <= 3'b0;
+            hw_req_sync3  <= 3'b0;
+        end else begin
+            reg_req_sync1 <= reg_req_pclk;
+            reg_req_sync2 <= reg_req_sync1;
+            hw_req_sync1  <= hw_req_in;
+            hw_req_sync2  <= hw_req_sync1;   // hw_req_sync2 = synchronised level
+            hw_req_sync3  <= hw_req_sync2;   // previous value, for the edge detect
         end
     end
 
-// Edge Clock detection in FCLK domain for 1 clock pulse when data changes from 0 to 1
+    assign reg_req_evt = reg_req_sync1 & ~reg_req_sync2;
+    assign hw_req_evt  = hw_req_sync2  & ~hw_req_sync3;
 
-    logic sw_reset_req_pulse_fclk;
-    logic dbg_reset_req_pulse_fclk;
-    logic lockup_reset_req_pulse_fclk;
-    
-    always_comb begin
-        sw_reset_req_pulse_fclk = sw_req_sync1 & ~sw_req_sync2;
-        dbg_reset_req_pulse_fclk = dbg_req_sync1 & ~dbg_req_sync2;
-        lockup_reset_req_pulse_fclk = lockup_req_sync1 & ~lockup_req_sync2;
-    end
+// One cause vector feeds BOTH the reset FSM and RESET_STATUS, so a reset and
+// its recorded cause can never disagree (the old code built them separately,
+// which is how RESET_REQ bits 1-2 ended up setting neither).
+    logic [3:0] cause_evt;     // indexed by RESET_STS_*_BIT
+    assign cause_evt[RESET_STS_SWRESET_BIT] = reg_req_evt[0];
+    assign cause_evt[RESET_STS_WDOG_BIT]    = reg_req_evt[1] | hw_req_evt[0];
+    assign cause_evt[RESET_STS_DBG_BIT]     = reg_req_evt[2] | hw_req_evt[1];
+    assign cause_evt[RESET_STS_LOCKUP_BIT]  = hw_req_evt[2];
 
 // RESET_STATUS in FCLK Domain
 
@@ -181,12 +206,13 @@ output logic sys_reset_req
             reset_status_reg <= 5'b0;
             reset_status_reg [RESET_STS_PORESET_BIT] <= 1'b1;
         end else begin
-            if (sw_reset_req_pulse_fclk) reset_status_reg[RESET_STS_SWRESET_BIT] <= 1'b1;
-            if (wdog_reset_req_i) reset_status_reg[RESET_STS_WDOG_BIT] <= 1'b1;  //wdog_reset_req_i is a level, not a pulse need to check.
-            if (lockup_reset_req_i) reset_status_reg[RESET_STS_LOCKUP_BIT] <=1'b1;
-            if (dbg_reset_req_i) reset_status_reg[RESET_STS_DBG_BIT] <= 1'b1;
-            if (clear_status_fclk) reset_status_reg <= reset_status_reg & ~clear_status_mask_fclk;
-            /////////////
+            // Clear first, then set, in ONE expression. Before, the clear was a
+            // whole-vector assignment after the per-bit sets, so the last NBA
+            // won and a cause arriving in the same cycle as a W1C was lost.
+            // PORESET (bit 4) is only ever set by PORESETn, so it is not in the
+            // set vector.
+            reset_status_reg <= (reset_status_reg & ~(clear_status_fclk ? clear_status_mask_fclk : 5'b0))
+                              | {1'b0, cause_evt};
         end
     end
 
@@ -208,7 +234,7 @@ output logic sys_reset_req
 
 
     logic global_reset_req;
-    assign global_reset_req = por_release_pulse | sw_reset_req_pulse_fclk | wdog_reset_req_i | lockup_reset_req_i | dbg_reset_req_i;
+    assign global_reset_req = por_release_pulse | (|cause_evt);
 
     logic reset_latch; //latch keeps active till the FSM routine completes
     typedef enum logic [2:0] {IDLE, ASSERT_ALL, R_AHB, R_APB, DONE} state_t;
