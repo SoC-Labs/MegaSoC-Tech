@@ -704,6 +704,13 @@ megasoc_axi_async_bridge #(
 apb3      LPDDR4_CFG_APB();
 apb4      LPDDR4_PHY_CFG_APB();
 
+// Readiness of the two configuration targets, from the subsystem's reset
+// block (DDR_CLK domain, the bridge's APB clock): the bridge answers ERROR at
+// once instead of hanging on a controller or PHY that cannot respond
+// (MEGASOC-DDR-024).
+wire      LPDDR4_CTRL_CFG_READY;
+wire      LPDDR4_PHY_CFG_READY;
+
 // The bridge's two halves must reset together, so its DDR_CLK half takes the
 // peripheral AHB reset (SYS_HRESETn), synchronised to DDR_CLK.
 reg [1:0] ddr_cfg_resetn_sync;
@@ -725,7 +732,9 @@ megasoc_ahb_to_apb_async u_lpddr4_cfg_bridge(
     .PCLK(DDR_CLK),
     .PRESETn(DDR_CFG_RESETn),
     .CTRL_APB(LPDDR4_CFG_APB),
-    .PHY_APB(LPDDR4_PHY_CFG_APB)
+    .PHY_APB(LPDDR4_PHY_CFG_APB),
+    .CTRL_READY(LPDDR4_CTRL_CFG_READY),
+    .PHY_READY(LPDDR4_PHY_CFG_READY)
 );
 
 // Low-power Q-channels from the DRAM power domain (megasoc_power_control,
@@ -790,7 +799,10 @@ dram_wrapper #(.ID_W(ID_W)) u_lpddr4_subsystem(
     .DDR4_ALERT_N(LPDDR4_ALERT_N),
     .DDR4_VREF(LPDDR4_VREF),
     .DDR4_ZN_SENSE(LPDDR4_ZN_SENSE),
-    .DDR4_ZN(LPDDR4_ZN)
+    .DDR4_ZN(LPDDR4_ZN),
+
+    .CTRL_CFG_READY(LPDDR4_CTRL_CFG_READY),
+    .PHY_CFG_READY(LPDDR4_PHY_CFG_READY)
 );
 
 `else
