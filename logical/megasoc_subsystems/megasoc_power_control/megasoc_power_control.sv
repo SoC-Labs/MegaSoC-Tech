@@ -177,7 +177,7 @@ cmsdk_apb_slave_mux #(
     .PSLVERR(PCK_APB.pslverr)
 );
 
-// ROM and SRAM PPU/LPD reset: power-on reset or any warm reset.
+// ROM, SRAM and DRAM PPU/LPD reset: power-on reset or any warm reset.
 wire MEM_PPU_RESETn = PRESETn & WARM_RESETn;
 
 megasoc_ROM_power_control u_megasoc_ROM_power_control(
@@ -221,6 +221,7 @@ megasoc_CPU_power_control u_megasoc_CPU_power_control(
 megasoc_DRAM_power_control u_megasoc_DRAM_power_control(
     .PCLK(PCLK),
     .PRESETn(PRESETn),
+    .PPU_RESETn(MEM_PPU_RESETn),
 
     .DRAM_PPU_APB(DRAM_PPU_APB),
     .DRAM_qchan_sys(DRAM_qchan_sys),

@@ -32,11 +32,24 @@
 // falls on entering self-refresh); it is not an activity indication and
 // would keep the PPU from ever leaving ON, so it is not used. The core
 // channel still accepts or refuses requests on its own.
+//
+// Reset: the PPU, the LPD and the response synchronisers use PPU_RESETn,
+// which is asserted by power-on reset AND by every warm reset (SW, WDOG,
+// debug). A warm reset already resets the LPDDR4 subsystem (DDR_RESETn), so
+// it now also returns the PPU to its default policy (ON, dynamic wake on,
+// PWPR=0x108) and the LPD and the Q-channel adapters to Q_RUN together, as
+// at power-on. Before, the PPU kept its pre-reset policy (e.g. FUNC_RET) over
+// a warm reset while the controller behind it was re-initialised; with a
+// static low-power policy nothing would wake the domain and the first DRAM
+// access after the reboot would hang (MEGASOC-DDR-015). Same scheme as
+// megasoc_ROM_power_control (BUG-40). The PCSM stays on PRESETn; its outputs
+// are unused here.
 //-----------------------------------------------------------------------------
 
 module megasoc_DRAM_power_control(
     input  wire         PCLK,
-    input  wire         PRESETn,
+    input  wire         PRESETn,      // power-on reset: PCSM only
+    input  wire         PPU_RESETn,   // power-on or warm reset: PPU, LPD, synchronisers
 
     apb3.subordinate    DRAM_PPU_APB,
     qchannel.master     DRAM_qchan_sys,
@@ -62,9 +75,9 @@ assign DRAM_qchan_sys.qreqn  = dev_qreqn[1];
 
 // Two-flop synchronisers for the DDR_CLK-domain responses
 reg [1:0] acc_s1, acc_s2, deny_s1, deny_s2, act_s1, act_s2;
-always @(posedge PCLK or negedge PRESETn)
+always @(posedge PCLK or negedge PPU_RESETn)
   begin
-    if (!PRESETn)
+    if (!PPU_RESETn)
       begin
         acc_s1  <= 2'b11; acc_s2  <= 2'b11;
         deny_s1 <= 2'b00; deny_s2 <= 2'b00;
@@ -84,7 +97,7 @@ assign dev_qactive  = act_s2;
 
 pck600_ppu_smc_q u_pck_ppu_dram_q(
     .clk(PCLK),
-    .reset_n(PRESETn),
+    .reset_n(PPU_RESETn),
 
     .dftcgen(1'b0),
     .dftisodisable(1'b0),
@@ -98,7 +111,7 @@ pck600_ppu_smc_q u_pck_ppu_dram_q(
     .prdata_o(DRAM_PPU_APB.prdata),
     .pready_o(DRAM_PPU_APB.pready),
     .pslverr_o(DRAM_PPU_APB.pslverr),
-    .pwakeup_i(PRESETn),
+    .pwakeup_i(PPU_RESETn),
 
     .irq_o(),
 
@@ -120,7 +133,7 @@ pck600_ppu_smc_q u_pck_ppu_dram_q(
     .pcsm_pstate_o(pcsm_pstate),
     .pcsm_paccept_i(pcsm_paccept),
 
-    .ppuclk_qreqn_i(PRESETn),
+    .ppuclk_qreqn_i(PPU_RESETn),
     .ppuclk_qacceptn_o(),
     .ppuclk_qdeny_o(),
     .ppuclk_qactive_o(),
@@ -134,7 +147,7 @@ pck600_lpd_q #(
     .ACTIVE_DENY(0)
 ) u_pck_lpd_dram_q(
     .clk(PCLK),
-    .reset_n(PRESETn),
+    .reset_n(PPU_RESETn),
 
     .ctrl_qreqn_i(lpd_qreqn),
     .ctrl_qacceptn_o(lpd_qacceptn),
