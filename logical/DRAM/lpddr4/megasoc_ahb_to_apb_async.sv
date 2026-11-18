@@ -8,9 +8,23 @@
 // subsystem clock). Decodes the 16 MB LPDDR4 configuration window by its low
 // address bits (the window itself is selected upstream by HSEL):
 //
-//   HADDR[23:16] == 8'h00  -> CTRL_APB (APB3), PADDR = HADDR[15:0]   (64 KB)
-//   HADDR[23:22] == 2'b01  -> PHY_APB  (APB4), PADDR = HADDR[21:0]   (4 MB)
-//   anything else          -> AHB ERROR, no APB access
+//   HADDR[23:0] 0x00_0000-0x00_5FFF -> CTRL_APB (APB3), controller registers
+//   HADDR[23:0] 0x00_6000-0x00_601F -> CTRL_APB (APB3), reset-control block
+//                                      (PADDR = HADDR[15:0] for both)
+//   HADDR[23:22] == 2'b01           -> PHY_APB  (APB4), PADDR = HADDR[21:0]
+//   anything else                   -> AHB ERROR, no APB access. This includes
+//                                      0x00_6020-0x00_FFFF: the subsystem's APB
+//                                      mux answers OKAY for its unused ports, and
+//                                      the reset block decodes only offset bits
+//                                      [4:2] (MEGASOC-DDR-023)
+//
+// Target-unavailable fence (MEGASOC-DDR-024): a controller or PHY held in
+// reset, or with its clock or PwrOk off, never raises PREADY, which used to
+// stall the AHB data phase (and the CPU) forever. The subsystem reports
+// CTRL_READY / PHY_READY in the PCLK domain; when the target of a request is
+// not ready the APB side answers ERROR at once without starting an APB
+// access. The reset-control block is never fenced (software releases the
+// other resets through it).
 //
 // One transfer at a time, crossed with a request/acknowledge toggle pair:
 //   1. AHB side accepts a transfer, captures address/direction/write data,
@@ -38,10 +52,14 @@ module megasoc_ahb_to_apb_async (
     input  wire             PCLK,
     input  wire             PRESETn,
     apb3.master             CTRL_APB,
-    apb4.master             PHY_APB
+    apb4.master             PHY_APB,
+
+    // Target readiness from the LPDDR4 subsystem (PCLK domain)
+    input  wire             CTRL_READY,     // controller registers can answer
+    input  wire             PHY_READY       // PHY registers can answer
 );
 
-localparam TGT_CTRL = 2'd0, TGT_PHY = 2'd1, TGT_NONE = 2'd2;
+localparam TGT_CTRL = 2'd0, TGT_PHY = 2'd1, TGT_NONE = 2'd2, TGT_RST = 2'd3;
 
 // ---- Request (HCLK domain, read by PCLK domain after req_tgl changes) ----
 reg  [21:0] req_addr_q;
@@ -75,8 +93,10 @@ wire        h_accept   = AHB.HSEL & AHB.HTRANS[1] & AHB.HREADY;
 wire        h_ack_new  = (h_ack_sync_q2 != h_ack_seen_q);
 wire        h_can_take = (h_state == H_IDLE) | (h_state == H_RESP) | (h_state == H_ERR2);
 
-wire [1:0]  h_tgt = (h_addr_q[23:16] == 8'h00) ? TGT_CTRL :
-                    (h_addr_q[23:22] == 2'b01) ? TGT_PHY  : TGT_NONE;
+wire        h_ctrl_win = (h_addr_q[23:16] == 8'h00);
+wire [1:0]  h_tgt = (h_ctrl_win && h_addr_q[15:12] <  4'h6)   ? TGT_CTRL :
+                    (h_ctrl_win && h_addr_q[15:5]  == 11'h300) ? TGT_RST  :
+                    (h_addr_q[23:22] == 2'b01)                 ? TGT_PHY  : TGT_NONE;
 
 assign AHB.HREADYOUT = (h_state == H_IDLE) | (h_state == H_RESP) | (h_state == H_ERR2);
 assign AHB.HRESP     = (h_state == H_ERR1) | (h_state == H_ERR2);
@@ -156,6 +176,10 @@ reg         p_write_q;
 reg         p_phy_q;
 
 wire        p_req_new = (p_req_sync_q2 != p_req_seen_q);
+// Fence: the request's target cannot answer (req_tgt_q is stable while
+// p_req_new is set, see the header)
+wire        p_fenced  = ((req_tgt_q == TGT_CTRL) & ~CTRL_READY) |
+                        ((req_tgt_q == TGT_PHY)  & ~PHY_READY);
 wire        p_active  = (p_state != P_IDLE);
 wire        p_enable  = (p_state == P_ACCESS);
 wire        p_ready   = p_phy_q ? PHY_APB.pready  : CTRL_APB.pready;
@@ -203,7 +227,15 @@ always @ (posedge PCLK or negedge PRESETn)
 
         case (p_state)
           P_IDLE:
-            if (p_req_new)
+            if (p_req_new && p_fenced)
+              begin
+                // target unavailable: ERROR at once, no APB access
+                p_req_seen_q <= p_req_sync_q2;
+                rsp_rdata_q  <= 32'd0;
+                rsp_err_q    <= 1'b1;
+                ack_tgl_q    <= ~ack_tgl_q;
+              end
+            else if (p_req_new)
               begin
                 p_req_seen_q <= p_req_sync_q2;
                 p_addr_q     <= req_addr_q;
