@@ -131,7 +131,13 @@ typedef	uint32_t DWORD, LBA_t, UINT;
 //	SDINFO: Set to turns on a verbose reporting.  This will dump values of
 //		registers, together with their meanings.  When reading,
 //		it will dump sectors read.  Often requires SDDEBUG.
-static	const int	SDINFO = 0, SDDEBUG = 1;
+// SDIO_DEBUG: build-time override of SDDEBUG (default 1 as before).  A loader
+// such as sdboot builds with -DSDIO_DEBUG=0 so that 12,000 single-sector reads
+// do not each print a "SDIO-READ(BLK)" line on the console.
+#ifndef SDIO_DEBUG
+#define SDIO_DEBUG 1
+#endif
+static	const int	SDINFO = 0, SDDEBUG = SDIO_DEBUG;
 
 // ─── Build-target policy ──────────────────────────────────────────────────────
 // Hardware-specific behaviour is controlled by the macros below.  Override any
@@ -402,6 +408,29 @@ extern	int	sdio_ioctl(SDIODRV *dev, char cmd, char *buf);
 #define SDIO_BUSY_TIMEOUT_CYCLES 50000000u
 #endif
 
+// Optional read-path profiling (HAPS-SX, 17 Nov 2026): build with -DSDIO_PROFILE=1
+// (AArch64 only; uses the generic timer counter) and read the counters from the
+// application (struct sdio_prof_s in sdiodrv.h).  Off by default: no code
+// change for other builds.
+#ifndef SDIO_PROFILE
+#define SDIO_PROFILE 0
+#endif
+#if SDIO_PROFILE
+struct sdio_prof_s sdio_prof;
+static inline uint64_t sdio_prof_now(void) {
+	uint64_t v; __asm__ volatile("mrs %0, cntpct_el0" : "=r"(v)); return v;
+}
+void sdio_prof_reset(void) {
+	sdio_prof.n_blk = sdio_prof.n_start_retry = 0;
+	sdio_prof.polls_busy1 = sdio_prof.polls_busy2 = 0;
+	sdio_prof.t_start = sdio_prof.t_busy = sdio_prof.t_busy1 = sdio_prof.t_busy2 = 0;
+	sdio_prof.t_fifo = sdio_prof.t_blk = sdio_prof.max_blk = 0;
+}
+#define SDIO_PROF_NOW() sdio_prof_now()
+#else
+#define SDIO_PROF_NOW() 0u
+#endif
+
 
 static int	sdio_wait_for_transfer_start_quiet(SDIODRV *dev,
 			unsigned cmdid, int report) {
@@ -476,10 +505,19 @@ static int	sdio_wait_while_busy_timeout(SDIODRV *dev) {
 	#define SDIO_CMD_BUSY_MASK (SDIO_CMDBUSY | SDIO_DMA | SDIO_CARDBUSY)
 
 	st = dev->d_dev->sd_cmd;
+#if SDIO_PROFILE
+	{ uint64_t _p0 = SDIO_PROF_NOW(); uint32_t _n = 0;
+	while((st & SDIO_CMD_BUSY_MASK) && (timeout > 0u)) {
+		st = dev->d_dev->sd_cmd;
+		timeout--; _n++;
+	}
+	sdio_prof.t_busy1 += SDIO_PROF_NOW() - _p0; sdio_prof.polls_busy1 += _n; }
+#else
 	while((st & SDIO_CMD_BUSY_MASK) && (timeout > 0u)) {
 		st = dev->d_dev->sd_cmd;
 		timeout--;
 	}
+#endif
 	if (st & SDIO_CMD_BUSY_MASK) {
         TRIGGER_SCOPE;
 
@@ -514,10 +552,19 @@ static int	sdio_wait_while_busy_timeout(SDIODRV *dev) {
 	// before-the-loop pattern above.
 	timeout = SDIO_BUSY_TIMEOUT_CYCLES;
 	st = dev->d_dev->sd_cmd;
+#if SDIO_PROFILE
+	{ uint64_t _p0 = SDIO_PROF_NOW(); uint32_t _n = 0;
+	while((st & SDIO_MEM) && (timeout > 0u)) {
+		st = dev->d_dev->sd_cmd;
+		timeout--; _n++;
+	}
+	sdio_prof.t_busy2 += SDIO_PROF_NOW() - _p0; sdio_prof.polls_busy2 += _n; }
+#else
 	while((st & SDIO_MEM) && (timeout > 0u)) {
 		st = dev->d_dev->sd_cmd;
 		timeout--;
 	}
+#endif
 	if (st & SDIO_MEM) {
 		TRIGGER_SCOPE;
 
@@ -555,13 +602,38 @@ static void sdio_store_word(char *dst, uint32_t word)
 	dst[3] = (char)((word >> 24) & 0x0ff);
 }
 
+// FIFO word order on the WRITE side (MBT-74).  The controller this tree points
+// at (SoC-Labs/sdio-controller ce36dd6 and later, merged 23 Oct 2026) swaps
+// the bytes of the FIFO word on its way to sdtxframe under OPT_LITTLE_ENDIAN,
+// so the FIFO holds little-endian natural words on both paths: the first byte
+// of each 4-byte group sits in bits 7:0, exactly as sdio_store_word() unpacks
+// it, and a little-endian host packs its words LSB first.  Measured on the
+// HAPS-SX build 64 (17-19 Nov 2026, that controller): PIO read, PIO write,
+// DMA read and DMA write all natural, sdio_tests 12/14 with this packing (the
+// two failures are the multi-block DMA writes of MBT-72/MBT-73).
+//
+// Controller copies that predate ce36dd6 (sdaxil.v without the o_tx_mem_data
+// swap; HAPS-SX builds 62c-63 compiled 4106f5a) transmit bits 31:24 first, so
+// the first byte must be packed into the MSB: that is the packing measured on
+// such a copy and introduced here on 12 Nov 2026, kept for those trees as
+// -DSDIO_FIFO_WRITE_LE=0.
+#ifndef SDIO_FIFO_WRITE_LE
+#define SDIO_FIFO_WRITE_LE 1
+#endif
 static uint32_t sdio_load_word(const char *src)
 {
-	// Mirror of sdio_store_word(): the controller transmits bits 31:24 of
-	// each FIFO word first, so the first byte of the sector must sit in the
-	// MSB whatever the host endianness.  Writing raw little-endian words
-	// (HAPS-SX build 62c, 12 Nov 2026) sent every 32-bit group byte-reversed
-	// and every write/readback test failed with RX = bswap32(TX).
+	if (SDIO_FIFO_WRITE_LE) {
+		// Little-endian natural: the mirror of sdio_store_word().
+		return ((uint32_t)(unsigned char)src[3] << 24)
+			| ((uint32_t)(unsigned char)src[2] << 16)
+			| ((uint32_t)(unsigned char)src[1] <<  8)
+			|  (uint32_t)(unsigned char)src[0];
+	}
+	// Older controllers: bits 31:24 go out first, so the first byte of the
+	// sector must sit in the MSB whatever the host endianness.  Writing raw
+	// little-endian words to such a controller (HAPS-SX build 62c, 12 Nov
+	// 2026) sent every 32-bit group byte-reversed and every write/readback
+	// test failed with RX = bswap32(TX).
 	return ((uint32_t)(unsigned char)src[0] << 24)
 		| ((uint32_t)(unsigned char)src[1] << 16)
 		| ((uint32_t)(unsigned char)src[2] <<  8)
@@ -1909,6 +1981,8 @@ int	sdio_read_block(SDIODRV *dev, uint32_t sector, uint32_t *buf){// CMD 17
 	}
 	// }}}
 
+	uint64_t	prof_t0 = SDIO_PROF_NOW(), prof_t1 = 0, prof_t2 = 0;
+	(void)prof_t0; (void)prof_t1; (void)prof_t2;
 	dev->d_dev->sd_data = sector;
 	dev->d_dev->sd_cmd = SDIO_READBLK;
 
@@ -1920,6 +1994,9 @@ int	sdio_read_block(SDIODRV *dev, uint32_t sector, uint32_t *buf){// CMD 17
 		// Retry once if the controller status still reflects the previous
 		// command.  This converts an intermittent stale-status observation
 		// into a real command issue before we read the FIFO.
+#if SDIO_PROFILE
+		sdio_prof.n_start_retry++;
+#endif
 		dev->d_dev->sd_data = sector;
 		dev->d_dev->sd_cmd = SDIO_READBLK;
 		if (sdio_wait_for_transfer_start(dev, 17) != 0) {
@@ -1927,8 +2004,10 @@ int	sdio_read_block(SDIODRV *dev, uint32_t sector, uint32_t *buf){// CMD 17
 			return RES_ERROR;
 		}
 	}
+	prof_t1 = SDIO_PROF_NOW();
 
 	sdio_wait_while_busy(dev);
+	prof_t2 = SDIO_PROF_NOW();
 
 	// Check for errors
 	dev_stat  = dev->d_dev->sd_cmd;
@@ -1950,6 +2029,16 @@ int	sdio_read_block(SDIODRV *dev, uint32_t sector, uint32_t *buf){// CMD 17
 			uint32_t	word = dev->d_dev->sd_fifa;
 			sdio_store_word(&((char *)buf)[k * sizeof(uint32_t)], word);
 		}
+#if SDIO_PROFILE
+	{	uint64_t _t3 = SDIO_PROF_NOW(), _blk = _t3 - prof_t0;
+		sdio_prof.n_blk++;
+		sdio_prof.t_start += prof_t1 - prof_t0;
+		sdio_prof.t_busy  += prof_t2 - prof_t1;
+		sdio_prof.t_fifo  += _t3 - prof_t2;
+		sdio_prof.t_blk   += _blk;
+		if (_blk > sdio_prof.max_blk) sdio_prof.max_blk = _blk;
+	}
+#endif
 
 	if (SDDEBUG && SDINFO)
 		sdio_dump_sector(buf);
@@ -2760,9 +2849,8 @@ int	sdio_write(SDIODRV *dev, const unsigned sector,
 				unsigned *src;
 				src = (unsigned *)&buf[s*512];
 
-				// Same host-endian packing as the single-block
-				// path: the first byte of each group goes to
-				// bits 31:24 (see sdio_load_word()).
+				// Same packing as the single-block path (see
+				// sdio_load_word() for the FIFO word order).
 				if (s&1) {
 					for(int w=0; w<512/sizeof(uint32_t); w++)
 						dev->d_dev->sd_fifb = sdio_load_word(
