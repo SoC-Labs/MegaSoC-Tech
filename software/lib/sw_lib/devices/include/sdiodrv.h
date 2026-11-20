@@ -67,4 +67,13 @@ extern	struct	SDIODRV_S *sdio_init(SDIO *dev);
 extern	int	sdio_write(struct SDIODRV_S *dev, const unsigned sector, const unsigned count, const char *buf);
 extern	int	sdio_read(struct SDIODRV_S *dev, const unsigned sector, const unsigned count, char *buf);
 extern	int	sdio_ioctl(struct SDIODRV_S *dev, char cmd, char *buf);
+
+// Optional read-path profiling counters (built with -DSDIO_PROFILE=1, see sdiodrv.c).
+#include <stdint.h>
+struct sdio_prof_s {
+	uint32_t n_blk, n_start_retry, polls_busy1, polls_busy2;
+	uint64_t t_start, t_busy, t_busy1, t_busy2, t_fifo, t_blk, max_blk;	// generic-timer ticks
+};
+extern struct sdio_prof_s sdio_prof;
+extern void sdio_prof_reset(void);
 #endif
