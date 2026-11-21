@@ -179,12 +179,10 @@ module megasoc_tech_wrapper(
     output wire [1:0]       LPDDR4_CKE,
     output wire [1:0]       LPDDR4_CS,
     output wire [5:0]       LPDDR4_CA,
-    output wire             LPDDR4_ODT,
     inout  wire [1:0]       LPDDR4_DQS_T,
     inout  wire [1:0]       LPDDR4_DQS_C,
     inout  wire [15:0]      LPDDR4_DQ,
     inout  wire [1:0]       LPDDR4_DMI,
-    inout  wire             LPDDR4_ALERT_N,
     inout  wire             LPDDR4_VREF,
     input  wire             LPDDR4_ZN_SENSE,
     output wire             LPDDR4_ZN,
@@ -758,6 +756,13 @@ megasoc_lpi_qchannel_adapter u_lpddr4_ddrc_qadapter(
     .DEV(LPDDR4_DDRC_QCHAN)
 );
 
+// LPDDR4 devices have no ALERT ball and no controller-driven ODT ball, so the
+// subsystem's DDR4-heritage ALERT_N and ODT are not chip pins (2026-11-19).
+// ODT is left open. ALERT_N is held inactive with a weak pull-up, the same
+// strength as the board pull-up the testbench used, so the PHY can still drive it.
+wire LPDDR4_ALERT_N_TIE;
+assign (pull1, pull0) LPDDR4_ALERT_N_TIE = 1'b1;
+
 dram_wrapper #(.ID_W(ID_W)) u_lpddr4_subsystem(
     .ACLK(DDR_CLK),
     .ARESETn(DDR_RESETn),
@@ -791,12 +796,12 @@ dram_wrapper #(.ID_W(ID_W)) u_lpddr4_subsystem(
     .DDR4_CKE(LPDDR4_CKE),
     .DDR4_CS(LPDDR4_CS),
     .DDR4_ADR(LPDDR4_CA),
-    .DDR4_ODT(LPDDR4_ODT),
+    .DDR4_ODT(),                          // no LPDDR4 ball: open
     .DDR4_DQS_T(LPDDR4_DQS_T),
     .DDR4_DQS_C(LPDDR4_DQS_C),
     .DDR4_DQ(LPDDR4_DQ),
     .DDR4_DM_DBI_N(LPDDR4_DMI),
-    .DDR4_ALERT_N(LPDDR4_ALERT_N),
+    .DDR4_ALERT_N(LPDDR4_ALERT_N_TIE),    // no LPDDR4 ball: held inactive
     .DDR4_VREF(LPDDR4_VREF),
     .DDR4_ZN_SENSE(LPDDR4_ZN_SENSE),
     .DDR4_ZN(LPDDR4_ZN),
@@ -836,7 +841,6 @@ assign LPDDR4_CK_C    = 1'b1;
 assign LPDDR4_CKE     = 2'b00;
 assign LPDDR4_CS      = 2'b00;
 assign LPDDR4_CA      = 6'd0;
-assign LPDDR4_ODT     = 1'b0;
 assign LPDDR4_ZN      = 1'b0;
 `endif
 
