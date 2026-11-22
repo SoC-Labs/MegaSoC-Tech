@@ -71,6 +71,10 @@ module megasoc_cpu_ss #(
   localparam NUM_CPUS    = 1;
   localparam NUM_EXP_SHD_INT = 64;
 
+  // Cortex-A53 STANDBYWFI, per core. Not used by the design; named so the
+  // bench can see when the core is in WFI (MEGASOC-GPIO-008 wake check).
+  wire [(NUM_CPUS-1):0] cpu_standbywfi;
+
   wire [(NUM_CPUS-1):0] cfg_cfgend;
   wire [(NUM_CPUS-1):0] cfg_aa64naa32;
   wire [(NUM_CPUS-1):0] cfg_vinithi;
@@ -177,7 +181,7 @@ module megasoc_cpu_ss #(
        .CLREXMONACK                 (),
        .EVENTI                      (1'b0),
        .EVENTO                      (),
-       .STANDBYWFI                  (),
+       .STANDBYWFI                  (cpu_standbywfi),
        .STANDBYWFE                  (),
        .STANDBYWFIL2                (),
        .L2FLUSHREQ                  (1'b0),
