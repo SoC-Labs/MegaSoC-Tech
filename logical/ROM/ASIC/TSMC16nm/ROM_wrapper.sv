@@ -102,7 +102,7 @@ TS3N16FFCLLULVTA8192X64M16O u_ROM (
     .A(memaddr[15:3]),
     .Q(memq),
 
-    .SD(1'b0), // Shutdown
+    .SD(~ARESETn), // Shutdown
 
     .RTSEL(2'b01),  // Timing Adjustment
     .PTSEL(2'b01),  // Timing Adjustment
