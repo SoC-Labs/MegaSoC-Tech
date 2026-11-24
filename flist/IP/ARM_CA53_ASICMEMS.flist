@@ -6,15 +6,21 @@ $(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_clkgate.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_inter_clkgate.v
 $(CORTEX_A53_IP_LOGICAL_DIR)/models/cells/generic/ca53_cell_sync.v
 
-$(SOCLABS_PROJECT_DIR)/memories/A53/L1_BTAC1/L1_btac1_emulation.v
-$(SOCLABS_PROJECT_DIR)/memories/A53/L1_dDIRTY/L1_ddirty_emulation.v
-$(SOCLABS_PROJECT_DIR)/memories/A53/L1_iTAG/L1_itag_emulation.v
-$(SOCLABS_PROJECT_DIR)/memories/A53/L2_DATA/L2_data_emulation.v
-$(SOCLABS_PROJECT_DIR)/memories/A53/L1_BTAC2/L1_btac2_emulation.v
-$(SOCLABS_PROJECT_DIR)/memories/A53/L1_dTAG/L1_dtag_emulation.v
-$(SOCLABS_PROJECT_DIR)/memories/A53/L1_TAG/L1_tag_emulation.v
-$(SOCLABS_PROJECT_DIR)/memories/A53/L2_TAG/L2_tag_emulation.v
-$(SOCLABS_PROJECT_DIR)/memories/A53/L1_dDATA/L1_ddata_emulation.v
-$(SOCLABS_PROJECT_DIR)/memories/A53/L1_iDATA/L1_idata_emulation.v
-$(SOCLABS_PROJECT_DIR)/memories/A53/L1_TLB/L1_tlb_emulation.v
-$(SOCLABS_PROJECT_DIR)/memories/A53/L2_VICTIM/L2_vict_emulation.v
+
+// BTAC1 Memory
+$(TSMC_16_MEMS)/rf_50b_128w/ts5n16ffcllulvta128x50m1ssho_120a/VERILOG/ts5n16ffcllulvta128x50m1ssho_120a.v           
+
+// BTAC2 Memory
+$(TSMC_16_MEMS)/rf_59b_128w/ts5n16ffcllulvta128x59m2ssho_120a/VERILOG/ts5n16ffcllulvta128x59m2ssho_120a.v
+
+$(TSMC_16_MEMS)/rf_32b_256w/ts5n16ffcllulvta256x32m2ssho_120a/VERILOG/ts5n16ffcllulvta256x32m2ssho_120a.v           
+$(TSMC_16_MEMS)/rf_114b_160w/ts5n16ffcllulvta160x114m2ssho_120a/VERILOG/ts5n16ffcllulvta160x114m2ssho_120a.v           
+$(TSMC_16_MEMS)/rf_8b_256w_wm/ts5n16ffcllulvta256x8m2swsho_120a/VERILOG/ts5n16ffcllulvta256x8m2swsho_120a.v
+$(TSMC_16_MEMS)/rf_32b_256w_wm/ts5n16ffcllulvta256x32m2swsho_120a/VERILOG/ts5n16ffcllulvta256x32m2swsho_120a.v      
+$(TSMC_16_MEMS)/rf_31b_256w/ts5n16ffcllulvta256x31m2ssho_120a/VERILOG/ts5n16ffcllulvta256x31m2ssho_120a.v              
+$(TSMC_16_MEMS)/sram_20b_2048w_wm/ts1n16ffcllulvta2048x20m8swsho_120b/VERILOG/ts1n16ffcllulvta2048x20m8swsho_120b.v
+$(TSMC_16_MEMS)/rf_33b_128w/ts5n16ffcllulvta128x33m2ssho_120a/VERILOG/ts5n16ffcllulvta128x33m2ssho_120a.v           
+$(TSMC_16_MEMS)/rf_32b_1024w_wm/ts5n16ffcllulvta1024x32m8swsho_120a/VERILOG/ts5n16ffcllulvta1024x32m8swsho_120a.v      
+$(TSMC_16_MEMS)/sram_32b_4096w/ts1n16ffcllulvta4096x32m8ssho_120b/VERILOG/ts1n16ffcllulvta4096x32m8ssho_120b.v
+$(TSMC_16_MEMS)/rf_32b_128w/ts5n16ffcllulvta128x32m2ssho_120a/VERILOG/ts5n16ffcllulvta128x32m2ssho_120a.v              
+$(TSMC_16_MEMS)/sram_64b_4096w_wm/ts1n16ffcllulvta4096x64m8swsho_120b/VERILOG/ts1n16ffcllulvta4096x64m8swsho_120b.v

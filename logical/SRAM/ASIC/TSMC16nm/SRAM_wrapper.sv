@@ -118,19 +118,21 @@ assign gwen_i= &memwen;
 
 genvar i;
 generate for(i=0; i<N_MEMS-1; i=i+1) begin: g_srams
-    sram_64b_16k u_sram_64b_16k (
-        .Q(q_i[N_MEMS-1]),
-        .CLK(clk),
-        .CEN(CEN_i[N_MEMS-1]),
-        .GWEN(gwen_i),
-        .A(memaddr[16:3]),
+    TS1N16FFCLLULVTA4096X32M8SWSHO u_sram_64b_16k (
+        .Q(q_i[i]),
+        .CLK(ACLK),
+        .CEB(CEN_i[i]),
+        .WEB(gwen_i),
+        .A(memaddr[14:3]),
         .D(memd),
-        .WEN(wena_i),
-        .STOV(1'b0),
-        .EMA(3'b011),
-        .EMAW(2'b01),
-        .EMAS(1'b0),
-        .RET1N(1'b1)
+        .BWEB(wena_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b01)
     );
 end endgenerate
 

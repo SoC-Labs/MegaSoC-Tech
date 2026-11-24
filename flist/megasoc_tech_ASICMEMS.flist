@@ -4,4 +4,4 @@
 
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/ROM/ASIC/TSMC16nm/ROM_wrapper.sv 
-$(SOCLABS_PROJECT_DIR)/memories/megasoc/bootrom/bootrom_emulation.v
+$(TSMC_16_MEMS)/megasoc_rom/ts3n16ffcllulvta8192x64m16o_120c/VERILOG/ts3n16ffcllulvta8192x64m16o_120c.v
