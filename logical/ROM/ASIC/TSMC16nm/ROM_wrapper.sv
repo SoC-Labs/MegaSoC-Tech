@@ -96,26 +96,20 @@ sie300_axi5_sram_ctrl_1 u_SMC(
     .memwen(memwen)
 );
 
-bootrom u_ROM (
+TS3N16FFCLLULVTA8192X64M16O u_ROM (
     .CLK(ACLK),
-    .CEN(memcen),
-    .A(memaddr[19:3]),
+    .CEB(memcen),
+    .A(memaddr[15:3]),
     .Q(memq),
 
-    .CENY(),
-    .AY(),
+    .SD(~ARESETn), // Shutdown
 
-    .PRDYN(),
-    .PGEN(~pwr_qreqn),
+    .RTSEL(2'b01),  // Timing Adjustment
+    .PTSEL(2'b01),  // Timing Adjustment
+    .TRB(2'b01),    // Timing Adjustment
+    .TM(1'b0),      // Timing Adjustment
 
-    .EMA(3'b011),
-    .TEN(1'b1),
-    .BEN(1'b1),
-    .TCEN(1'b1),
-    .TA(14'd0),
-    .TQ(64'd0),
-    .KEN(1'b1),
-    .STOV(1'b0)
+    .PUDELAY() // Propogation of SD
 );
 
 

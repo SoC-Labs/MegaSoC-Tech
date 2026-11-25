@@ -106,436 +106,260 @@ module ca53_l2_datarams `CA53_L2_RAM_PARAM_DECL (
   // and the data outputs. The enable pin will never be high for two consecutive
   // cycles.
 
-L2_data u_l2_dataram_0_low (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_0_low (
         .CLK (clk_bank[0]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata0_o[31:0]),
         .D   (l2_dataram_wdata0_i[31:0]),
-        .CEN (~l2_dataram_en_i[0]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[0]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_0_high (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_0_high (
         .CLK (clk_bank[0]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata0_o[63:32]),
         .D   (l2_dataram_wdata0_i[63:32]),
-        .CEN (~l2_dataram_en_i[0]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[0]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_1_low (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_1_low (
         .CLK (clk_bank[1]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata1_o[31:0]),
         .D   (l2_dataram_wdata1_i[31:0]),
-        .CEN (~l2_dataram_en_i[1]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[1]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_1_high (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_1_high (
         .CLK (clk_bank[1]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata1_o[63:32]),
         .D   (l2_dataram_wdata1_i[63:32]),
-        .CEN (~l2_dataram_en_i[1]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[1]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_2_low (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_2_low (
         .CLK (clk_bank[2]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata2_o[31:0]),
         .D   (l2_dataram_wdata2_i[31:0]),
-        .CEN (~l2_dataram_en_i[2]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[2]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_2_high (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_2_high (
         .CLK (clk_bank[2]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata2_o[63:32]),
         .D   (l2_dataram_wdata2_i[63:32]),
-        .CEN (~l2_dataram_en_i[2]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[2]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_3_low (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_3_low (
         .CLK (clk_bank[3]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata3_o[31:0]),
         .D   (l2_dataram_wdata3_i[31:0]),
-        .CEN (~l2_dataram_en_i[3]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[3]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_3_high (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_3_high (
         .CLK (clk_bank[3]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata3_o[63:32]),
         .D   (l2_dataram_wdata3_i[63:32]),
-        .CEN (~l2_dataram_en_i[3]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[3]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_4_low (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_4_low (
         .CLK (clk_bank[4]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata4_o[31:0]),
         .D   (l2_dataram_wdata4_i[31:0]),
-        .CEN (~l2_dataram_en_i[4]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[4]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_4_high (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_4_high (
         .CLK (clk_bank[4]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata4_o[63:32]),
         .D   (l2_dataram_wdata4_i[63:32]),
-        .CEN (~l2_dataram_en_i[4]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[4]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_5_low (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_5_low (
         .CLK (clk_bank[5]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata5_o[31:0]),
         .D   (l2_dataram_wdata5_i[31:0]),
-        .CEN (~l2_dataram_en_i[5]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[5]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_5_high (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_5_high (
         .CLK (clk_bank[5]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata5_o[63:32]),
         .D   (l2_dataram_wdata5_i[63:32]),
-        .CEN (~l2_dataram_en_i[5]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[5]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_6_low (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_6_low (
         .CLK (clk_bank[6]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata6_o[31:0]),
         .D   (l2_dataram_wdata6_i[31:0]),
-        .CEN (~l2_dataram_en_i[6]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[6]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_6_high (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_6_high (
         .CLK (clk_bank[6]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata6_o[63:32]),
         .D   (l2_dataram_wdata6_i[63:32]),
-        .CEN (~l2_dataram_en_i[6]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[6]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_7_low (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_7_low (
         .CLK (clk_bank[7]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata7_o[31:0]),
         .D   (l2_dataram_wdata7_i[31:0]),
-        .CEN (~l2_dataram_en_i[7]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[7]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
-L2_data u_l2_dataram_7_high (
+TS1N16FFCLLULVTA4096X32M8SSHO u_l2_dataram_7_high (
         .CLK (clk_bank[7]),
         .A   (l2_dataram_addr_i[11:0]),
         .Q   (l2_dataram_rdata7_o[63:32]),
         .D   (l2_dataram_wdata7_i[63:32]),
-        .CEN (~l2_dataram_en_i[7]),
-        .GWEN(~l2_dataram_wr_i),
-        .STOV      (1'b0),
-        .EMA       (3'b011),
-        .EMAW      (2'b01),
-        .EMAS      (1'b0),
-        .TEN       (1'b1),
-        .TCEN      (1'b1),
-        .TGWEN      (1'b1),
-        .TA        (12'b0),
-        .TD        (32'b0),
-        .RET1N     (1'b1),
-        .RET2N     (1'b1),
-        .PGEN      (1'b0),
-        .SI        (2'b0),
-        .SE        (DFTSE),
-        .DFTRAMBYP (1'b0),
-        .SO        (),
-        .AY        (),
-        .CENY      ()
+        .CEB (~l2_dataram_en_i[7]),
+        .WEB(~l2_dataram_wr_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
         );
 
 endmodule

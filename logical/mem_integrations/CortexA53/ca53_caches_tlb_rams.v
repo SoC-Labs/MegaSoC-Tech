@@ -183,257 +183,139 @@ module ca53_caches_tlb_rams `CA53_L1_RAM_PARAM_DECL
   // represents `CA53_IDATA_RAM_W/`CA53_IDATA_WEN_W bits of the
   // write data (9 bits of 72 bits)
 
-  L1_idata u_idata_bank0_h1 (
-                                        .CLK       (clk),
-                                        .A         (ic_dataram_addr0_i[10:0]),
-                                        .Q         (ic_dataram_rdata0_o[79:60]),
-                                        .D         (ic_dataram_wdata0_i[79:60]),
-                                        .CEN       (~ic_dataram_en_i[1]),
-                                        .WEN       ({20{~(ic_dataram_strb0_i[3])}}),
-                                        .EMA       (3'b011),
-                                        .EMAW      (2'b01),
-                                        .EMAS      (1'b0),
-                                        .STOV      (1'b0),
-                                        .GWEN      (~ic_dataram_wr_i),
-                                        .GWENY     (),
-                                        .TGWEN     (1'b1),
-                                        .TA        (11'd0),
-                                        .TD        (20'd0),
-                                        .SO        (),
-                                        .CENY      (),
-                                        .WENY      (),
-                                        .AY        (),
-                                        .TEN       (1'b1),
-                                        .TCEN      (1'b1),
-                                        .TWEN      (20'hFFFFF),
-                                        .SI        (2'b00),
-                                        .SE        (DFTSE),
-                                        .DFTRAMBYP (1'b0),
-                                        .RET1N     (1'b1),
-                                        .RET2N     (1'b1),
-                                        .PGEN      (1'b0)
+  TS1N16FFCLLULVTA2048X20M8SWSHO u_idata_bank0_h1 (
+                                       .CLK       (clk),
+                                       .A         (ic_dataram_addr0_i[10:0]),
+                                       .Q         (ic_dataram_rdata0_o[79:60]),
+                                       .D         (ic_dataram_wdata0_i[79:60]),
+                                       .CEB       (~ic_dataram_en_i[1]),
+                                       .BWEB      ({20{~(ic_dataram_strb0_i[3])}}),
+                                       .WEB       (~ic_dataram_wr_i),
+
+                                       .SLP        (1'b0),
+                                       .DSLP       (1'b0),
+                                       .SD         (1'b0),
+                                       .PUDELAY    (),      // Propogation of SD
+                                       .RTSEL      (2'b01),
+                                       .WTSEL      (2'b01)
                                         );
 
-  L1_idata u_idata_bank0_h0 (
+  TS1N16FFCLLULVTA2048X20M8SWSHO u_idata_bank0_h0 (
                                         .CLK       (clk),
                                         .A         (ic_dataram_addr0_i[10:0]),
                                         .Q         (ic_dataram_rdata0_o[59:40]),
                                         .D         (ic_dataram_wdata0_i[59:40]),
-                                        .CEN       (~ic_dataram_en_i[1]),
-                                        .WEN       ({20{~(ic_dataram_strb0_i[2])}}),
-                                        .EMA       (3'b011),
-                                        .EMAW      (2'b01),
-                                        .EMAS      (1'b0),
-                                        .STOV      (1'b0),
-                                        .GWEN      (~ic_dataram_wr_i),
-                                        .GWENY     (),
-                                        .TGWEN     (1'b1),
-                                        .TA        (11'd0),
-                                        .TD        (20'd0),
-                                        .SO        (),
-                                        .CENY      (),
-                                        .WENY      (),
-                                        .AY        (),
-                                        .TEN       (1'b1),
-                                        .TCEN      (1'b1),
-                                        .TWEN      (20'hFFFFF),
-                                        .SI        (2'b00),
-                                        .SE        (DFTSE),
-                                        .DFTRAMBYP (1'b0),
-                                        .RET1N     (1'b1),
-                                        .RET2N     (1'b1),
-                                        .PGEN      (1'b0)
+                                        .CEB       (~ic_dataram_en_i[1]),
+                                        .BWEB      ({20{~(ic_dataram_strb0_i[2])}}),
+                                        .WEB       (~ic_dataram_wr_i),
+
+                                       .SLP        (1'b0),
+                                       .DSLP       (1'b0),
+                                       .SD         (1'b0),
+                                       .PUDELAY    (),      // Propogation of SD
+                                       .RTSEL      (2'b01),
+                                       .WTSEL      (2'b01)
                                         );
 
 
-  L1_idata u_idata_bank0_l1 (
+  TS1N16FFCLLULVTA2048X20M8SWSHO u_idata_bank0_l1 (
                                         .CLK       (clk),
                                         .A         (ic_dataram_addr0_i[10:0]),
                                         .Q         (ic_dataram_rdata0_o[39:20]),
                                         .D         (ic_dataram_wdata0_i[39:20]),
-                                        .CEN       (~ic_dataram_en_i[0]),
-                                        .WEN       ({20{~(ic_dataram_strb0_i[1])}}),
-                                        .EMA       (3'b011),
-                                        .EMAW      (2'b01),
-                                        .EMAS      (1'b0),
-                                        .STOV      (1'b0),
-                                        .GWEN      (~ic_dataram_wr_i),
-                                        .GWENY     (),
-                                        .TGWEN     (1'b1),
-                                        .TA        (11'd0),
-                                        .TD        (20'd0),
-                                        .SO        (),
-                                        .CENY      (),
-                                        .WENY      (),
-                                        .AY        (),
-                                        .TEN       (1'b1),
-                                        .TCEN      (1'b1),
-                                        .TWEN      (20'hFFFFF),
-                                        .SI        (2'b00),
-                                        .SE        (DFTSE),
-                                        .DFTRAMBYP (1'b0),
-                                        .RET1N     (1'b1),
-                                        .RET2N     (1'b1),
-                                        .PGEN      (1'b0)
+                                        .CEB       (~ic_dataram_en_i[0]),
+                                        .BWEB      ({20{~(ic_dataram_strb0_i[1])}}),
+                                        .WEB       (~ic_dataram_wr_i),
 
+                                       .SLP        (1'b0),
+                                       .DSLP       (1'b0),
+                                       .SD         (1'b0),
+                                       .PUDELAY    (),      // Propogation of SD
+                                       .RTSEL      (2'b01),
+                                       .WTSEL      (2'b01)
                                         );
 
-  L1_idata u_idata_bank0_l0 (
+  TS1N16FFCLLULVTA2048X20M8SWSHO u_idata_bank0_l0 (
                                         .CLK       (clk),
                                         .A         (ic_dataram_addr0_i[10:0]),
                                         .Q         (ic_dataram_rdata0_o[19:0]),
                                         .D         (ic_dataram_wdata0_i[19:0]),
-                                        .CEN       (~ic_dataram_en_i[0]),
-                                        .WEN       ({20{~(ic_dataram_strb0_i[0])}}),
-                                        .EMA       (3'b011),
-                                        .EMAW      (2'b01),
-                                        .EMAS      (1'b0),
-                                        .STOV      (1'b0),
-                                        .GWEN      (~ic_dataram_wr_i),
-                                        .GWENY     (),
-                                        .TGWEN     (1'b1),
-                                        .TA        (11'd0),
-                                        .TD        (20'd0),
-                                        .SO        (),
-                                        .CENY      (),
-                                        .WENY      (),
-                                        .AY        (),
-                                        .TEN       (1'b1),
-                                        .TCEN      (1'b1),
-                                        .TWEN      (20'hFFFFF),
-                                        .SI        (2'b00),
-                                        .SE        (DFTSE),
-                                        .DFTRAMBYP (1'b0),
-                                        .RET1N     (1'b1),
-                                        .RET2N     (1'b1),
-                                        .PGEN      (1'b0)
+                                        .CEB       (~ic_dataram_en_i[0]),
+                                        .BWEB      ({20{~(ic_dataram_strb0_i[0])}}),
+                                        .WEB       (~ic_dataram_wr_i),
 
+                                       .SLP        (1'b0),
+                                       .DSLP       (1'b0),
+                                       .SD         (1'b0),
+                                       .PUDELAY    (),      // Propogation of SD
+                                       .RTSEL      (2'b01),
+                                       .WTSEL      (2'b01)
                                         );
 
-  L1_idata u_idata_bank1_h1 (
+  TS1N16FFCLLULVTA2048X20M8SWSHO u_idata_bank1_h1 (
                                         .CLK       (clk),
                                         .A         (ic_dataram_addr1_i[10:0]),
                                         .Q         (ic_dataram_rdata1_o[79:60]),
                                         .D         (ic_dataram_wdata1_i[79:60]),
-                                        .CEN       (~ic_dataram_en_i[3]),
-                                        .WEN       ({20{~(ic_dataram_strb1_i[3])}}),
-                                        .EMA       (3'b011),
-                                        .EMAW      (2'b01),
-                                        .EMAS      (1'b0),
-                                        .STOV      (1'b0),
-                                        .GWEN      (~ic_dataram_wr_i),
-                                        .GWENY     (),
-                                        .TGWEN     (1'b1),
-                                        .TA        (11'd0),
-                                        .TD        (20'd0),
-                                        .SO        (),
-                                        .CENY      (),
-                                        .WENY      (),
-                                        .AY        (),
-                                        .TEN       (1'b1),
-                                        .TCEN      (1'b1),
-                                        .TWEN      (20'hFFFFF),
-                                        .SI        (2'b00),
-                                        .SE        (DFTSE),
-                                        .DFTRAMBYP (1'b0),
-                                        .RET1N     (1'b1),
-                                        .RET2N     (1'b1),
-                                        .PGEN      (1'b0)
+                                        .CEB       (~ic_dataram_en_i[3]),
+                                        .BWEB      ({20{~(ic_dataram_strb1_i[3])}}),
+                                        .WEB       (~ic_dataram_wr_i),
 
+                                       .SLP        (1'b0),
+                                       .DSLP       (1'b0),
+                                       .SD         (1'b0),
+                                       .PUDELAY    (),      // Propogation of SD
+                                       .RTSEL      (2'b01),
+                                       .WTSEL      (2'b01)
                                         );
-  L1_idata u_idata_bank1_h0 (
+  TS1N16FFCLLULVTA2048X20M8SWSHO u_idata_bank1_h0 (
                                         .CLK       (clk),
                                         .A         (ic_dataram_addr1_i[10:0]),
                                         .Q         (ic_dataram_rdata1_o[59:40]),
                                         .D         (ic_dataram_wdata1_i[59:40]),
-                                        .CEN       (~ic_dataram_en_i[3]),
-                                        .WEN       ({20{~(ic_dataram_strb1_i[2])}}),
-                                        .EMA       (3'b011),
-                                        .EMAW      (2'b01),
-                                        .EMAS      (1'b0),
-                                        .STOV      (1'b0),
-                                        .GWEN      (~ic_dataram_wr_i),
-                                        .GWENY     (),
-                                        .TGWEN     (1'b1),
-                                        .TA        (11'd0),
-                                        .TD        (20'd0),
-                                        .SO        (),
-                                        .CENY      (),
-                                        .WENY      (),
-                                        .AY        (),
-                                        .TEN       (1'b1),
-                                        .TCEN      (1'b1),
-                                        .TWEN      (20'hFFFFF),
-                                        .SI        (2'b00),
-                                        .SE        (DFTSE),
-                                        .DFTRAMBYP (1'b0),
-                                        .RET1N     (1'b1),
-                                        .RET2N     (1'b1),
-                                        .PGEN      (1'b0)
+                                        .CEB       (~ic_dataram_en_i[3]),
+                                        .BWEB      ({20{~(ic_dataram_strb1_i[2])}}),
+                                        .WEB       (~ic_dataram_wr_i),
 
+                                       .SLP        (1'b0),
+                                       .DSLP       (1'b0),
+                                       .SD         (1'b0),
+                                       .PUDELAY    (),      // Propogation of SD
+                                       .RTSEL      (2'b01),
+                                       .WTSEL      (2'b01)
                                         );
 
-  L1_idata u_idata_bank1_l1 (
+  TS1N16FFCLLULVTA2048X20M8SWSHO u_idata_bank1_l1 (
                                         .CLK       (clk),
                                         .A         (ic_dataram_addr1_i[10:0]),
                                         .Q         (ic_dataram_rdata1_o[39:20]),
                                         .D         (ic_dataram_wdata1_i[39:20]),
-                                        .CEN       (~ic_dataram_en_i[2]),
-                                        .WEN       ({20{~(ic_dataram_strb1_i[1])}}),
-                                        .EMA       (3'b011),
-                                        .EMAW      (2'b01),
-                                        .EMAS      (1'b0),
-                                        .STOV      (1'b0),
-                                        .GWEN      (~ic_dataram_wr_i),
-                                        .GWENY     (),
-                                        .TGWEN     (1'b1),
-                                        .TA        (11'd0),
-                                        .TD        (20'd0),
-                                        .SO        (),
-                                        .CENY      (),
-                                        .WENY      (),
-                                        .AY        (),
-                                        .TEN       (1'b1),
-                                        .TCEN      (1'b1),
-                                        .TWEN      (20'hFFFFF),
-                                        .SI        (2'b00),
-                                        .SE        (DFTSE),
-                                        .DFTRAMBYP (1'b0),
-                                        .RET1N     (1'b1),
-                                        .RET2N     (1'b1),
-                                        .PGEN      (1'b0)
+                                        .CEB       (~ic_dataram_en_i[2]),
+                                        .BWEB      ({20{~(ic_dataram_strb1_i[1])}}),
+                                        .WEB       (~ic_dataram_wr_i),
 
+                                       .SLP        (1'b0),
+                                       .DSLP       (1'b0),
+                                       .SD         (1'b0),
+                                       .PUDELAY    (),      // Propogation of SD
+                                       .RTSEL      (2'b01),
+                                       .WTSEL      (2'b01)
                                         );
-  L1_idata u_idata_bank1_l0 (
+  TS1N16FFCLLULVTA2048X20M8SWSHO u_idata_bank1_l0 (
                                         .CLK       (clk),
                                         .A         (ic_dataram_addr1_i[10:0]),
                                         .Q         (ic_dataram_rdata1_o[19:0]),
                                         .D         (ic_dataram_wdata1_i[19:0]),
-                                        .CEN       (~ic_dataram_en_i[2]),
-                                        .WEN       ({20{~(ic_dataram_strb1_i[0])}}),
-                                        .EMA       (3'b011),
-                                        .EMAW      (2'b01),
-                                        .EMAS      (1'b0),
-                                        .STOV      (1'b0),
-                                        .GWEN      (~ic_dataram_wr_i),
-                                        .GWENY     (),
-                                        .TGWEN     (1'b1),
-                                        .TA        (11'd0),
-                                        .TD        (20'd0),
-                                        .SO        (),
-                                        .CENY      (),
-                                        .WENY      (),
-                                        .AY        (),
-                                        .TEN       (1'b1),
-                                        .TCEN      (1'b1),
-                                        .TWEN      (20'hFFFFF),
-                                        .SI        (2'b00),
-                                        .SE        (DFTSE),
-                                        .DFTRAMBYP (1'b0),
-                                        .RET1N     (1'b1),
-                                        .RET2N     (1'b1),
-                                        .PGEN      (1'b0)
+                                        .CEB       (~ic_dataram_en_i[2]),
+                                        .BWEB      ({20{~(ic_dataram_strb1_i[0])}}),
+                                        .WEB       (~ic_dataram_wr_i),
 
+                                       .SLP        (1'b0),
+                                       .DSLP       (1'b0),
+                                       .SD         (1'b0),
+                                       .PUDELAY    (),      // Propogation of SD
+                                       .RTSEL      (2'b01),
+                                       .WTSEL      (2'b01)
                                         );
   // I Tag RAM
   // Reset the Tag RAM memory to n`b1111... to make
@@ -441,60 +323,37 @@ module ca53_caches_tlb_rams `CA53_L1_RAM_PARAM_DECL
   // indicating an non-valid tag.
 
 
-  L1_itag u_itag_ram0 (
+  TS5N16FFCLLULVTA256X31M2SSHO u_itag_ram0 (
                                    .CLK       (clk),
                                    .A         (ic_tagram_addr_i[7:0]),
                                    .Q         (ic_tagram_rdata0_o[`CA53_ITAG_RAM_W-1:0]), //connection size 31
                                    .D         (ic_tagram_wdata_i[`CA53_ITAG_RAM_W-1:0]), //connection size 31
-                                   .CEN       (~ic_tagram_en_i[0]),
-                                   .GWEN      (~ic_tagram_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (8'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .GWENY     (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN      (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~ic_tagram_en_i[0]),
+                                   .WEB       (~ic_tagram_wr_i),
+
+                                 .SLP        (1'b0),
+                                 .DSLP       (1'b0),
+                                 .SD         (1'b0),
+                                 .PUDELAY    (),      // Propogation of SD
+                                 .RTSEL      (2'b01),
+                                 .WTSEL      (2'b01)
+
                                    );
 
-  L1_itag u_itag_ram1 (
+  TS5N16FFCLLULVTA256X31M2SSHO u_itag_ram1 (
                                    .CLK       (clk),
                                    .A         (ic_tagram_addr_i[7:0]),
                                    .Q         (ic_tagram_rdata1_o[`CA53_ITAG_RAM_W-1:0]),
                                    .D         (ic_tagram_wdata_i[`CA53_ITAG_RAM_W-1:0]),
-                                   .CEN       (~ic_tagram_en_i[1]),
-                                   .GWEN      (~ic_tagram_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (8'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .GWENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN      (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~ic_tagram_en_i[1]),
+                                   .WEB       (~ic_tagram_wr_i),
+
+                                 .SLP        (1'b0),
+                                 .DSLP       (1'b0),
+                                 .SD         (1'b0),
+                                 .PUDELAY    (),      // Propogation of SD
+                                 .RTSEL      (2'b01),
+                                 .WTSEL      (2'b01)
                                    );
 
   // D Data Ram
@@ -523,236 +382,140 @@ module ca53_caches_tlb_rams `CA53_L1_RAM_PARAM_DECL
   assign dc_dataram_wen7_i = {{8{dc_dataram_strb7_i[3]}}, {8{dc_dataram_strb7_i[2]}}, {8{dc_dataram_strb7_i[1]}}, {8{dc_dataram_strb7_i[0]}}};
 
 
-  L1_ddata u_ddata_bank0 (
+  TS5N16FFCLLULVTA1024X32M8SWSHO u_ddata_bank0 (
                                       .CLK       (clk),
                                       .A         (dc_dataram_addr0_i[9:0]),
                                       .Q         (dc_dataram_rdata0_o[`CA53_DDATA_RAM_W-1:0]), //connection size 32
                                       .D         (dc_dataram_wdata0_i[`CA53_DDATA_RAM_W-1:0]), //connection size 32
-                                      .CEN       (~dc_dataram_en_i[0]),
-                                      .GWEN      ({~(dc_dataram_wr_i)}),
-                                      .WEN       (~dc_dataram_wen0_i[31:0]),
-                                      .EMA       (3'b111),
-                                      .EMAW      (2'b11),
-                                      .EMAS      (1'b1),
-                                      .STOV      (1'b0),
-                                      .TA        (10'd0),
-                                      .TD        (32'd0),
-                                      .SO        (),
-                                      .CENY      (),
-                                      .GWENY      (),
-                                      .AY        (),
-                                      .TEN       (1'b1),
-                                      .TCEN      (1'b1),
-                                      .TGWEN      (1'b1),
-                                      .SI        (2'b00),
-                                      .SE        (DFTSE),
-                                      .DFTRAMBYP (1'b0),
-                                      .RET1N     (1'b1),
-                                      .RET2N     (1'b1),
-                                      .PGEN      (1'b0)
+                                      .CEB       (~dc_dataram_en_i[0]),
+                                      .WEB       ({~(dc_dataram_wr_i)}),
+                                      .BWEB       (~dc_dataram_wen0_i[31:0]),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                       );
 
-  L1_ddata u_ddata_bank1 (
+  TS5N16FFCLLULVTA1024X32M8SWSHO u_ddata_bank1 (
                                       .CLK       (clk),
                                       .A         (dc_dataram_addr1_i[9:0]),
                                       .Q         (dc_dataram_rdata1_o[`CA53_DDATA_RAM_W-1:0]),
                                       .D         (dc_dataram_wdata1_i[`CA53_DDATA_RAM_W-1:0]),
-                                      .CEN       (~dc_dataram_en_i[1]),
-                                      .GWEN      ({~(dc_dataram_wr_i)}),
-                                      .WEN       (~dc_dataram_wen1_i[31:0]),
-                                      .EMA       (3'b111),
-                                      .EMAW      (2'b11),
-                                      .EMAS      (1'b1),
-                                      .STOV      (1'b0),
-                                      .TA        (10'b0),
-                                      .TD        (32'b0),
-                                      .SO        (),
-                                      .CENY      (),
-                                      .GWENY      (),
-                                      .AY        (),
-                                      .TEN       (1'b1),
-                                      .TCEN      (1'b1),
-                                      .TGWEN      (1'b1),
-                                      .SI        (2'b00),
-                                      .SE        (DFTSE),
-                                      .DFTRAMBYP (1'b0),
-                                      .RET1N     (1'b1),
-                                      .RET2N     (1'b1),
-                                      .PGEN      (1'b0)
+                                      .CEB       (~dc_dataram_en_i[1]),
+                                      .WEB       ({~(dc_dataram_wr_i)}),
+                                      .BWEB       (~dc_dataram_wen1_i[31:0]),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                       );
 
-  L1_ddata u_ddata_bank2 (
+  TS5N16FFCLLULVTA1024X32M8SWSHO u_ddata_bank2 (
                                       .CLK       (clk),
                                       .A         (dc_dataram_addr2_i[9:0]),
                                       .Q         (dc_dataram_rdata2_o[`CA53_DDATA_RAM_W-1:0]),
                                       .D         (dc_dataram_wdata2_i[`CA53_DDATA_RAM_W-1:0]),
-                                      .CEN       (~dc_dataram_en_i[2]),
-                                      .GWEN      ({~(dc_dataram_wr_i)}),
-                                      .WEN       (~dc_dataram_wen2_i[31:0]),
-                                      .EMA       (3'b111),
-                                      .EMAW      (2'b11),
-                                      .EMAS      (1'b1),
-                                      .STOV      (1'b0),
-                                      .TA        (10'b0),
-                                      .TD        (32'b0),
-                                      .SO        (),
-                                      .CENY      (),
-                                      .GWENY      (),
-                                      .AY        (),
-                                      .TEN       (1'b1),
-                                      .TCEN      (1'b1),
-                                      .TGWEN      (1'b1),
-                                      .SI        (2'b00),
-                                      .SE        (DFTSE),
-                                      .DFTRAMBYP (1'b0),
-                                      .RET1N     (1'b1),
-                                      .RET2N     (1'b1),
-                                      .PGEN      (1'b0)
+                                      .CEB       (~dc_dataram_en_i[2]),
+                                      .WEB       ({~(dc_dataram_wr_i)}),
+                                      .BWEB       (~dc_dataram_wen2_i[31:0]),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                       );
 
-  L1_ddata u_ddata_bank3 (
+  TS5N16FFCLLULVTA1024X32M8SWSHO u_ddata_bank3 (
                                       .CLK       (clk),
                                       .A         (dc_dataram_addr3_i[9:0]),
                                       .Q         (dc_dataram_rdata3_o[`CA53_DDATA_RAM_W-1:0]),
                                       .D         (dc_dataram_wdata3_i[`CA53_DDATA_RAM_W-1:0]),
-                                      .CEN       (~dc_dataram_en_i[3]),
-                                      .GWEN      ({~(dc_dataram_wr_i)}),
-                                      .WEN       (~dc_dataram_wen3_i[31:0]),
-                                      .EMA       (3'b111),
-                                      .EMAW      (2'b11),
-                                      .EMAS      (1'b1),
-                                      .STOV      (1'b0),
-                                      .TA        (10'b0),
-                                      .TD        (32'b0),
-                                      .SO        (),
-                                      .CENY      (),
-                                      .GWENY      (),
-                                      .AY        (),
-                                      .TEN       (1'b1),
-                                      .TCEN      (1'b1),
-                                      .TGWEN      (1'b1),
-                                      .SI        (2'b00),
-                                      .SE        (DFTSE),
-                                      .DFTRAMBYP (1'b0),
-                                      .RET1N     (1'b1),
-                                      .RET2N     (1'b1),
-                                      .PGEN      (1'b0)
+                                      .CEB       (~dc_dataram_en_i[3]),
+                                      .WEB       ({~(dc_dataram_wr_i)}),
+                                      .BWEB       (~dc_dataram_wen3_i[31:0]),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                       );
 
-  L1_ddata u_ddata_bank4 (
+  TS5N16FFCLLULVTA1024X32M8SWSHO u_ddata_bank4 (
                                       .CLK       (clk),
                                       .A         (dc_dataram_addr4_i[9:0]),
                                       .Q         (dc_dataram_rdata4_o[`CA53_DDATA_RAM_W-1:0]),
                                       .D         (dc_dataram_wdata4_i[`CA53_DDATA_RAM_W-1:0]),
-                                      .CEN       (~dc_dataram_en_i[4]),
-                                      .GWEN      ({~(dc_dataram_wr_i)}),
-                                      .WEN       (~dc_dataram_wen4_i[31:0]),
-                                      .EMA       (3'b111),
-                                      .EMAW      (2'b11),
-                                      .EMAS      (1'b1),
-                                      .STOV      (1'b0),
-                                      .TA        (10'b0),
-                                      .TD        (32'b0),
-                                      .SO        (),
-                                      .CENY      (),
-                                      .GWENY      (),
-                                      .AY        (),
-                                      .TEN       (1'b1),
-                                      .TCEN      (1'b1),
-                                      .TGWEN      (1'b1),
-                                      .SI        (2'b00),
-                                      .SE        (DFTSE),
-                                      .DFTRAMBYP (1'b0),
-                                      .RET1N     (1'b1),
-                                      .RET2N     (1'b1),
-                                      .PGEN      (1'b0)
+                                      .CEB       (~dc_dataram_en_i[4]),
+                                      .WEB       ({~(dc_dataram_wr_i)}),
+                                      .BWEB       (~dc_dataram_wen4_i[31:0]),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                       );
 
-  L1_ddata u_ddata_bank5 (
+  TS5N16FFCLLULVTA1024X32M8SWSHO u_ddata_bank5 (
                                       .CLK       (clk),
                                       .A         (dc_dataram_addr5_i[9:0]),
                                       .Q         (dc_dataram_rdata5_o[`CA53_DDATA_RAM_W-1:0]),
                                       .D         (dc_dataram_wdata5_i[`CA53_DDATA_RAM_W-1:0]),
-                                      .CEN       (~dc_dataram_en_i[5]),
-                                      .GWEN      ({~(dc_dataram_wr_i)}),
-                                      .WEN       (~dc_dataram_wen5_i[31:0]),
-                                      .EMA       (3'b111),
-                                      .EMAW      (2'b11),
-                                      .EMAS      (1'b1),
-                                      .STOV      (1'b0),
-                                      .TA        (10'b0),
-                                      .TD        (32'b0),
-                                      .SO        (),
-                                      .CENY      (),
-                                      .GWENY      (),
-                                      .AY        (),
-                                      .TEN       (1'b1),
-                                      .TCEN      (1'b1),
-                                      .TGWEN      (1'b1),
-                                      .SI        (2'b00),
-                                      .SE        (DFTSE),
-                                      .DFTRAMBYP (1'b0),
-                                      .RET1N     (1'b1),
-                                      .RET2N     (1'b1),
-                                      .PGEN      (1'b0)
+                                      .CEB       (~dc_dataram_en_i[5]),
+                                      .WEB       ({~(dc_dataram_wr_i)}),
+                                      .BWEB       (~dc_dataram_wen5_i[31:0]),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                       );
 
-  L1_ddata u_ddata_bank6 (
+  TS5N16FFCLLULVTA1024X32M8SWSHO u_ddata_bank6 (
                                       .CLK       (clk),
                                       .A         (dc_dataram_addr6_i[9:0]),
                                       .Q         (dc_dataram_rdata6_o[`CA53_DDATA_RAM_W-1:0]),
                                       .D         (dc_dataram_wdata6_i[`CA53_DDATA_RAM_W-1:0]),
-                                      .CEN       (~dc_dataram_en_i[6]),
-                                      .GWEN      ({~(dc_dataram_wr_i)}),
-                                      .WEN       (~dc_dataram_wen6_i[31:0]),
-                                      .EMA       (3'b111),
-                                      .EMAW      (2'b11),
-                                      .EMAS      (1'b1),
-                                      .STOV      (1'b0),
-                                      .TA        (10'b0),
-                                      .TD        (32'b0),
-                                      .SO        (),
-                                      .CENY      (),
-                                      .GWENY      (),
-                                      .AY        (),
-                                      .TEN       (1'b1),
-                                      .TCEN      (1'b1),
-                                      .TGWEN      (1'b1),
-                                      .SI        (2'b00),
-                                      .SE        (DFTSE),
-                                      .DFTRAMBYP (1'b0),
-                                      .RET1N     (1'b1),
-                                      .RET2N     (1'b1),
-                                      .PGEN      (1'b0)
+                                      .CEB       (~dc_dataram_en_i[6]),
+                                      .WEB       ({~(dc_dataram_wr_i)}),
+                                      .BWEB       (~dc_dataram_wen6_i[31:0]),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                       );
 
-  L1_ddata u_ddata_bank7 (
+  TS5N16FFCLLULVTA1024X32M8SWSHO u_ddata_bank7 (
                                       .CLK       (clk),
                                       .A         (dc_dataram_addr7_i[9:0]),
                                       .Q         (dc_dataram_rdata7_o[`CA53_DDATA_RAM_W-1:0]),
                                       .D         (dc_dataram_wdata7_i[`CA53_DDATA_RAM_W-1:0]),
-                                      .CEN       (~dc_dataram_en_i[7]),
-                                      .GWEN      ({~(dc_dataram_wr_i)}),
-                                      .WEN       (~dc_dataram_wen7_i[31:0]),
-                                      .EMA       (3'b111),
-                                      .EMAW      (2'b11),
-                                      .EMAS      (1'b1),
-                                      .STOV      (1'b0),
-                                      .TA        (10'b0),
-                                      .TD        (32'b0),
-                                      .SO        (),
-                                      .CENY      (),
-                                      .GWENY      (),
-                                      .AY        (),
-                                      .TEN       (1'b1),
-                                      .TCEN      (1'b1),
-                                      .TGWEN      (1'b1),
-                                      .SI        (2'b00),
-                                      .SE        (DFTSE),
-                                      .DFTRAMBYP (1'b0),
-                                      .RET1N     (1'b1),
-                                      .RET2N     (1'b1),
-                                      .PGEN      (1'b0)
+                                      .CEB       (~dc_dataram_en_i[7]),
+                                      .WEB       ({~(dc_dataram_wr_i)}),
+                                      .BWEB       (~dc_dataram_wen7_i[31:0]),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                       );
 
 
@@ -768,150 +531,88 @@ module ca53_caches_tlb_rams `CA53_L1_RAM_PARAM_DECL
   wire u_dtag_bank2_UNCONNECTED;
   wire u_dtag_bank3_UNCONNECTED;      
 
-  L1_dtag u_dtag_bank0 (
+  TS5N16FFCLLULVTA128X32M2SSHO u_dtag_bank0 (
                                    .CLK       (clk),
                                    .A         (dc_tagram_addr_i[6:0]),
                                    .Q         ({u_dtag_bank0_UNCONNECTED,dc_tagram_rdata0_o[31:2]}), //connection size 32
                                    .D         ({1'b0,dc_tagram_wdata_i[31:2]}), //connection size 32
-                                   .CEN       (~dc_tagram_en_i[0]),
-                                   .GWEN       (~dc_tagram_wr_i),
-                                        .EMA       (3'b111),
-                                        .EMAW      (2'b11),
-                                        .EMAS      (1'b1),
-                                        .STOV      (1'b0),
-                                   .TA        (7'b0),
-                                   .TD        (32'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .GWENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN      (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~dc_tagram_en_i[0]),
+                                   .WEB        (~dc_tagram_wr_i),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                    );
 
-  L1_dtag u_dtag_bank1 (
+  TS5N16FFCLLULVTA128X32M2SSHO u_dtag_bank1 (
                                    .CLK       (clk),
                                    .A         (dc_tagram_addr_i[6:0]),
                                    .Q         ({u_dtag_bank1_UNCONNECTED,dc_tagram_rdata1_o[31:2]}),
                                    .D         ({1'b0,dc_tagram_wdata_i[31:2]}),
-                                   .CEN       (~dc_tagram_en_i[1]),
-                                   .GWEN       (~dc_tagram_wr_i),
-                                        .EMA       (3'b111),
-                                        .EMAW      (2'b11),
-                                        .EMAS      (1'b1),
-                                        .STOV      (1'b0),
-                                   .TA        (7'b0),
-                                   .TD        (32'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .GWENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN      (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~dc_tagram_en_i[1]),
+                                   .WEB        (~dc_tagram_wr_i),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                    );
 
-  L1_dtag u_dtag_bank2 (
+  TS5N16FFCLLULVTA128X32M2SSHO u_dtag_bank2 (
                                    .CLK       (clk),
                                    .A         (dc_tagram_addr_i[6:0]),
                                    .Q         ({u_dtag_bank2_UNCONNECTED,dc_tagram_rdata2_o[31:2]}),
                                    .D         ({1'b0,dc_tagram_wdata_i[31:2]}),
-                                   .CEN       (~dc_tagram_en_i[2]),
-                                   .GWEN       (~dc_tagram_wr_i),
-                                        .EMA       (3'b111),
-                                        .EMAW      (2'b11),
-                                        .EMAS      (1'b1),
-                                        .STOV      (1'b0),
-                                   .TA        (7'b0),
-                                   .TD        (32'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .GWENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN      (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~dc_tagram_en_i[2]),
+                                   .WEB        (~dc_tagram_wr_i),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                    );
 
-  L1_dtag u_dtag_bank3 (
+  TS5N16FFCLLULVTA128X32M2SSHO u_dtag_bank3 (
                                    .CLK       (clk),
                                    .A         (dc_tagram_addr_i[6:0]),
                                    .Q         ({u_dtag_bank3_UNCONNECTED,dc_tagram_rdata3_o[31:2]}),
                                    .D         ({1'b0,dc_tagram_wdata_i[31:2]}),
-                                   .CEN       (~dc_tagram_en_i[3]),
-                                   .GWEN       (~dc_tagram_wr_i),
-                                        .EMA       (3'b111),
-                                        .EMAW      (2'b11),
-                                        .EMAS      (1'b1),
-                                        .STOV      (1'b0),
-                                   .TA        (7'b0),
-                                   .TD        (32'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .GWENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN      (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~dc_tagram_en_i[3]),
+                                   .WEB        (~dc_tagram_wr_i),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                    );
 
   // D Dirty Ram
 
 
-  L1_ddirty u_ddirty_ram (
+  TS5N16FFCLLULVTA256X8M2SWSHO u_ddirty_ram (
                                      .CLK       (clk),
                                      .A         (dc_dirtyram_addr_i[7:0]),
                                      .Q         (dc_dirtyram_rdata_o[7:0]),
                                      .D         (dc_dirtyram_wdata_i[7:0]),
-                                     .CEN       (~dc_dirtyram_en_i),
-                                     .WEN       (~(dc_dirtyram_strb_i[7:0])),
-                                        .EMA       (3'b111),
-                                        .EMAW      (2'b11),
-                                        .EMAS      (1'b1),
-                                        .STOV      (1'b0),
-                                     .GWEN      (~dc_dirtyram_wr_i),
-                                     .GWENY     (),
-                                     .TGWEN     (1'b1),
-                                     .TA        (8'd0),
-                                     .TD        (8'd0),
-                                     .SO        (),
-                                     .CENY      (),
-                                     .WENY      (),
-                                     .AY        (),
-                                     .TEN       (1'b1),
-                                     .TCEN      (1'b1),
-                                     .TWEN      (8'hFF),
-                                     .SI        (2'b00),
-                                     .SE        (DFTSE),
-                                     .DFTRAMBYP (1'b0),
-                                     .RET1N     (1'b1),
-                                     .RET2N     (1'b1),
-                                     .PGEN      (1'b0)
+                                     .CEB       (~dc_dirtyram_en_i),
+                                     .BWEB       (~(dc_dirtyram_strb_i[7:0])),
+                                     .WEB       (~dc_dirtyram_wr_i),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                      );
 
   // TLB Ram
@@ -923,171 +624,99 @@ module ca53_caches_tlb_rams `CA53_L1_RAM_PARAM_DECL
 
   assign u_tlb_bank_i_UNCONNECTED = 4'b0;
 
-  L1_tlb u_tlb_bank0 (
+  TS5N16FFCLLULVTA160X114M2SSHO u_tlb_bank0 (
                                   .CLK       (clk),
                                   .A         (tlb_ram_addr_i),
                                   .Q         (tlb_ram_rdata0_o[`CA53_TLB_RAM_W-1:0]),
                                   .D         (tlb_ram_wdata_i[`CA53_TLB_RAM_W-1:0]),
-                                  .CEN       (~tlb_ram_en_i[0]),
-                                  .GWEN       (~tlb_ram_wr_i),
-                                  .EMA       (3'b111),
-                                  .EMAW      (2'b11),
-                                  .EMAS      (1'b1),
-                                  .STOV      (1'b0),
-                                  .TA        (8'b0),
-                                  .TD        (114'b0),
-                                  .SO        (),
-                                  .CENY      (),
-                                  .GWENY      (),
-                                  .AY        (),
-                                  .TEN       (1'b1),
-                                  .TCEN      (1'b1),
-                                  .TGWEN      (1'b1),
-                                  .SI        (2'b00),
-                                  .SE        (DFTSE),
-                                  .DFTRAMBYP (1'b0),
-                                  .RET1N     (1'b1),
-                                  .RET2N     (1'b1),
-                                  .PGEN      (1'b0)
+                                  .CEB       (~tlb_ram_en_i[0]),
+                                  .WEB        (~tlb_ram_wr_i),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                   );
 
-  L1_tlb u_tlb_bank1 (
+  TS5N16FFCLLULVTA160X114M2SSHO u_tlb_bank1 (
                                   .CLK       (clk),
                                   .A         (tlb_ram_addr_i),
                                   .Q         (tlb_ram_rdata1_o[`CA53_TLB_RAM_W-1:0]),
                                   .D         (tlb_ram_wdata_i[`CA53_TLB_RAM_W-1:0]),
-                                  .CEN       (~tlb_ram_en_i[1]),
-                                  .GWEN       (~tlb_ram_wr_i),
-                                  .EMA       (3'b111),
-                                  .EMAW      (2'b11),
-                                  .EMAS      (1'b1),
-                                  .STOV      (1'b0),
-                                  .TA        (8'b0),
-                                  .TD        (114'b0),
-                                  .SO        (),
-                                  .CENY      (),
-                                  .GWENY      (),
-                                  .AY        (),
-                                  .TEN       (1'b1),
-                                  .TCEN      (1'b1),
-                                  .TGWEN      (1'b1),
-                                  .SI        (2'b00),
-                                  .SE        (DFTSE),
-                                  .DFTRAMBYP (1'b0),
-                                  .RET1N     (1'b1),
-                                  .RET2N     (1'b1),
-                                  .PGEN      (1'b0)
+                                  .CEB       (~tlb_ram_en_i[1]),
+                                  .WEB        (~tlb_ram_wr_i),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                   );
 
-  L1_tlb u_tlb_bank2 (
+  TS5N16FFCLLULVTA160X114M2SSHO u_tlb_bank2 (
                                   .CLK       (clk),
                                   .A         (tlb_ram_addr_i),
                                   .Q         (tlb_ram_rdata2_o[`CA53_TLB_RAM_W-1:0]),
                                   .D         (tlb_ram_wdata_i[`CA53_TLB_RAM_W-1:0]),
-                                  .CEN       (~tlb_ram_en_i[2]),
-                                  .GWEN       (~tlb_ram_wr_i),
-                                  .EMA       (3'b111),
-                                  .EMAW      (2'b11),
-                                  .EMAS      (1'b1),
-                                  .STOV      (1'b0),
-                                  .TA        (8'b0),
-                                  .TD        (114'b0),
-                                  .SO        (),
-                                  .CENY      (),
-                                  .GWENY      (),
-                                  .AY        (),
-                                  .TEN       (1'b1),
-                                  .TCEN      (1'b1),
-                                  .TGWEN      (1'b1),
-                                  .SI        (2'b00),
-                                  .SE        (DFTSE),
-                                  .DFTRAMBYP (1'b0),
-                                  .RET1N     (1'b1),
-                                  .RET2N     (1'b1),
-                                  .PGEN      (1'b0)
+                                  .CEB       (~tlb_ram_en_i[2]),
+                                  .WEB        (~tlb_ram_wr_i),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                   );
-  L1_tlb u_tlb_bank3 (
+  TS5N16FFCLLULVTA160X114M2SSHO u_tlb_bank3 (
                                   .CLK       (clk),
                                   .A         (tlb_ram_addr_i),
                                   .Q         (tlb_ram_rdata3_o[`CA53_TLB_RAM_W-1:0]),
                                   .D         (tlb_ram_wdata_i[`CA53_TLB_RAM_W-1:0]),
-                                  .CEN       (~tlb_ram_en_i[3]),
-                                  .GWEN       (~tlb_ram_wr_i),
-                                  .EMA       (3'b111),
-                                  .EMAW      (2'b11),
-                                  .EMAS      (1'b1),
-                                  .STOV      (1'b0),
-                                  .TA        (8'b0),
-                                  .TD        (114'b0),
-                                  .SO        (),
-                                  .CENY      (),
-                                  .GWENY      (),
-                                  .AY        (),
-                                  .TEN       (1'b1),
-                                  .TCEN      (1'b1),
-                                  .TGWEN      (1'b1),
-                                  .SI        (2'b00),
-                                  .SE        (DFTSE),
-                                  .DFTRAMBYP (1'b0),
-                                  .RET1N     (1'b1),
-                                  .RET2N     (1'b1),
-                                  .PGEN      (1'b0)
+                                  .CEB       (~tlb_ram_en_i[3]),
+                                  .WEB        (~tlb_ram_wr_i),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                   );
 
-  L1_btac1 u_btac_stg0 (
+  TS5N16FFCLLULVTA128X50M1SSHO u_btac_stg0 (
                                      .CLK       (clk),
                                      .A         (btac_stg0_ram_addr_i),
                                      .Q         (btac_stg0_ram_rdata_o),
                                      .D         (btac_stg0_ram_wdata_i),
-                                     .CEN       (~btac_stg0_ram_en_i),
-                                     .GWEN       (~btac_stg0_ram_wr_i),
-                                     .EMA       (3'b111),
-                                     .EMAW      (2'b11),
-                                     .EMAS      (1'b1),
-                                     .STOV      (1'b0),
-                                     .TA        (7'b0),
-                                     .TD        (50'b0),
-                                     .SO        (),
-                                     .CENY      (),
-                                     .GWENY      (),
-                                     .AY        (),
-                                     .TEN       (1'b1),
-                                     .TCEN      (1'b1),
-                                     .TGWEN      (1'b1),
-                                     .SI        (2'b00),
-                                     .SE        (DFTSE),
-                                     .DFTRAMBYP (1'b0),
-                                     .RET1N     (1'b1),
-                                     .RET2N     (1'b1),
-                                     .PGEN      (1'b0)
+                                     .CEB       (~btac_stg0_ram_en_i),
+                                     .WEB        (~btac_stg0_ram_wr_i),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                      );
 
-  L1_btac2 u_btac_stg1 (
+  TS5N16FFCLLULVTA128X59M2SSHO u_btac_stg1 (
                                      .CLK       (clk),
                                      .A         (btac_stg1_ram_addr_i),
                                      .Q         (btac_stg1_ram_rdata_o),
                                      .D         (btac_stg1_ram_wdata_i),
-                                     .CEN       (~btac_stg1_ram_en_i),
-                                     .GWEN       (~btac_stg1_ram_wr_i),
-                                     .EMA       (3'b111),
-                                     .EMAW      (2'b11),
-                                     .EMAS      (1'b1),
-                                     .STOV      (1'b0),
-                                     .TA        (7'b0),
-                                     .TD        (59'b0),
-                                     .SO        (),
-                                     .CENY      (),
-                                     .GWENY      (),
-                                     .AY        (),
-                                     .TEN       (1'b1),
-                                     .TCEN      (1'b1),
-                                     .TGWEN      (1'b1),
-                                     .SI        (2'b00),
-                                     .SE        (DFTSE),
-                                     .DFTRAMBYP (1'b0),
-                                     .RET1N     (1'b1),
-                                     .RET2N     (1'b1),
-                                     .PGEN      (1'b0)
+                                     .CEB       (~btac_stg1_ram_en_i),
+                                     .WEB        (~btac_stg1_ram_wr_i),
+
+                                    .SLP        (1'b0),
+                                    .DSLP       (1'b0),
+                                    .SD         (1'b0),
+                                    .PUDELAY    (),      // Propogation of SD
+                                    .RTSEL      (2'b01),
+                                    .WTSEL      (2'b01)
                                      );
 
 endmodule

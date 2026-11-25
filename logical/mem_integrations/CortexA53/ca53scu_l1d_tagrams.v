@@ -182,109 +182,65 @@ module ca53scu_l1d_tagrams `CA53_L1D_RAM_PARAM_DECL (
 //assign l1d_tagram_cpu0_way2_rdata_o[0] = 1'b0;
 //assign l1d_tagram_cpu0_way3_rdata_o[0] = 1'b0;
 
-          L1_tag u_l1d_tagram_cpu0_way0 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu0_way0 (
                                    .CLK       (clk_tagram[0]),
                                    .A         (cpu0_addr[6:0]),
                                    .Q         (l1d_tagram_cpu0_way0_rdata_o[32:0]),
                                    .D         (l1d_tagram_cpu0_wdata_i[32:0]),
-                                   .CEN       (~l1d_tagram_cpu0_en_i[0]),
-                                   .GWEN       (~l1d_tagram_cpu0_wr_i),
-                                   .EMA       (3'b011),
-                                   .EMAW      (2'b01),
-                                   .EMAS      (1'b0),
-                                   .STOV      (1'b0),
-                                   .TA        (7'd0),
-                                   .TD        (33'd0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu0_en_i[0]),
+                                   .WEB       (~l1d_tagram_cpu0_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu0_way1 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu0_way1 (
                                    .CLK       (clk_tagram[0]),
                                    .A         (cpu0_addr[6:0]),
                                    .Q         (l1d_tagram_cpu0_way1_rdata_o[32:0]),
                                    .D         (l1d_tagram_cpu0_wdata_i[32:0]),
-                                   .CEN       (~l1d_tagram_cpu0_en_i[1]),
-                                   .GWEN       (~l1d_tagram_cpu0_wr_i),
-                                   .EMA       (3'b011),
-                                   .EMAW      (2'b01),
-                                   .EMAS      (1'b0),
-                                   .STOV      (1'b0),
-                                   .TA        (7'd0),
-                                   .TD        (33'd0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu0_en_i[1]),
+                                   .WEB       (~l1d_tagram_cpu0_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu0_way2 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu0_way2 (
                                    .CLK       (clk_tagram[0]),
                                    .A         (cpu0_addr[6:0]),
                                    .Q         (l1d_tagram_cpu0_way2_rdata_o[32:0]),
                                    .D         (l1d_tagram_cpu0_wdata_i[32:0]),
-                                   .CEN       (~l1d_tagram_cpu0_en_i[2]),
-                                   .GWEN       (~l1d_tagram_cpu0_wr_i),
-                                   .EMA       (3'b011),
-                                   .EMAW      (2'b01),
-                                   .EMAS      (1'b0),
-                                   .STOV      (1'b0),
-                                   .TA        (7'd0),
-                                   .TD        (33'd0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu0_en_i[2]),
+                                   .WEB       (~l1d_tagram_cpu0_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu0_way3 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu0_way3 (
                                    .CLK       (clk_tagram[0]),
                                    .A         (cpu0_addr[6:0]),
                                    .Q         (l1d_tagram_cpu0_way3_rdata_o[32:0]),
                                    .D         (l1d_tagram_cpu0_wdata_i[32:0]),
-                                   .CEN       (~l1d_tagram_cpu0_en_i[3]),
-                                   .GWEN       (~l1d_tagram_cpu0_wr_i),
-                                   .EMA       (3'b011),
-                                   .EMAW      (2'b01),
-                                   .EMAS      (1'b0),
-                                   .STOV      (1'b0),
-                                   .TA        (7'd0),
-                                   .TD        (33'd0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu0_en_i[3]),
+                                   .WEB       (~l1d_tagram_cpu0_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
 
 
@@ -355,109 +311,65 @@ assign l1d_tagram_cpu1_way1_rdata_o[1:0] = 2'b00;
 assign l1d_tagram_cpu1_way2_rdata_o[1:0] = 2'b00;
 assign l1d_tagram_cpu1_way3_rdata_o[1:0] = 2'b00;
 
-          L1_tag u_l1d_tagram_cpu1_way0 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu1_way0 (
                                    .CLK       (clk_tagram[1]),
                                    .A         (cpu1_addr[6:0]),
                                    .Q         (l1d_tagram_cpu1_way0_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu1_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu1_en_i[0]),
-                                   .GWEN       (~l1d_tagram_cpu1_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu1_en_i[0]),
+                                   .WEB       (~l1d_tagram_cpu1_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu1_way1 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu1_way1 (
                                    .CLK       (clk_tagram[1]),
                                    .A         (cpu1_addr[6:0]),
                                    .Q         (l1d_tagram_cpu1_way1_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu1_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu1_en_i[1]),
-                                   .GWEN       (~l1d_tagram_cpu1_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu1_en_i[1]),
+                                   .WEB       (~l1d_tagram_cpu1_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu1_way2 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu1_way2 (
                                    .CLK       (clk_tagram[1]),
                                    .A         (cpu1_addr[6:0]),
                                    .Q         (l1d_tagram_cpu1_way2_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu1_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu1_en_i[2]),
-                                   .GWEN       (~l1d_tagram_cpu1_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu1_en_i[2]),
+                                   .WEB       (~l1d_tagram_cpu1_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu1_way3 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu1_way3 (
                                    .CLK       (clk_tagram[1]),
                                    .A         (cpu1_addr[6:0]),
                                    .Q         (l1d_tagram_cpu1_way3_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu1_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu1_en_i[3]),
-                                   .GWEN       (~l1d_tagram_cpu1_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu1_en_i[3]),
+                                   .WEB       (~l1d_tagram_cpu1_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
 
 
@@ -478,109 +390,65 @@ assign l1d_tagram_cpu2_way2_rdata_o[1:0] = 2'b00;
 assign l1d_tagram_cpu2_way3_rdata_o[1:0] = 2'b00;
 
 
-          L1_tag u_l1d_tagram_cpu2_way0 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu2_way0 (
                                    .CLK       (clk_tagram[2]),
                                    .A         (cpu2_addr[6:0]),
                                    .Q         (l1d_tagram_cpu2_way0_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu2_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu2_en_i[0]),
-                                   .GWEN       (~l1d_tagram_cpu2_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu2_en_i[0]),
+                                   .WEB       (~l1d_tagram_cpu2_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu2_way1 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu2_way1 (
                                    .CLK       (clk_tagram[2]),
                                    .A         (cpu2_addr[6:0]),
                                    .Q         (l1d_tagram_cpu2_way1_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu2_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu2_en_i[1]),
-                                   .GWEN       (~l1d_tagram_cpu2_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu2_en_i[1]),
+                                   .WEB       (~l1d_tagram_cpu2_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu2_way2 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu2_way2 (
                                    .CLK       (clk_tagram[2]),
                                    .A         (cpu2_addr[6:0]),
                                    .Q         (l1d_tagram_cpu2_way2_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu2_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu2_en_i[2]),
-                                   .GWEN       (~l1d_tagram_cpu2_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu2_en_i[2]),
+                                   .WEB       (~l1d_tagram_cpu2_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu2_way3 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu2_way3 (
                                    .CLK       (clk_tagram[2]),
                                    .A         (cpu2_addr[6:0]),
                                    .Q         (l1d_tagram_cpu2_way3_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu2_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu2_en_i[3]),
-                                   .GWEN       (~l1d_tagram_cpu2_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu2_en_i[3]),
+                                   .WEB       (~l1d_tagram_cpu2_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
 
 
@@ -601,109 +469,65 @@ assign l1d_tagram_cpu3_way1_rdata_o[1:0] = 2'b00;
 assign l1d_tagram_cpu3_way2_rdata_o[1:0] = 2'b00;
 assign l1d_tagram_cpu3_way3_rdata_o[1:0] = 2'b00;
 
-          L1_tag u_l1d_tagram_cpu3_way0 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu3_way0 (
                                    .CLK       (clk_tagram[3]),
                                    .A         (cpu3_addr[6:0]),
                                    .Q         (l1d_tagram_cpu3_way0_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu3_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu3_en_i[0]),
-                                   .GWEN       (~l1d_tagram_cpu3_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu3_en_i[0]),
+                                   .WEB       (~l1d_tagram_cpu3_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu3_way1 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu3_way1 (
                                    .CLK       (clk_tagram[3]),
                                    .A         (cpu3_addr[6:0]),
                                    .Q         (l1d_tagram_cpu3_way1_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu3_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu3_en_i[1]),
-                                   .GWEN       (~l1d_tagram_cpu3_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu3_en_i[1]),
+                                   .WEB       (~l1d_tagram_cpu3_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu3_way2 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu3_way2 (
                                    .CLK       (clk_tagram[3]),
                                    .A         (cpu3_addr[6:0]),
                                    .Q         (l1d_tagram_cpu3_way2_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu3_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu3_en_i[2]),
-                                   .GWEN       (~l1d_tagram_cpu3_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu3_en_i[2]),
+                                   .WEB       (~l1d_tagram_cpu3_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
-          L1_tag u_l1d_tagram_cpu3_way3 (
+          TS5N16FFCLLULVTA128X33M2SSHO u_l1d_tagram_cpu3_way3 (
                                    .CLK       (clk_tagram[3]),
                                    .A         (cpu3_addr[6:0]),
                                    .Q         (l1d_tagram_cpu3_way3_rdata_o[32:2]),
                                    .D         (l1d_tagram_cpu3_wdata_i[32:2]),
-                                   .CEN       (~l1d_tagram_cpu3_en_i[3]),
-                                   .GWEN       (~l1d_tagram_cpu3_wr_i),
-                                   .EMA       (3'b111),
-                                   .EMAW      (2'b11),
-                                   .EMAS      (1'b1),
-                                   .STOV      (1'b0),
-                                   .TA        (6'b0),
-                                   .TD        (31'b0),
-                                   .SO        (),
-                                   .CENY      (),
-                                   .AY        (),
-                                   .TEN       (1'b1),
-                                   .TCEN      (1'b1),
-                                   .TGWEN     (1'b1),
-                                   .SI        (2'b00),
-                                   .SE        (DFTSE),
-                                   .DFTRAMBYP (1'b0),
-                                   .RET1N     (1'b1),
-                                   .RET2N     (1'b1),
-                                   .PGEN      (1'b0)
+                                   .CEB       (~l1d_tagram_cpu3_en_i[3]),
+                                   .WEB       (~l1d_tagram_cpu3_wr_i),
+
+                                  .SLP        (1'b0),
+                                  .DSLP       (1'b0),
+                                  .SD         (1'b0),
+                                  .PUDELAY    (),      // Propogation of SD
+                                  .RTSEL      (2'b01),
+                                  .WTSEL      (2'b01)
                                    );
 
   end else begin

@@ -27,17 +27,18 @@ module SRAM_wrapper#(
     input  wire             cfg_gate_resp
 );
 
-wire [16:0]     memaddr;
+wire [19:0]     memaddr;
 wire [63:0]     memd;
-wire [63:0]     memq;
+reg  [63:0]     memq;
 wire            memcen;
 wire [7:0]      memwen;
 
 localparam N_MEMS = 4;
 localparam SEL_W = 2;
 
-reg [N_MEMS:0]  CEN_i;
-wire [63:0]     q_i[0:N_MEMS];
+reg [N_MEMS-1:0]  CEN_i;
+reg [SEL_W-1:0] sel_d;                    // pipelined bank select for muxing
+wire [63:0]     q_i[0:N_MEMS-1];
 wire [63:0]     wena_i;
 wire            gwen_i;
 
@@ -118,33 +119,48 @@ assign gwen_i= &memwen;
 
 genvar i;
 generate for(i=0; i<N_MEMS-1; i=i+1) begin: g_srams
-    sram_64b_16k u_sram_64b_16k (
-        .Q(q_i[N_MEMS-1]),
-        .CLK(clk),
-        .CEN(CEN_i[N_MEMS-1]),
-        .GWEN(gwen_i),
-        .A(memaddr[16:3]),
+    TS1N16FFCLLULVTA4096X64M8SWSHO u_sram_64b_16k (
+        .Q(q_i[i]),
+        .CLK(ACLK),
+        .CEB(CEN_i[i]),
+        .WEB(gwen_i),
+        .A(memaddr[14:3]),
         .D(memd),
-        .WEN(wena_i),
-        .STOV(1'b0),
-        .EMA(3'b011),
-        .EMAW(2'b01),
-        .EMAS(1'b0),
-        .RET1N(1'b1)
+        .BWEB(wena_i),
+
+        .SLP        (1'b0),
+        .DSLP       (1'b0),
+        .SD         (1'b0),
+        .PUDELAY    (),      // Propogation of SD
+        .RTSEL      (2'b01),
+        .WTSEL      (2'b00)
     );
 end endgenerate
 
+// pipeline the bank index so that the combinational mux sees the
+// address corresponding to the valid data from the SRAMs.  This
+// keeps the overall read latency at one cycle (the inherent SRAM
+// delay) while avoiding glitches when "memaddr" changes concurrently
+// with the SRAM output update.
+
+always @(posedge ACLK or negedge ARESETn) begin
+    if (!ARESETn)
+        sel_d <= {SEL_W{1'b0}};
+    else
+        sel_d <= memaddr[(SEL_W+15-1):15];
+end
+
 generate
 integer j;
-always @(*) begin 
+always @(*) begin
     for(j=0; j<N_MEMS; j=j+1) begin
-        if(j==memaddr[(SEL_W+17-1):17])
+        if(j==memaddr[(SEL_W+15-1):15])
             CEN_i[j] = memcen;
         else
             CEN_i[j] = 1'b1;
     end
-    memq = q_i[memaddr[(SEL_W+17-1):17]];
+    // use the pipelined select for the data mux
+    memq = q_i[sel_d];
 end endgenerate
-
 
 endmodule

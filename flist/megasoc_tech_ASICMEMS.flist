@@ -4,4 +4,11 @@
 
 
 $(SOCLABS_MEGASOC_TECH_DIR)/logical/ROM/ASIC/TSMC16nm/ROM_wrapper.sv 
-$(SOCLABS_PROJECT_DIR)/memories/megasoc/bootrom/bootrom_emulation.v
+$(TSMC_16_MEMS)/megasoc_rom/ts3n16ffcllulvta8192x64m16o_120c/VERILOG/ts3n16ffcllulvta8192x64m16o_120c.v
+
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/SRAM/ASIC/TSMC16nm/SRAM_wrapper.sv
+
+$(SOCLABS_MEGASOC_TECH_DIR)/logical/sl_ahb_qspi/logical/cache_models/tsmc16/cache_ram.v
+
+$(TSMC_16_MEMS)/sram_64b_4096w_wm/ts1n16ffcllulvta4096x64m8swsho_120b/VERILOG/ts1n16ffcllulvta4096x64m8swsho_120b.v
+$(TSMC_16_MEMS)/rf_11b_256w/ts5n16ffcllulvta256x11m2ssho_120a/VERILOG/ts5n16ffcllulvta256x11m2ssho_120a.v
