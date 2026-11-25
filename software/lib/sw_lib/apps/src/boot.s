@@ -162,6 +162,15 @@ app_bl1_entry:
 mmu_cache_setup:
             
             bl enable_mmu
+//===================================================================
+// CPU caches on for every application (MBT-66). enable_caches() sets
+// CPUECTLR.SMPEN, then SCTLR_EL3.C and .I. Every core runs this code.
+// An application that must start with the caches off is built with
+// -DBOOT_CACHES_OFF in its APP_AS_FLAGS.
+//===================================================================
+#ifndef BOOT_CACHES_OFF
+            bl enable_caches
+#endif
             B __stack_multi_cpu_init
 
             NOP
