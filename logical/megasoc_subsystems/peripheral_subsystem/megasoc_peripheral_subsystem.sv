@@ -692,6 +692,86 @@ always @(posedge RT_CLK or negedge PRESETn) begin
         rt_clk_div <= rt_clk_div + 1;
 end
 
+// G-RTC-1: PL031 nPOR/nRTCRST and the RTC CLK1HZ divider come from the
+// power-on reset only (DDI0224C 2.3.1), so a warm reset (PRESETn) does not
+// clear the RTC enable, offset, match value or counter.
+// nPOR: PORESETn, asserted asynchronously, deasserted synchronously to PCLK.
+reg [1:0] rtc_npor_sync;
+always @(posedge PCLK or negedge PORESETn) begin
+    if(~PORESETn)
+        rtc_npor_sync <= 2'b00;
+    else
+        rtc_npor_sync <= {rtc_npor_sync[0], 1'b1};
+end
+wire rtc_npor = rtc_npor_sync[1];
+
+`ifndef SIM_FAST_RTC
+// RTC CLK1HZ divider on PORESETn. Separate from rt_clk_div so that TIMER1
+// EXTIN (rt_clk_div[4]) keeps its existing warm-reset behaviour.
+reg [14:0] rtc_clk_div;
+always @(posedge RT_CLK or negedge PORESETn) begin
+    if(~PORESETn)
+        rtc_clk_div <= 15'd0;
+    else
+        rtc_clk_div <= rtc_clk_div + 1;
+end
+`endif
+
+// -----------------------------------------------------------------------
+// Simulation-only RTC speed-up (MEGASOC-IRQ-008, verif/vplan/megasoc_vplan.yaml
+// and verif/reports/megasoc/gic_and_uart_boundary_read_hangs.md SS3).
+//
+// CLK1HZ (rt_clk_div[14] above) is a genuine ~1Hz signal in real hardware:
+// RT_CLK runs at ~32.768kHz (see verif/control/logical/megasoc_clkreset.v),
+// divided by 2^15. Waiting for even one real RTC match therefore needs
+// ~1 second of simulated hardware time -- ~10^8 cycles at the 100MHz system
+// clock -- which is why every prior attempt to verify the RTC interrupt
+// end-to-end was manually killed (5-7 minutes wall-clock) before ever
+// reaching a real match; this was never a hang, just an extremely long,
+// architecturally-expected wait that nobody let finish.
+//
+// `SIM_FAST_RTC` (opt-in, +define+SIM_FAST_RTC on the VCS command line only
+// -- see flows/makefile.simulate; never defined for ASIC/FPGA synthesis
+// flows) substitutes a dedicated counter clocked by PCLK (~100MHz) instead
+// of RT_CLK for the RTC's CLK1HZ/SCANINCLK1HZ inputs ONLY, giving a
+// same-bit-position (bit 14) "CLK1HZ-equivalent" tick ~3051x faster than
+// real time -- collapsing a ~1-second wait to well under a millisecond of
+// simulated time.
+//
+// Deliberately kept as a SEPARATE counter/wire rather than modifying
+// rt_clk_div itself: rt_clk_div also feeds TIMER1's EXTIN port
+// (rt_clk_div[4], 1.024kHz tap) below, and speeding up the shared counter
+// would silently change TIMER1's EXTIN-clocked timing for any test that
+// uses it, even though this change only intends to speed up RTC
+// verification. With a dedicated counter, everything except the RTC
+// instance's two CLK1HZ-sourced ports is completely unaffected, in both
+// simulation and (since the macro is never defined there) synthesis.
+`ifdef SIM_FAST_RTC
+reg [14:0] sim_fast_rtc_div;
+always @(posedge PCLK or negedge rtc_npor) begin   // G-RTC-1: was PRESETn
+    if(~rtc_npor)
+        sim_fast_rtc_div <= 15'd0;
+    else
+        sim_fast_rtc_div <= sim_fast_rtc_div + 1;
+end
+`endif
+
+// G-RTC-1: nRTCRST from the same power-on reset, asserted asynchronously,
+// deasserted synchronously to the CLK1HZ that feeds the RTC (2-flop sync).
+`ifdef SIM_FAST_RTC
+wire rtc_clk1hz = sim_fast_rtc_div[14];
+`else
+wire rtc_clk1hz = rtc_clk_div[14];
+`endif
+reg [1:0] rtc_nrtcrst_sync;
+always @(posedge rtc_clk1hz or negedge PORESETn) begin
+    if(~PORESETn)
+        rtc_nrtcrst_sync <= 2'b00;
+    else
+        rtc_nrtcrst_sync <= {rtc_nrtcrst_sync[0], 1'b1};
+end
+wire rtc_nrtcrst = rtc_nrtcrst_sync[1];
+
 cmsdk_apb_timer u_apb_timer0(
     .PCLK(PCLK),    // PCLK for timer operation
     .PCLKG(PCLK),   // Gated clock
@@ -853,13 +933,24 @@ Rtc u_apb_rtc(
     .PWRITE(PWRITE),
     .PADDR(PADDR[11:2]),
     .PWDATA(PWDATA),
-    .CLK1HZ(rt_clk_div[14]),
+    // SIM_FAST_RTC: see the sim_fast_rtc_div comment block near rt_clk_div's
+    // declaration above -- opt-in, simulation-only, never defined for
+    // synthesis, and scoped to only these two ports.
+`ifdef SIM_FAST_RTC
+    .CLK1HZ(sim_fast_rtc_div[14]),
+`else
+    .CLK1HZ(rtc_clk_div[14]),          // G-RTC-1: was rt_clk_div[14]
+`endif
 
-    .nRTCRST(PRESETn),
-    .nPOR(PRESETn),
+    .nRTCRST(rtc_nrtcrst),             // G-RTC-1: was PRESETn
+    .nPOR(rtc_npor),                   // G-RTC-1: was PRESETn
     .SCANENABLE(1'b0),
     .SCANINPCLK(PCLK),
-    .SCANINCLK1HZ(rt_clk_div[14]),
+`ifdef SIM_FAST_RTC
+    .SCANINCLK1HZ(sim_fast_rtc_div[14]),
+`else
+    .SCANINCLK1HZ(rtc_clk_div[14]),    // G-RTC-1: was rt_clk_div[14]
+`endif
     // Outputs
     .PRDATA(PRDATA_RTC),
     .RTCINTR(rtc_int),
