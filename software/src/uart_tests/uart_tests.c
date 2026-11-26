@@ -303,24 +303,33 @@ static int test_uart_addr_rw (void)
 
 
 
- // TX overrun: UART0 (the console) at divider 10. The bytes written here reach the console as two
- // glitch frames at the fast rate; nothing is printed until the console rate is restored.
+ // TX overrun: UART0 (the console). The two bytes left in the UART afterwards reach the console as
+ // glitch frames at divider 10; nothing is printed until the console rate is restored.
+ //
+ // The overrun must not depend on how fast the three writes follow each other. With the transmitter
+ // idle the UART moves the first byte from the holding register into the shift register on the next
+ // PCLK (tx_buf_clear), so the second write finds the register free; the third write overruns only
+ // while the second byte still waits for the first to be shifted out. At divider 10 that is one frame
+ // of about 160 PCLK. Three consecutive stores meet that when nothing stalls the CPU between them,
+ // but an instruction fetch from flash can take longer, and the test then failed or passed with the
+ // position of the code in memory (MBT-66, seen on the HAPS-SX with the CPU caches on). The writes are
+ // therefore done at the slowest baud rate: the transmitter waits up to 65535 PCLK for its first baud
+ // tick, with the first byte in the shift register and TXD still idle, and the holding register stays
+ // full for that time and for the frame of 160 ticks that follows.
  static int test_uart_tx_overrun (void){
     int errors = 0;
     int not_set = 0, stuck = 0;
     printf("Test: UART TX overrun\n");
     uint32_t baud_console = CMSDK_UART0->BAUDDIV;
     console_drain();
-    CMSDK_UART0->CTRL = 0;
-    CMSDK_UART0->BAUDDIV = 10;
+    CMSDK_UART0->CTRL = 0;                             // also stops the baud rate generator
+    CMSDK_UART0->BAUDDIV = 0xFFFF0;                    // slowest rate; the counter restarts from this value
     CMSDK_UART0->INTCLEAR = 0xFF;
 
     //enable tx and tx overrun in uart0
     CMSDK_UART0->CTRL = CMSDK_UART_CTRL_TXEN_Msk | CMSDK_UART_CTRL_TXORIRQEN_Msk;
-    // Three writes, not two: with the transmitter idle the UART moves the first byte from the holding
-    // register into the shift register on the next PCLK (tx_buf_clear), so a second write finds the
-    // register free and nothing overruns. The third write lands while the second byte waits for the
-    // first to be shifted out (>= 160 PCLK) - that is the overrun.
+    // Three writes, not two: the first goes straight to the shift register, the second fills the
+    // holding register, the third finds it full - that is the overrun.
     CMSDK_UART0->DATA = 0x11;
     CMSDK_UART0->DATA = 0x22;
     CMSDK_UART0->DATA = 0x33;
@@ -334,7 +343,11 @@ static int test_uart_addr_rw (void)
     CMSDK_UART0->INTCLEAR = CMSDK_UART_INTSTATUS_TXORIRQ_Msk;
     if(CMSDK_UART0->INTSTATUS & CMSDK_UART_INTSTATUS_TXORIRQ_Msk) stuck = 1;
 
-    // console back before anything is printed
+    // Send the two bytes that are still in the UART at divider 10 (two frames of 160 PCLK), then put
+    // the console back before anything is printed. The rate is changed with the UART disabled.
+    CMSDK_UART0->CTRL = 0;
+    CMSDK_UART0->BAUDDIV = 10;
+    CMSDK_UART0->CTRL = CMSDK_UART_CTRL_TXEN_Msk;
     console_drain();
     CMSDK_UART0->BAUDDIV = baud_console;
     CMSDK_UART0->CTRL = CMSDK_UART_CTRL_TXEN_Msk;

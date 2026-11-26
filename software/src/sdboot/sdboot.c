@@ -102,9 +102,11 @@ static void report_caches(const char *when) {
 }
 
 /* Turn the CPU caches on if whoever started us left them off: invalidate the data caches (off, so nothing is dirty),
- * set CPUECTLR.SMPEN (the Cortex-A53 needs it before its caches are enabled; the library's enable_caches() does not
- * set it, MBT-66), then enable_caches() (ic iallu, SCTLR_EL3.C and .I).  The page tables map the flash and the DDR4
- * as Normal WB and the SRAM and every peripheral as Device, so the SDIO FIFO is never cached. */
+ * set CPUECTLR.SMPEN (the Cortex-A53 needs it before its caches are enabled), then enable_caches() (ic iallu,
+ * SCTLR_EL3.C and .I).  Since MBT-66 the library start-up (boot.s) enables the caches itself and enable_caches() sets
+ * SMPEN, so this function finds them on and only reports the state; it still does the work for an image built with
+ * -DBOOT_CACHES_OFF.  The page tables map the flash and the DDR4 as Normal WB and the SRAM and every peripheral as
+ * Device, so the SDIO FIFO is never cached. */
 static void cpu_caches_on(void) {
     uint64_t sctlr, ectlr;
     report_caches("entry state");

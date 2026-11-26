@@ -177,12 +177,19 @@ void enable_mmu_el1(void)
 }
 
 /** @brief  enable_caches, function to enable caches <br>
+ *         Sets CPUECTLR_EL1.SMPEN first: the Cortex-A53 requires SMPEN = 1 before <br>
+ *         its caches are enabled, and the register reads 0 out of reset (MBT-66). <br>
+ *         Uses no stack: boot.s calls it before the stack pointer is set. <br>
  * @return void
  */
 
 void enable_caches(void)
 {
-  __ASM volatile ( "ic iallu                \n\t"           //; Invalidate I cache and BTAC
+  __ASM volatile ( "mrs     x0, S3_1_c15_c2_1 \n\t"         //; CPUECTLR_EL1
+                 "orr     x0, x0, #0x40   \n\t"           //; SMPEN (bit 6) before the caches are enabled
+                 "msr     S3_1_c15_c2_1, x0 \n\t"
+                 "isb                     \n\t"
+                 "ic iallu                \n\t"           //; Invalidate I cache and BTAC
                  "dsb sy                  \n\t"
                  "isb                     \n\t"
                  "mrs     x0, sctlr_el3   \n\t"
