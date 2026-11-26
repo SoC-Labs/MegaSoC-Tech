@@ -408,6 +408,44 @@ extern	int	sdio_ioctl(SDIODRV *dev, char cmd, char *buf);
 #define SDIO_BUSY_TIMEOUT_CYCLES 50000000u
 #endif
 
+// Timeouts in time instead of poll counts (MBT-75).  The two limits above are
+// loop iterations, so the time they allow depends on how fast the CPU runs the
+// poll loop.  On the 20 MHz HAPS-SX one poll takes about 1 us with the CPU
+// caches on and about 100 us with them off, so the same count allows a
+// hundred times longer in one case than in the other.  Build with
+// -DSDIO_TIMEOUT_TICKS_PER_MS=<n>, the number of CNTPCT_EL0 ticks in one
+// millisecond, and the same waits are bounded by SDIO_START_TIMEOUT_MS and
+// SDIO_BUSY_TIMEOUT_MS instead.  On MegaSoC the generic counter counts system
+// clock cycles: 100000 at 100 MHz, 20000 on the 20 MHz HAPS-SX.  AArch64 only.
+// The default 0 keeps the poll counts, which the simulation targets are tuned for.
+#ifndef SDIO_TIMEOUT_TICKS_PER_MS
+#define SDIO_TIMEOUT_TICKS_PER_MS 0u
+#endif
+#ifndef SDIO_START_TIMEOUT_MS
+#define SDIO_START_TIMEOUT_MS 100u
+#endif
+#ifndef SDIO_BUSY_TIMEOUT_MS
+#define SDIO_BUSY_TIMEOUT_MS 1000u
+#endif
+#if SDIO_TIMEOUT_TICKS_PER_MS
+static inline uint64_t sdio_ticks(void) {
+	uint64_t v; __asm__ volatile("mrs %0, cntpct_el0" : "=r"(v)); return v;
+}
+#define	SDIO_DEADLINE(MS)	(sdio_ticks() + (uint64_t)(MS) * (uint64_t)(SDIO_TIMEOUT_TICKS_PER_MS))
+#define	SDIO_TIME_LEFT(END, POLLS)	(sdio_ticks() < (END))
+#else
+#define	SDIO_DEADLINE(MS)	((uint64_t)0)
+#define	SDIO_TIME_LEFT(END, POLLS)	((POLLS) > 0u)
+#endif
+
+// Number of CMD13 polls sdio_wait_card_ready() makes before it gives up when
+// the timeouts are poll counts.  One poll is a whole command and response, so
+// it is derived from the busy limit: a simulation build that shrinks
+// SDIO_BUSY_TIMEOUT_CYCLES shrinks this with it.
+#ifndef SDIO_CARD_READY_POLLS
+#define SDIO_CARD_READY_POLLS ((SDIO_BUSY_TIMEOUT_CYCLES / 64u) + 16u)
+#endif
+
 // Optional read-path profiling (HAPS-SX, 17 Nov 2026): build with -DSDIO_PROFILE=1
 // (AArch64 only; uses the generic timer counter) and read the counters from the
 // application (struct sdio_prof_s in sdiodrv.h).  Off by default: no code
@@ -437,6 +475,7 @@ static int	sdio_wait_for_transfer_start_quiet(SDIODRV *dev,
 	// {{{
 	uint32_t	st;
 	uint32_t	timeout = SDIO_START_TIMEOUT_CYCLES;
+	const uint64_t	deadline = SDIO_DEADLINE(SDIO_START_TIMEOUT_MS);
 	const uint32_t expected_cmd = cmdid & 0x3fu;
 
 	// A command write and the reflected busy bits are separated by at least
@@ -449,10 +488,11 @@ static int	sdio_wait_for_transfer_start_quiet(SDIODRV *dev,
 	st = dev->d_dev->sd_cmd;
 	while((((st & 0x3fu) != expected_cmd)
 			|| (!(st & SDIO_BUSY) && ((st & SDIO_CMDECODE) == SDIO_CMDTMOUT)))
-			&& (timeout > 0u)) {
+			&& SDIO_TIME_LEFT(deadline, timeout)) {
 		st = dev->d_dev->sd_cmd;
 		timeout--;
 	}
+	(void)deadline;
 
 	if (((st & 0x3fu) != expected_cmd)
 			|| (!(st & SDIO_BUSY) && ((st & SDIO_CMDECODE) == SDIO_CMDTMOUT))) {
@@ -496,6 +536,7 @@ static int	sdio_wait_while_busy_timeout(SDIODRV *dev) {
 	// Busy wait implementation
 	uint32_t	st;
 	uint32_t	timeout = SDIO_BUSY_TIMEOUT_CYCLES;
+	uint64_t	deadline = SDIO_DEADLINE(SDIO_BUSY_TIMEOUT_MS);
 
 	// Phase 1: wait for command/DMA/card-busy to clear with a finite timeout.
 	// SDIO_MEM is deliberately excluded here - a data transfer that has
@@ -507,13 +548,13 @@ static int	sdio_wait_while_busy_timeout(SDIODRV *dev) {
 	st = dev->d_dev->sd_cmd;
 #if SDIO_PROFILE
 	{ uint64_t _p0 = SDIO_PROF_NOW(); uint32_t _n = 0;
-	while((st & SDIO_CMD_BUSY_MASK) && (timeout > 0u)) {
+	while((st & SDIO_CMD_BUSY_MASK) && SDIO_TIME_LEFT(deadline, timeout)) {
 		st = dev->d_dev->sd_cmd;
 		timeout--; _n++;
 	}
 	sdio_prof.t_busy1 += SDIO_PROF_NOW() - _p0; sdio_prof.polls_busy1 += _n; }
 #else
-	while((st & SDIO_CMD_BUSY_MASK) && (timeout > 0u)) {
+	while((st & SDIO_CMD_BUSY_MASK) && SDIO_TIME_LEFT(deadline, timeout)) {
 		st = dev->d_dev->sd_cmd;
 		timeout--;
 	}
@@ -551,16 +592,18 @@ static int	sdio_wait_while_busy_timeout(SDIODRV *dev) {
 	// MEM=0, skipping this wait entirely. Mirrors Phase 1's own fresh-read-
 	// before-the-loop pattern above.
 	timeout = SDIO_BUSY_TIMEOUT_CYCLES;
+	deadline = SDIO_DEADLINE(SDIO_BUSY_TIMEOUT_MS);
+	(void)deadline;
 	st = dev->d_dev->sd_cmd;
 #if SDIO_PROFILE
 	{ uint64_t _p0 = SDIO_PROF_NOW(); uint32_t _n = 0;
-	while((st & SDIO_MEM) && (timeout > 0u)) {
+	while((st & SDIO_MEM) && SDIO_TIME_LEFT(deadline, timeout)) {
 		st = dev->d_dev->sd_cmd;
 		timeout--; _n++;
 	}
 	sdio_prof.t_busy2 += SDIO_PROF_NOW() - _p0; sdio_prof.polls_busy2 += _n; }
 #else
-	while((st & SDIO_MEM) && (timeout > 0u)) {
+	while((st & SDIO_MEM) && SDIO_TIME_LEFT(deadline, timeout)) {
 		st = dev->d_dev->sd_cmd;
 		timeout--;
 	}
@@ -1774,6 +1817,76 @@ static void sdio_dump_sector(const unsigned *ubuf) {
 }
 // }}}
 
+// Card status (R1) bits used below
+#define	SDIO_R1_READY_FOR_DATA	0x00000100u
+#define	SDIO_R1_STATE_MASK	0x00001e00u
+#define	SDIO_R1_STATE_TRAN	0x00000800u	// CURRENT_STATE = 4, transfer
+
+static int sdio_wait_card_ready(SDIODRV *dev, unsigned *dev_stat, unsigned *card_stat) {
+	// {{{
+	// Poll CMD13 (SEND_STATUS) until the card reports READY_FOR_DATA in
+	// state "tran", i.e. until it has finished programming what was just
+	// written.  A card that is still programming answers CMD13 (state
+	// "prg", READY_FOR_DATA clear) but does not answer a read or a write
+	// command at all, so returning from a write before this point makes the
+	// next command fail with a response timeout (MBT-75).
+	//
+	// The controller's CARDBUSY flag should cover this.  It does once the
+	// front end starts its busy detection after the CRC status token
+	// (sdio-controller, MBT-72); on controller builds without that fix
+	// CARDBUSY clears while the card is still busy, and this wait is what
+	// keeps the driver correct.
+	//
+	// Returns 0 when the card is ready.  Otherwise returns -1 with the
+	// last controller and card status: either CMD13 itself failed, or the
+	// card never became ready within the limit.
+	uint32_t	polls = SDIO_CARD_READY_POLLS;
+	const uint64_t	deadline = SDIO_DEADLINE(SDIO_BUSY_TIMEOUT_MS);
+	unsigned	st, r1;
+
+	(void)deadline;
+	do {
+		dev->d_dev->sd_data = dev->d_RCA << 16;
+		dev->d_dev->sd_cmd  = (SDIO_ERR|SDIO_READREG) + 13;
+		sdio_wait_while_busy(dev);
+
+		st = dev->d_dev->sd_cmd;
+		r1 = dev->d_dev->sd_data;
+
+		if ((st & (SDIO_ERR|SDIO_REMOVED|SDIO_RXERR)) || (r1 & SDIO_R1ERR))
+			break;
+		if ((r1 & SDIO_R1_READY_FOR_DATA)
+				&& ((r1 & SDIO_R1_STATE_MASK) == SDIO_R1_STATE_TRAN))
+			return 0;
+		polls--;
+	} while(SDIO_TIME_LEFT(deadline, polls));
+
+	*dev_stat  = st;
+	*card_stat = r1;
+	return -1;
+}
+// }}}
+
+static void sdio_post_write_status(SDIODRV *dev, unsigned *dev_stat, unsigned *card_stat) {
+	// {{{
+	// Called with the status of a write that reported no error.  Waits for
+	// the card to be ready again; on failure replaces the status with the
+	// one that shows why, and marks a card that stayed busy as an error.
+	unsigned	st13 = 0, r13 = 0;
+
+	if (0 == sdio_wait_card_ready(dev, &st13, &r13))
+		return;
+
+	if (!(st13 & (SDIO_ERR|SDIO_REMOVED|SDIO_RXERR)) && !(r13 & SDIO_R1ERR)) {
+		txstr("SDIO TIMEOUT: card not ready after write, R1 = ");
+		txhex(r13); txstr("\n");
+		st13 |= SDIO_ERR;
+	}
+	*dev_stat  = st13;
+	*card_stat = r13;
+}
+// }}}
+
 static int sdio_write_block_once(SDIODRV *dev, uint32_t sector, uint32_t *buf){// CMD 24
 	// {{{
 	unsigned	dev_stat, card_stat, err = 0;
@@ -1848,10 +1961,11 @@ static int sdio_write_block_once(SDIODRV *dev, uint32_t sector, uint32_t *buf){/
 	dev_stat  = dev->d_dev->sd_cmd;
 	card_stat = dev->d_dev->sd_data;
 
-	// Post-write CMD13 (SEND_STATUS) — PYNQ FPGA only.
-	// On the PYNQ AXI path, consecutive CMD24 writes can run tighter than
-	// some cards tolerate.  CMD13 gives the card and controller a clean
-	// status checkpoint before the next command without altering any data.
+	// Post-write CMD13 (SEND_STATUS): wait until the card has finished
+	// programming (sdio_wait_card_ready() above).  Until MBT-75 this was a
+	// single CMD13 used as a pause between consecutive CMD24 writes on the
+	// PYNQ; a card that is ready answers the first poll, so that case costs
+	// the same one command as before.
 	//
 	// SDIO_POST_WRITE_STATUS_CHECK is set to 0 for simulation via APP_C_FLAGS
 	// because the behavioural SD card model does not implement CMD13 responses.
@@ -1861,22 +1975,8 @@ static int sdio_write_block_once(SDIODRV *dev, uint32_t sector, uint32_t *buf){/
 	// this entire block when the macro is 0.
 	if (SDIO_POST_WRITE_STATUS_CHECK
 			&& !(dev_stat & (SDIO_ERR|SDIO_REMOVED|SDIO_RXERR))
-			&& !(card_stat & SDIO_R1ERR)) {
-		unsigned	st13, r13;
-
-		dev->d_dev->sd_data = dev->d_RCA << 16;
-		dev->d_dev->sd_cmd  = (SDIO_ERR|SDIO_READREG) + 13;
-		sdio_wait_while_busy(dev);
-
-		st13 = dev->d_dev->sd_cmd;
-		r13  = dev->d_dev->sd_data;
-
-		if ((st13 & (SDIO_ERR|SDIO_REMOVED|SDIO_RXERR))
-				|| (r13 & SDIO_R1ERR)) {
-			dev_stat  = st13;
-			card_stat = r13;
-		}
-	}
+			&& !(card_stat & SDIO_R1ERR))
+		sdio_post_write_status(dev, &dev_stat, &card_stat);
 
 	RELEASE_MUTEX;
 
@@ -2907,6 +3007,13 @@ int	sdio_write(SDIODRV *dev, const unsigned sector,
 
 	dev_stat  = dev->d_dev->sd_cmd;
 	card_stat = dev->d_dev->sd_data;
+
+	// As after a single block: do not return while the card is still
+	// programming (MBT-75).
+	if (SDIO_POST_WRITE_STATUS_CHECK && !err
+			&& !(dev_stat & (SDIO_ERR|SDIO_REMOVED))
+			&& !(card_stat & SDIO_R1ERR))
+		sdio_post_write_status(dev, &dev_stat, &card_stat);
 
 	RELEASE_MUTEX;
 
